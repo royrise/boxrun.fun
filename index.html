@@ -123,7 +123,7 @@ canvas{display:block;width:100%;height:100%}
 <div id="editor" hidden>
  <div id="etools"><input id="ename" maxlength="24" placeholder="Level name" value="My level"><span id="epal"></span>
   <input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height">
-  <select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button><button data-e="test">▶ Test</button><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden><button data-e="back">Back</button><span id="estat"></span></div>
+  <select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button><button data-e="test">▶ Test</button><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden><button data-e="back">Back</button><span id="estat"></span></div>
  <canvas id="ec"></canvas>
 </div>
 <script>
@@ -478,7 +478,9 @@ addEventListener('keydown',e=>{
   if(!editorEl.hidden&&e.target.tagName!=='INPUT'){
     if(e.key==='Delete'||e.key==='Backspace'){selClear();e.preventDefault();return}
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){selAll();e.preventDefault();return}
-    if(e.key==='Escape'){esel=new Set();selNote();eRender();return}
+    if((e.ctrlKey||e.metaKey)&&!e.altKey&&'cxv'.includes(e.key.toLowerCase())&&e.key.length===1){const k=e.key.toLowerCase();if(k==='c')selCopy();else if(k==='x')selCut();else selPaste();e.preventDefault();return}
+    if(e.key.startsWith('Arrow')&&esel.size&&!paste){const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];selNudge(d[0],d[1]);e.preventDefault();return}
+    if(e.key==='Escape'){if(paste){cancelPaste();selNote()}else{esel=new Set();selNote();eRender()}return}
   }
   if(!editorEl.hidden||e.target.tagName==='INPUT')return;
   if(e.key.toLowerCase()==='g'&&!e.repeat){setGhost(pb.ghostOn===false);return}
@@ -832,9 +834,56 @@ function selCommit(){
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const k=x+','+y;if(selMode==='sub'||(one&&selMode==='add'&&esel.has(k)))esel.delete(k);else esel.add(k)}
   selA=selB=null;selNote();eRender();
 }
+// move / copy / cut / paste. The grid is edited live while you drag or hover, from a snapshot taken at the start, so it all goes through the normal undo.
+let mv=null,paste=null,eclip=null,lastCell=[1,1];
+const snapState=()=>({g:eg.map(r=>r.slice()),s:JSON.stringify(eshp),o:JSON.stringify(eov),a:esa});
+function restoreState(b){eg=b.g.map(r=>r.slice());eshp=JSON.parse(b.s);eov=JSON.parse(b.o);esa=b.a}
+const selTiles=()=>[...esel].map(k=>k.split(',').map(Number));
+function selBox(){let x0=1e9,y0=1e9,x1=-1,y1=-1;for(const [x,y] of selTiles()){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}return {x0,y0,x1,y1}}
+const collect=withStart=>selTiles().map(([x,y])=>[x,y,eg[y][x]==='S'?'S':ePieces(x,y)]).filter(it=>withStart||it[2]!=='S');   // the Start tile travels with a move but is never duplicated
+function placeItems(items,ox,oy){for(const [x,y,l] of items){const nx=x+ox,ny=y+oy;if(nx<0||ny<0||ny>=eg.length||nx>=eg[0].length)continue;setPieces(nx,ny,l==='S'?[['S','f',0]]:l.map(p=>p.slice()))}}
+function startMove(c){
+  ePush();const items=collect(true),box=selBox();
+  for(const [x,y] of selTiles())setPieces(x,y,[]);                                   // lift the tiles off the grid
+  mv={items,box,ax:c[0],ay:c[1],base:snapState(),sel:[...esel],dx:0,dy:0};
+}
+function moveTo(c){
+  const W=eg[0].length,H=eg.length,{x0,y0,x1,y1}=mv.box;
+  const dx=Math.max(-x0,Math.min(W-1-x1,c[0]-mv.ax)),dy=Math.max(-y0,Math.min(H-1-y1,c[1]-mv.ay));
+  if(dx===mv.dx&&dy===mv.dy)return;mv.dx=dx;mv.dy=dy;
+  restoreState(mv.base);placeItems(mv.items,dx,dy);
+  esel=new Set(mv.sel.map(k=>{const [x,y]=k.split(',').map(Number);return (x+dx)+','+(y+dy)}));eRender();
+}
+function selNudge(dx,dy){
+  if(!esel.size||paste)return;const box=selBox(),W=eg[0].length,H=eg.length;
+  dx=Math.max(-box.x0,Math.min(W-1-box.x1,dx));dy=Math.max(-box.y0,Math.min(H-1-box.y1,dy));if(!dx&&!dy)return;
+  ePush();const items=collect(true),tiles=selTiles();for(const [x,y] of tiles)setPieces(x,y,[]);placeItems(items,dx,dy);
+  esel=new Set(tiles.map(([x,y])=>(x+dx)+','+(y+dy)));eRender();draftSoon();
+}
+function selCopy(){
+  if(!esel.size){eStat('Select some tiles first.');return false}
+  const box=selBox(),items=collect(false).map(([x,y,l])=>[x-box.x0,y-box.y0,l]);
+  eclip={w:box.x1-box.x0+1,h:box.y1-box.y0+1,items};eStat('Copied '+esel.size+' tile'+(esel.size>1?'s':'')+'. Ctrl+V pastes.');return true;
+}
+function selCut(){if(selCopy())selClear()}
+function selPaste(){
+  if(!eclip){eStat('Nothing copied yet.');return}
+  if(paste)cancelPaste();
+  ePush();paste={base:snapState(),at:null};eStat('Click where it should go. Esc cancels.');pasteHover(lastCell);
+}
+function pasteHover(c){
+  if(!paste)return;const W=eg[0].length,H=eg.length;
+  const ox=Math.max(0,Math.min(W-eclip.w,c[0])),oy=Math.max(0,Math.min(H-eclip.h,c[1]));
+  if(paste.at&&paste.at[0]===ox&&paste.at[1]===oy)return;paste.at=[ox,oy];
+  restoreState(paste.base);placeItems(eclip.items,ox,oy);
+  esel=new Set(eclip.items.map(([x,y])=>(x+ox)+','+(y+oy)));eRender();
+}
+function commitPaste(c){pasteHover(c);paste=null;draftSoon();eStat('Pasted. You can drag it to move it, or Ctrl+V to paste again.')}
+function cancelPaste(){if(!paste)return;restoreState(paste.base);paste=null;eUndo.pop();esel=new Set();eRender()}
+function selReset(){if(paste)cancelPaste();mv=null;selA=selB=null;esel=new Set()}
 function selAll(){esel=new Set();for(let y=0;y<eg.length;y++)for(let x=0;x<eg[0].length;x++)esel.add(x+','+y);selNote();eRender()}
 function selClear(){
-  if(!esel.size)return;ePush();let n=0;
+  if(!esel.size||paste)return;ePush();let n=0;
   for(const k of esel){const [x,y]=k.split(',').map(Number);if(eg[y][x]!=='S'){setPieces(x,y,[]);n++}}
   eRender();draftSoon();eStat('Cleared '+n+' tile'+(n===1?'':'s')+' (Ctrl+Z undoes)');
 }
@@ -846,7 +895,7 @@ markAnc();const toolShape={'#':'f','L':'f'},GLYPH=['\u25e4','\u25e5','\u25e2','\
 const eovClean=()=>cleanOv(eov,eg.map(r=>r.join('')));
 function eshpClean(){const o={};for(const k in eshp){const [x,y]=k.split(',').map(Number),v=eg[y]&&eg[y][x];if(v==='#'||v==='L')o[k]=eshp[k]}return o}
 function ePush(){eUndo.push({g:eg.map(r=>r.slice()),s:JSON.stringify(eshp),o:JSON.stringify(eov),a:esa});if(eUndo.length>100)eUndo.shift();eDirty=true}
-function eUndoDo(){const u=eUndo.pop();if(u){eg=u.g;eshp=JSON.parse(u.s);eov=JSON.parse(u.o||'{}');esa=u.a||0;eRender();draftSoon()}}
+function eUndoDo(){if(paste){cancelPaste();return}const u=eUndo.pop();if(u){esel=new Set();eg=u.g;eshp=JSON.parse(u.s);eov=JSON.parse(u.o||'{}');esa=u.a||0;eRender();draftSoon()}}
 // save / load a level as a file
 let dlNS=null;(async()=>{try{if(window.claude)dlNS=await claude.use('downloads')}catch(e){}})();
 // save a file: through the host's file-saving capability when there is one, otherwise a normal browser download (works on any website)
@@ -919,7 +968,7 @@ addEventListener('pagehide',flushDraft);addEventListener('beforeunload',flushDra
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushDraft()});
 document.getElementById('ename').addEventListener('input',()=>{eDirty=true;draftSoon()});
 function openEditor(id){
-  if(id!==undefined){eUndo=[];esel=new Set();eid=id;const c=id&&customs.find(c=>c.id===id);
+  if(id!==undefined){selReset();eUndo=[];eid=id;const c=id&&customs.find(c=>c.id===id);
     eshp=c&&c.sh?JSON.parse(JSON.stringify(c.sh)):{};
     eov=c&&c.ov?JSON.parse(JSON.stringify(c.ov)):{};
     esa=c?(c.sa||0):0;
@@ -976,9 +1025,9 @@ function setPieces(x,y,list){
   if(list.length&&list[0][1]!=='f')eshp[key]=[list[0][1],list[0][2]];else delete eshp[key];
   const rest=list.slice(1).filter(p=>p[1]!=='f');if(rest.length)eov[key]=rest;else delete eov[key];
 }
-ec.addEventListener('pointerdown',e=>{ec.setPointerCapture(e.pointerId);if(etool==='sel'){selA=selB=cellAt(e);selMode=e.altKey?'sub':(e.shiftKey||e.ctrlKey||e.metaKey||selAdd)?'add':'set';eRender();return}epaint=true;ePush();ePaint(e,true)});
-ec.addEventListener('pointermove',e=>{if(selA){selB=cellAt(e);eRender()}else if(epaint)ePaint(e)});
-['pointerup','pointercancel'].forEach(n=>ec.addEventListener(n,()=>{epaint=false;selCommit();draftSoon()}));
+ec.addEventListener('pointerdown',e=>{ec.setPointerCapture(e.pointerId);if(etool==='sel'){const c=cellAt(e);if(paste){commitPaste(c);return}if(esel.has(c[0]+','+c[1])&&!(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||selAdd)){startMove(c);return}selA=selB=c;selMode=e.altKey?'sub':(e.shiftKey||e.ctrlKey||e.metaKey||selAdd)?'add':'set';eRender();return}epaint=true;ePush();ePaint(e,true)});
+ec.addEventListener('pointermove',e=>{lastCell=cellAt(e);if(etool==='sel')ec.style.cursor=paste?'copy':mv?'grabbing':esel.has(lastCell.join(','))?'move':'crosshair';else ec.style.cursor='';if(selA){selB=lastCell;eRender()}else if(mv)moveTo(lastCell);else if(paste)pasteHover(lastCell);else if(epaint)ePaint(e)});
+['pointerup','pointercancel'].forEach(n=>ec.addEventListener(n,()=>{epaint=false;selCommit();if(mv){mv=null;selNote()}draftSoon()}));
 editorEl.addEventListener('pointerdown',e=>e.stopPropagation());
 addEventListener('resize',()=>{if(!editorEl.hidden)eRender()});
 function eValid(){
@@ -989,11 +1038,15 @@ function eValid(){
 }
 editorEl.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.t){const prev=etool;etool=b.dataset.t;if((prev==='#'||prev==='L')&&(etool==='#'||etool==='L'))toolShape[etool]=toolShape[prev];markTool();eStat(etool==='S'?'Click the start tile again to rotate it':etool==='sel'?'Drag to select tiles. Shift (or + Add) adds, Alt removes, Delete clears them.':'');return}
+  if(b.dataset.t){const prev=etool;etool=b.dataset.t;if((prev==='#'||prev==='L')&&(etool==='#'||etool==='L'))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(etool==='S'?'Click the start tile again to rotate it':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
+  if(paste&&['save','test','export','back','new','resize','import'].includes(a))cancelPaste();
   if(a==='rot')eRot();
   else if(a==='selall')selAll();
+  else if(a==='selcopy')selCopy();
+  else if(a==='selcut')selCut();
+  else if(a==='selpaste')selPaste();
   else if(a==='seldel')selClear();
   else if(a==='selnone'){esel=new Set();selNote();eRender()}
   else if(a==='seladd'){selAdd=!selAdd;b.classList.toggle('on',selAdd)}
