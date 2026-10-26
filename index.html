@@ -50,7 +50,7 @@ canvas{display:block;width:100%;height:100%}
 .row.sep{margin-top:6px;border-top:1px dashed #fff6}
 #p-main{width:min(380px,100%)}
 .icol{display:flex;flex-direction:column;gap:12px}
-#p-main .icons{display:grid;grid-template-columns:repeat(4,64px);gap:12px;justify-content:center;align-items:start;margin-top:8px}
+#p-main .icons{display:grid;grid-template-columns:repeat(3,64px);gap:12px;justify-content:center;align-items:start;margin-top:8px}
 #p-main .ib.playbig{grid-column:1/-1;width:auto;gap:10px;font-weight:800;letter-spacing:.1em}
 #p-main .ib{position:relative;width:64px;height:64px;padding:0;display:flex;align-items:center;justify-content:center}
 #p-main .ib::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:max-content;max-width:170px;text-align:center;font-size:13px;line-height:1.3;background:#000d;color:#fff;padding:5px 9px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .1s;z-index:3}
@@ -124,9 +124,6 @@ canvas{display:block;width:100%;height:100%}
 <div class="icol">
 <button class="ib" data-a="edit" aria-label="Level Editor" data-tip="Level Editor: build and test your own levels"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></svg></button>
 <button class="ib" data-a="comm" aria-label="Community levels" data-tip="Community levels: play, rate and share levels made by players"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></button>
-</div>
-<div class="icol">
-<button class="ib" data-a="stats" aria-label="Statistics" data-tip="Statistics: your total time, deaths and completions"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></button>
 </div>
 <div class="icol">
 <button class="ib" data-a="prof" aria-label="Profile" data-tip="Profile: your account, level, stats and placements"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
