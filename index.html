@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>window.BOXRUN_API='https://boxrun-api.thefrisk6.workers.dev'</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -79,7 +78,12 @@ canvas{display:block;width:100%;height:100%}
 .panel.wide{width:min(720px,100%)}
 #lvwrap{display:flex;gap:18px;text-align:left}#lvleft,#lvside{flex:1;min-width:0}#lvleft{display:flex;flex-direction:column;gap:10px}
 #lvside .lbt{font-weight:600;margin-bottom:6px;opacity:.85}
-@media(max-width:640px){#lvwrap{flex-direction:column}}
+#p-levels{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)}
+#p-levels #lvwrap{flex:1;min-height:0}
+#lvleft{overflow-y:auto;min-height:0;padding-right:6px}
+#lvside{align-self:flex-start}
+.panel .lbbtn{padding:6px 10px;display:flex;align-items:center}
+@media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
 #etools{display:flex;flex-wrap:wrap;gap:6px;padding:8px;align-items:center;background:#1c1c28}
@@ -272,7 +276,7 @@ function show(id){['main','levels','stats','lb','skins','comm','endless','profil
 function showMenu(f){if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
-  let h=LEVELS.map((_,i)=>'<button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button>').join('');
+  let h=LEVELS.map((_,i)=>'<div class="crow"><button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button><button class="lbbtn" data-lbs="'+i+'" title="Show the leaderboard for level '+(i+1)+'" aria-label="Leaderboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button></div>').join('');
   h+='<h3 class="sec">Custom levels</h3>'+(customs.length?customs.map(c=>'<div class="crow"><button data-c="'+c.id+'">'+esc(c.name)+'<small>'+(pb.cl[c.id]!=null?'Best '+fmt(pb.cl[c.id]):'Not cleared')+'</small></button><button data-sh="'+c.id+'" title="Share to the community">Share</button><button data-e2="'+c.id+'">Edit</button><button data-x="'+c.id+'">\u2715</button></div>').join(''):'<small>None yet. Make one in the Level Editor.</small>');
   document.getElementById('lvlist').innerHTML=h;
   lvNote(store.ok?'':'Warning: this browser is blocking saving, so custom levels and records are lost when you close the game. Use Export to keep levels.');
@@ -290,6 +294,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.e2)openEditor(d.e2);
   else if(d.x){customs=customs.filter(c=>c.id!==d.x);delete pb.cl[d.x];delete pb.cg[d.x];saveCustoms();savePB();buildLevels()}
   else if(d.u)showProfile(d.u);
+  else if(d.lbs!=null)sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs));
   else if(d.sk)pickSkin(d.sk,+d.ci);
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
@@ -914,7 +919,7 @@ async function sideLB(f,title){
   const h=lbHTML(await lbTop(f,8),true);sideCache[f]=h;if(tok===sideTok)b.innerHTML=h;
 }
 {const L=document.getElementById('lvlist');
- L.addEventListener('mouseover',e=>{const b=e.target.closest('button[data-l]');if(b)sideLB(fld(+b.dataset.l),'Level '+(+b.dataset.l+1))});
+ L.addEventListener('mouseover',e=>{const b=e.target.closest('button[data-l]');if(b)sideLB(fld(+b.dataset.l),'Level '+(+b.dataset.l+1)+' \u00b7 '+lvName(+b.dataset.l))});
  L.addEventListener('mouseleave',()=>sideLB('run3','Overall'))}
 async function showLB(field){
   show('lb');
