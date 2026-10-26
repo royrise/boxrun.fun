@@ -345,7 +345,7 @@ function finish(){
   savePB();
   banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button><button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
-  if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);const all=lbMerge(await lbTop(f,50),patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8)rows.push(Object.assign({rank:mi+1},all[mi]))}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
+  if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
 function load(n,keep){
@@ -891,7 +891,7 @@ function pushProfile(now){
 }
 async function rankOf(field,t,id){
   if(backend==='http'&&httpB){try{return await httpB.rank(field,t)}catch(e){return null}}
-  const rows=await lbTop(field,100);if(!rows)return null;
+  const rows=await lbTop(field,1000);if(!rows)return null;
   const i=rows.findIndex(r=>r.id===id);return i>=0?{rank:i+1}:{rank:null,more:true};
 }
 const offMsg=()=>backend==='none'?(window.claude?'Online features are not available in this view.':'No server address is set, so the online features are off. Add boxrun-config.js next to index.html (see boxrun-server/README.md).'):backendErr?'Cannot reach your server ('+backendErr+'). Check the address in boxrun-config.js, and that ALLOW_ORIGIN matches this site.':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
