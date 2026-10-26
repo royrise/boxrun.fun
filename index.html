@@ -144,7 +144,7 @@ canvas{display:block;width:100%;height:100%}
  <div id="etools">
   <div class="erow"><input id="ename" maxlength="24" placeholder="Level name" value="My level">
    <span class="grp"><input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
-   <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
+   <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="share" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="back">Back</button></span></div>
   <div class="erow"><span id="epal"></span><select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select></div>
   <div class="erow"><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
@@ -592,7 +592,7 @@ function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins('Locke
 
 // ---- community levels: shared in db as lv/<author> = {levels:{id:{...}}} and vt/<voter> = {v:{levelKey:1|-1}}
 let commList=[],commSort='rel',myVotes={};
-const lvNote=t=>{const e=document.getElementById('lvnote');if(e)e.textContent=t||''},cNote=t=>{document.getElementById('cnote').textContent=t||''};
+const lvNote=t=>{const ed=document.getElementById('editor');if(ed&&!ed.hidden){eStat(t||'');return}const e=document.getElementById('lvnote');if(e)e.textContent=t||''},cNote=t=>{document.getElementById('cnote').textContent=t||''};
 function cleanTx(o,rows){
   const r={},w=rows[0].length,h=rows.length;let n=0;
   try{const s0=typeof o==='string'?JSON.parse(o):(o||{});
@@ -1225,7 +1225,7 @@ editorEl.addEventListener('click',e=>{
   if(b.dataset.t){const prev=etool;etool=b.dataset.t;if((prev==='#'||prev==='L')&&(etool==='#'||etool==='L'))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
-  if(paste&&['save','test','export','back','new','resize','import'].includes(a))cancelPaste();
+  if(paste&&['save','share','test','export','back','new','resize','import'].includes(a))cancelPaste();
   if(a==='rot')eRot();
   else if(a==='selall')selAll();
   else if(a==='selcopy')selCopy();
@@ -1246,6 +1246,7 @@ editorEl.addEventListener('click',e=>{
     const nov={};for(const k in eov){const [sx,sy]=k.split(',').map(Number),nx=sx+ox,ny=sy+oy;if(nx>=0&&ny>=0&&nx<w&&ny<h)nov[nx+','+ny]=eov[k]}
     const ntx={};for(const k in etx){const [sx,sy]=k.split(',').map(Number),nx=sx+ox,ny=sy+oy;if(nx>=0&&ny>=0&&nx<w&&ny<h)ntx[nx+','+ny]=etx[k]}
     ePush();esel=new Set();eg=g;eshp=ns;eov=nov;etx=ntx;eRender();draftSoon();eStat(eg.flat().includes('S')?'':'The start tile was cropped out. Place it again.')}
+  else if(a==='share'){if(!eValid())return;document.querySelector('[data-e=save]').click();if(eid&&!eDirty)commShare(eid);else eStat('Could not save the level, so it was not shared.')}
   else if(a==='test'){const rows=eValid();if(rows){editorEl.hidden=true;mode='test';cur={id:null,name,rows,sh:eshpClean(),ov:eovClean(),tx:etxClean(),sa:esa};fullRun=false;total=0;deaths=0;load(0)}}
   else if(a==='save'){const rows=eValid();if(!rows)return;
     if(eid){const c=customs.find(c=>c.id===eid);if(c){const sh=eshpClean(),ov=eovClean(),tx=etxClean();if(c.rows.join()!==rows.join()||JSON.stringify(c.sh||{})!==JSON.stringify(sh)||JSON.stringify(c.ov||{})!==JSON.stringify(ov)||(c.sa||0)!==esa){delete pb.cl[eid];delete pb.cg[eid];savePB()}c.name=name;c.rows=rows;c.sh=sh;c.ov=ov;c.tx=tx;c.sa=esa}}
