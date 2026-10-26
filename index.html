@@ -88,7 +88,9 @@ canvas{display:block;width:100%;height:100%}
 @media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
-#p-comm .cbd{padding:4px 10px 10px 44px;text-align:left}
+#cwrap{display:flex;gap:18px;text-align:left}#cleft{flex:3;min-width:0}#cside{flex:2;min-width:0}@media(hover:hover){#clist [data-ct]{display:none}}#cside{align-self:flex-start;position:sticky;top:0}#cside .lbt{font-weight:600;margin-bottom:6px;opacity:.85}
+#cleft{max-height:62vh;overflow-y:auto;padding-right:6px}
+@media(max-width:640px){#cwrap{flex-direction:column}#cside{order:-1;max-height:34vh;overflow:auto;width:100%;position:static}#cleft{max-height:none}}
 #etools{display:flex;flex-direction:column;gap:6px;padding:8px;background:#1c1c28}
 .erow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp{display:inline-flex;gap:6px;align-items:center;padding-right:10px;margin-right:4px;border-right:1px solid #3a3d53}.grp:last-child{border:0}
 #etools select{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:6px}
@@ -133,7 +135,7 @@ canvas{display:block;width:100%;height:100%}
 </div>
 </div></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
- <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select></div><div id="clist"></div><small id="cnote"></small><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><button data-a="back">Back</button></div>
@@ -649,14 +651,14 @@ function renderComm(){
     const mine=l.by===uid,v=myVotes[l.key]||0;
     return '<div class="cw"><div class="cr"><div class="vt"><button data-vk="'+l.key+'" data-vv="1" class="'+(v>0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25b2</button><b>'+(l.up-l.down)+'</b><button data-vk="'+l.key+'" data-vv="-1" class="'+(v<0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25bc</button></div>'+
     '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+'</small></div>'+
-    '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+'<button data-ct="'+l.key+'" title="Fastest times on this level">Times</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div><div class="cbd" id="cb_'+l.key+'" hidden></div></div>';
+    '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+'<button data-ct="'+l.key+'" title="Fastest times on this level">Times</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div></div>';
   }).join('');
 }
 async function showComm(){
   show('comm');cNote('');const el=document.getElementById('clist');el.textContent='Loading\u2026';
   const list=await commLoad();
   if(list===null){el.textContent='';cNote(backend==='none'?offMsg():'Could not load community levels. Try again in a moment.');return}
-  commList=list;renderComm();
+  commList=list;for(const k in cCache)delete cCache[k];renderComm();
 }
 async function commShare(id){
   const c=customs.find(c=>c.id===id);if(!c)return;
@@ -669,14 +671,16 @@ async function commShare(id){
     await ref.set(d);lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');
   }catch(e){lvNote('Could not share the level.')}
 }
+let cTok=0;const cCache={};
 async function commTimes(key){
-  const el=document.getElementById('cb_'+key);if(!el)return;
-  if(!el.hidden){el.hidden=true;return}
-  el.hidden=false;el.textContent='Loading\u2026';
-  const f=cfld(key),mine=pb.cl['cm_'+key];
-  const rows=lbMerge(await lbTop(f,10),mine!=null?rnd(mine,3):null);
-  el.innerHTML='<div class="lbt">Fastest times</div>'+lbHTML(rows&&rows.slice(0,10),true)+(rows&&!uid&&backend==='http'?'<small>Sign in with the Profile icon to post your time.</small>':'');
+  const tok=++cTok,l=commList.find(x=>x.key===key),t=document.getElementById('cside-t'),b=document.getElementById('cside-b');if(!l||!b)return;
+  t.textContent=l.name;
+  if(cCache[key])b.innerHTML=cCache[key];else b.textContent='Loading\u2026';
+  const mine=pb.cl['cm_'+key],rows=lbMerge(await lbTop(cfld(key),8),mine!=null?rnd(mine,3):null);
+  const h=lbHTML(rows&&rows.slice(0,8),true);cCache[key]=h;if(tok===cTok)b.innerHTML=h;
 }
+{const L=document.getElementById('clist');
+ L.addEventListener('mouseover',e=>{const r=e.target.closest('.cr');if(!r)return;const b=r.querySelector('[data-ct]');if(b&&b.dataset.ct!==L.dataset.cur){L.dataset.cur=b.dataset.ct;commTimes(b.dataset.ct)}})}
 async function commVote(key,val){
   const l=commList.find(x=>x.key===key);if(!l||l.by===uid||!db)return;
   if(!uid){cNote('Sign in with the Profile icon to vote.');return}
@@ -689,7 +693,7 @@ async function commVote(key,val){
 function startComm(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
-  if(pb.cl['cm_'+key]!=null)lbPut({[cfld(key)]:rnd(pb.cl['cm_'+key],3)});
+  delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfld(key)]:rnd(pb.cl['cm_'+key],3)});
 }
 function commCopy(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
