@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>window.BOXRUN_API='https://boxrun-api.thefrisk6.workers.dev'</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" type="image/png" href="favicon.png">
 <title>boxrun.fun</title>
+<script>window.BOXRUN_API='https://boxrun-api.thefrisk6.workers.dev'</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Bungee&display=swap">
 <style>
 :root{--bg:#f2f2f5;--fg:#1c1c24;--bar:#ffffffcc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -50,7 +50,8 @@ canvas{display:block;width:100%;height:100%}
 .row.sep{margin-top:6px;border-top:1px dashed #fff6}
 #p-main{width:min(380px,100%)}
 .icol{display:flex;flex-direction:column;gap:12px}
-#p-main .icons{display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-top:8px}
+#p-main .icons{display:grid;grid-template-columns:repeat(4,64px);gap:12px;justify-content:center;align-items:start;margin-top:8px}
+#p-main .ib.playbig{grid-column:1/-1;width:auto;gap:10px;font-weight:800;letter-spacing:.1em}
 #p-main .ib{position:relative;width:64px;height:64px;padding:0;display:flex;align-items:center;justify-content:center}
 #p-main .ib::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:max-content;max-width:170px;text-align:center;font-size:13px;line-height:1.3;background:#000d;color:#fff;padding:5px 9px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .1s;z-index:3}
 #p-main .ib:hover::after{opacity:1;transition:opacity .15s .5s}
@@ -87,7 +88,8 @@ canvas{display:block;width:100%;height:100%}
 @media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
-#etools{display:flex;flex-wrap:wrap;gap:6px;padding:8px;align-items:center;background:#1c1c28}
+#etools{display:flex;flex-direction:column;gap:6px;padding:8px;background:#1c1c28}
+.erow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp{display:inline-flex;gap:6px;align-items:center;padding-right:10px;margin-right:4px;border-right:1px solid #3a3d53}.grp:last-child{border:0}
 #etools select{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:6px}
 #etools button,#etools input{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:6px 10px}
 #etools input{width:110px}#etools input[type=number]{width:56px}
@@ -111,21 +113,23 @@ canvas{display:block;width:100%;height:100%}
 <div id="banner"></div>
 <div id="menu">
  <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub">Steer. Survive. Don’t touch the lava.</p><div class="icons">
- <div class="icol">
-  <button class="ib" data-a="play" aria-label="Play" data-tip="Play: start a full run from Level 1"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
-  <button class="ib" data-a="levels" aria-label="Level Select" data-tip="Level Select: pick a level and see its leaderboard"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg></button>
-  <button class="ib" data-a="endless" aria-label="Endless" data-tip="Endless: a random track from a seed. Go as far as you can"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-3-3.5-4-5.5-4a4 4 0 000 8c2 0 3.5-1 5.5-4zm0 0c2 3 3.5 4 5.5 4a4 4 0 000-8c-2 0-3.5 1-5.5 4z"/></svg></button>
- </div>
- <div class="icol">
-  <button class="ib" data-a="edit" aria-label="Level Editor" data-tip="Level Editor: build and test your own levels"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></svg></button>
-  <button class="ib" data-a="comm" aria-label="Community levels" data-tip="Community levels: play, rate and share levels made by players"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></button>
- </div>
- <div class="icol">
-  <button class="ib" data-a="lb" aria-label="Leaderboard" data-tip="Leaderboard: the fastest overall runs"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button>
-  <button class="ib" data-a="stats" aria-label="Statistics" data-tip="Statistics: your total time, deaths and completions"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></button>
-  <button class="ib" data-a="skins" aria-label="Skins" data-tip="Skins: choose your cube's colours and unlock more"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg></button>
-  <button class="ib" data-a="prof" aria-label="Profile" data-tip="Profile: your account, level, stats and placements"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
- </div>
+<button class="ib playbig" data-a="play" aria-label="Play" data-tip="Play: start a full run from Level 1"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span>PLAY</span></button>
+<div class="icol">
+<button class="ib" data-a="levels" aria-label="Level Select" data-tip="Level Select: pick a level and see its leaderboard"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg></button>
+<button class="ib" data-a="endless" aria-label="Endless" data-tip="Endless: a random track from a seed. Go as far as you can"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-3-3.5-4-5.5-4a4 4 0 000 8c2 0 3.5-1 5.5-4zm0 0c2 3 3.5 4 5.5 4a4 4 0 000-8c-2 0-3.5 1-5.5 4z"/></svg></button>
+</div>
+<div class="icol">
+<button class="ib" data-a="edit" aria-label="Level Editor" data-tip="Level Editor: build and test your own levels"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></svg></button>
+<button class="ib" data-a="comm" aria-label="Community levels" data-tip="Community levels: play, rate and share levels made by players"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></button>
+</div>
+<div class="icol">
+<button class="ib" data-a="lb" aria-label="Leaderboard" data-tip="Leaderboard: the fastest overall runs"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button>
+<button class="ib" data-a="stats" aria-label="Statistics" data-tip="Statistics: your total time, deaths and completions"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></button>
+</div>
+<div class="icol">
+<button class="ib" data-a="prof" aria-label="Profile" data-tip="Profile: your account, level, stats and placements"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
+<button class="ib" data-a="skins" aria-label="Skins" data-tip="Skins: choose your cube's colours and unlock more"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg></button>
+</div>
 </div></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select></div><div id="clist"></div><small id="cnote"></small><button data-a="back">Back</button></div>
@@ -137,9 +141,14 @@ canvas{display:block;width:100%;height:100%}
 </div>
 <div id="msg">Hold ← / → (or A / D) to turn · R restart level · G ghost on/off · touch: hold left/right side</div>
 <div id="editor" hidden>
- <div id="etools"><input id="ename" maxlength="24" placeholder="Level name" value="My level"><span id="epal"></span>
-  <input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height">
-  <select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button><button data-e="test">▶ Test</button><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden><button data-e="back">Back</button><span id="estat"></span></div>
+ <div id="etools">
+  <div class="erow"><input id="ename" maxlength="24" placeholder="Level name" value="My level">
+   <span class="grp"><input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
+   <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
+   <span class="grp"><button data-e="test">▶ Test</button><button data-e="back">Back</button></span></div>
+  <div class="erow"><span id="epal"></span><select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select></div>
+  <div class="erow"><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
+ </div>
  <canvas id="ec"></canvas>
 </div>
 <script>
@@ -789,7 +798,19 @@ function endRun(done){
 
 // ---- online features. Inside claude.ai they use its built-in database. On your own website they use your server: set window.BOXRUN_API
 // (see boxrun-server/README.md). With neither, the game still works fully offline.
-const BOXRUN_API=String(window.BOXRUN_API||'').replace(/\/+$/,'');
+// The server address comes from (1) window.BOXRUN_API, (2) a file called boxrun-config.js next to index.html, (3) ?api=https://... in the page address,
+// and is remembered in this browser. Keeping it in boxrun-config.js means replacing index.html with a newer version never loses it.
+let BOXRUN_API='',backendErr='';
+const cfgReady=new Promise(res=>{
+  if(window.claude||window.BOXRUN_API){res();return}
+  const sc=document.createElement('script');sc.src='boxrun-config.js';sc.onload=sc.onerror=()=>res();document.head.appendChild(sc);setTimeout(res,2500);
+});
+function fixApi(u){u=String(u||'').replace(/\/+$/,'');return u.replace(/^http:\/\/([^\/]*\.workers\.dev)/i,'https://$1')}
+function findApi(){
+  try{const q=new URLSearchParams(location.search).get('api');if(q&&/^https?:\/\//.test(q)){store.set('boxrunApi',q);return fixApi(q)}}catch(e){}
+  const w=fixApi(window.BOXRUN_API);if(w){store.set('boxrunApi',w);return w}
+  return fixApi(store.get('boxrunApi'));
+}
 let db=null,uid=null,usersNS=null,backend='none',httpB=null;
 function httpBackend(base){
   let token=store.get('boxrunToken')||null,me=null;
@@ -811,7 +832,8 @@ function httpBackend(base){
         set:async d=>{await call('/db/'+c+'/'+id,{method:'PUT',body:JSON.stringify(d)})}}}},
     users:{id:async()=>me?me.id:null,profiles:async ids=>ids.length?call('/users?ids='+ids.map(encodeURIComponent).join(',')):{}},
     uid:()=>me?me.id:null,name:()=>me?me.name:null,
-    async restore(){if(!token)return;try{me=await call('/auth/me')}catch(e){token=null;me=null;store.set('boxrunToken','')}},
+    async restore(){if(!token)return;try{me=await call('/auth/me')}catch(e){if(e.status===401){token=null;me=null;store.set('boxrunToken','')}else throw e}},
+    ping:()=>call('/db/lb?limit=1'),
     async register(n,p){return enter(await call('/auth/register',{method:'POST',body:JSON.stringify({name:n,password:p})}))},
     async login(n,p){return enter(await call('/auth/login',{method:'POST',body:JSON.stringify({name:n,password:p})}))},
     async logout(){try{await call('/auth/logout',{method:'POST'})}catch(e){}token=null;me=null;store.set('boxrunToken','')},
@@ -819,11 +841,16 @@ function httpBackend(base){
   };
 }
 async function initBackend(){
+  await cfgReady;BOXRUN_API=findApi();
   try{
-    if(window.claude){db=await claude.use('db');usersNS=await claude.use('user');if(usersNS)uid=await usersNS.id();backend='claude'}
-    else if(BOXRUN_API){httpB=httpBackend(BOXRUN_API);db=httpB.db;usersNS=httpB.users;await httpB.restore();uid=httpB.uid();backend='http'}
+    if(window.claude){db=await claude.use('db');usersNS=await claude.use('user');if(db){if(usersNS)uid=await usersNS.id();backend='claude'}}
+    else if(BOXRUN_API){
+      httpB=httpBackend(BOXRUN_API);db=httpB.db;usersNS=httpB.users;backend='http';
+      try{await httpB.ping();await httpB.restore()}catch(e){backendErr=(e&&e.message)||'no answer'}
+      uid=httpB.uid();
+    }
   }catch(e){db=null;uid=null}
-  if(db&&uid){await pullMine();syncPBs();pushProfile(true)}
+  if(db&&uid&&!backendErr){await pullMine();syncPBs();pushProfile(true)}
 }
 initBackend();
 // bring your server-side times and stats onto this device (a new browser, or after clearing site data); the faster time always wins
@@ -851,14 +878,15 @@ async function rankOf(field,t,id){
   const rows=await lbTop(field,100);if(!rows)return null;
   const i=rows.findIndex(r=>r.id===id);return i>=0?{rank:i+1}:{rank:null,more:true};
 }
-const offMsg=()=>backend==='none'?'Not available on this site yet: the online features need a server (see boxrun-server/README.md).':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
-const loginForm=()=>'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr">Your account keeps your times, level and skin on every device.</small>';
+const offMsg=()=>backend==='none'?(window.claude?'Online features are not available in this view.':'No server address is set, so the online features are off. Add boxrun-config.js next to index.html (see boxrun-server/README.md).'):backendErr?'Cannot reach your server ('+backendErr+'). Check the address in boxrun-config.js, and that ALLOW_ORIGIN matches this site.':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
+const srvLine=()=>backend==='http'?(backendErr?'Server problem: '+backendErr:'Server: '+new URL(BOXRUN_API).host+' (connected)'):backend==='claude'?'Using your claude.ai account':'No server set up';
+const loginForm=()=>'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr">Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
 const cubeSvg=(p,s)=>'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
 async function showProfile(id){
   show('profile');const el=document.getElementById('profbody');
   if(backend==='none'){el.innerHTML='<small>'+offMsg()+'</small>';return}
   if(!id){
-    if(!uid){el.innerHTML=backend==='http'?loginForm():'<small>Sign in to claude.ai to have a profile.</small>';return}
+    if(!uid){el.innerHTML=backend==='http'&&!backendErr?loginForm():backendErr?'<small>'+offMsg()+'</small>':'<small>Sign in to claude.ai to have a profile.</small>';return}
     id=uid;
   }
   const mine=id===uid;el.textContent='Loading\u2026';
@@ -874,7 +902,7 @@ async function showProfile(id){
    +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',st.run?'Done':'Not yet']].map(r=>'<div class="row"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<div class="lbt">Placements</div>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')
-   +(mine&&backend==='http'?'<button data-a="alogout">Sign out</button>':'');
+   +(mine&&backend==='http'?'<button data-a="alogout">Sign out</button><small class="srv">'+srvLine()+'</small>':'');
   defs.forEach(([n,f],i)=>{if(times[f]==null)return;rankOf(f,times[f],id).then(r=>{const c=document.getElementById('rk'+i);if(c&&r)c.textContent=r.rank?'#'+r.rank:'100+'})});
 }
 async function acctDo(kind){
