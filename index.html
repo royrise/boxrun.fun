@@ -88,6 +88,7 @@ canvas{display:block;width:100%;height:100%}
 @media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
+#p-comm .cbd{padding:4px 10px 10px 44px;text-align:left}
 #etools{display:flex;flex-direction:column;gap:6px;padding:8px;background:#1c1c28}
 .erow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp{display:inline-flex;gap:6px;align-items:center;padding-right:10px;margin-right:4px;border-right:1px solid #3a3d53}.grp:last-child{border:0}
 #etools select{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:6px}
@@ -309,6 +310,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
   else if(d.cp)startComm(d.cp);
+  else if(d.ct)commTimes(d.ct);
   else if(d.cs)commCopy(d.cs);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
@@ -336,11 +338,13 @@ function finish(){
   txt+='<br>Attempts: '+attempts;
   const patch={};
   if(mode==='main')patch[fld(lvl)]=rnd(pb.levels[LID[lvl]],3);
+  const cmk=mode==='custom'&&cur&&/^cm_/.test(cur.id)?cur.id.slice(3):null;
+  if(cmk&&pb.cl[cur.id]!=null)patch[cfld(cmk)]=rnd(pb.cl[cur.id],3);
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
   savePB();
   banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button><button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
-  if(mode==='main'){const f=fld(lvl);(async()=>{await lbPut(patch);const all=lbMerge(await lbTop(f,50),patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8)rows.push(Object.assign({rank:mi+1},all[mi]))}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
+  if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);const all=lbMerge(await lbTop(f,50),patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8)rows.push(Object.assign({rank:mi+1},all[mi]))}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
 function load(n,keep){
@@ -643,9 +647,9 @@ function renderComm(){
   if(!commList.length){el.innerHTML='<small>No community levels yet. Share one from Level Select.</small>';return}
   el.innerHTML=commSorted().map(l=>{
     const mine=l.by===uid,v=myVotes[l.key]||0;
-    return '<div class="cr"><div class="vt"><button data-vk="'+l.key+'" data-vv="1" class="'+(v>0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25b2</button><b>'+(l.up-l.down)+'</b><button data-vk="'+l.key+'" data-vv="-1" class="'+(v<0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25bc</button></div>'+
+    return '<div class="cw"><div class="cr"><div class="vt"><button data-vk="'+l.key+'" data-vv="1" class="'+(v>0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25b2</button><b>'+(l.up-l.down)+'</b><button data-vk="'+l.key+'" data-vv="-1" class="'+(v<0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25bc</button></div>'+
     '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+'</small></div>'+
-    '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div>';
+    '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+'<button data-ct="'+l.key+'" title="Fastest times on this level">Times</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div><div class="cbd" id="cb_'+l.key+'" hidden></div></div>';
   }).join('');
 }
 async function showComm(){
@@ -665,6 +669,14 @@ async function commShare(id){
     await ref.set(d);lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');
   }catch(e){lvNote('Could not share the level.')}
 }
+async function commTimes(key){
+  const el=document.getElementById('cb_'+key);if(!el)return;
+  if(!el.hidden){el.hidden=true;return}
+  el.hidden=false;el.textContent='Loading\u2026';
+  const f=cfld(key),mine=pb.cl['cm_'+key];
+  const rows=lbMerge(await lbTop(f,10),mine!=null?rnd(mine,3):null);
+  el.innerHTML='<div class="lbt">Fastest times</div>'+lbHTML(rows&&rows.slice(0,10),true)+(rows&&!uid&&backend==='http'?'<small>Sign in with the Profile icon to post your time.</small>':'');
+}
 async function commVote(key,val){
   const l=commList.find(x=>x.key===key);if(!l||l.by===uid||!db)return;
   if(!uid){cNote('Sign in with the Profile icon to vote.');return}
@@ -677,6 +689,7 @@ async function commVote(key,val){
 function startComm(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
+  if(pb.cl['cm_'+key]!=null)lbPut({[cfld(key)]:rnd(pb.cl['cm_'+key],3)});
 }
 function commCopy(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
@@ -913,6 +926,7 @@ async function acctDo(kind){
 async function acctOut(){await httpB.logout();uid=null;showProfile()}
 document.getElementById('profbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ap')acctDo('login')});
 
+const cfld=key=>{let a=2166136261,b=5381;for(let i=0;i<key.length;i++){const c=key.charCodeAt(i);a=Math.imul(a^c,16777619);b=(Math.imul(b,33)^c)>>>0}return 'x'+(a>>>0).toString(36)+b.toString(36)};
 async function lbPut(patch){
   if(!db||!uid)return;
   try{const ref=db.doc('lb/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};let ch=false;
