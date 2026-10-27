@@ -665,7 +665,7 @@ function buildSkins(note){
     document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
   document.getElementById('skinprev').innerHTML='<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
 }
-function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins('Locked: '+c.n+' - '+c.t);return}pb.skin[k]=c.id;savePB();buildSkins(c.n+' selected')}
+function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins(c.n+': '+c.t);return}pb.skin[k]=c.id;savePB();buildSkins(c.n+' selected')}
 
 // ---- achievements: each one unlocks a cube colour. Counters live in pb.st, unlocked ids in pb.ach
 const bump=(k,n)=>{pb.st[k]=(pb.st[k]||0)+(n==null?1:n)};
