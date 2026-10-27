@@ -1521,8 +1521,10 @@ function eMovers(cs){
     ex.strokeStyle='#fff';ex.lineWidth=1.5;ex.beginPath();if(!mi.v){ex.moveTo(bx+cs*.2,by+cs/2);ex.lineTo(bx+cs*.8,by+cs/2)}else{ex.moveTo(bx+cs/2,by+cs*.2);ex.lineTo(bx+cs/2,by+cs*.8)}ex.stroke();
     ex.fillStyle='#fff';ex.font='bold '+(cs*.32|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(mi.d,bx+cs/2,by+cs*.3);ex.restore()}
 }
-setInterval(()=>{if(!editorEl.hidden&&eg.length&&eg.some(r=>r.some(c=>mvInfo(c)))&&!epaint)eRender()},50);
-function eRender(){
+// moving-block preview: redraw every frame (also while painting, so it doesn't freeze or stutter), unless eRender just ran
+let lastER=0,eHasMv=false;
+(function eAnim(){requestAnimationFrame(eAnim);if(editorEl.hidden||!eg.length||performance.now()-lastER<14)return;if(eHasMv)eRender()})();
+function eRender(){lastER=performance.now();eHasMv=eg.some(r=>r.some(c=>mvInfo(c)));
   const r=ec.getBoundingClientRect();ec.width=r.width*dpr;ec.height=r.height*dpr;
   ex.setTransform(dpr,0,0,dpr,0,0);
   const rows=eg.length,cols=eg[0].length,cs=Math.min(40,(r.width-8)/cols,(r.height-8)/rows);
