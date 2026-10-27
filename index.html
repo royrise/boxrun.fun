@@ -1133,7 +1133,7 @@ async function showLB(field){
 // ---- level editor
 const editorEl=document.getElementById('editor'),ec=document.getElementById('ec'),ex=ec.getContext('2d');
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
-const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','H':'#6a6f94','V':'#6a6f94','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
+const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
   '#':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.5"/><path d="M2 9h20M2 16h20M9 2v7M15 9v7M9 16v6" stroke="#9a9fc0" stroke-width="1" fill="none"/>'),
@@ -1155,7 +1155,7 @@ const ICONS={
 };
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" title="'+t[1]+'" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('');
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
-for(const c of 'abcdefghijklmnop')ECOL[c]='#6a6f94';
+for(const c of 'abcdefghijklmnop')ECOL[c]='#1e1e2a';
 let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t;
 function markTool(){document.querySelectorAll('#epal button').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
 let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
@@ -1327,6 +1327,18 @@ function openEditor(id){
   keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';
   state='menu';menuEl.hidden=true;editorEl.hidden=false;markTool();eStat(eRestored?'Restored your unsaved changes. Press Save to keep them.':(store.ok?'':'Warning: this browser is blocking saving. Use Export to keep levels.'));eRestored=false;eRender();
 }
+function eMovers(cs){
+  const tm=performance.now()/1000;
+  for(let y=0;y<eg.length;y++)for(let x=0;x<eg[0].length;x++){const mi=mvInfo(eg[y][x]);if(!mi)continue;
+    const px=eo.x+x*cs,py=eo.y+y*cs,L=cs*mi.d,w=mi.v?cs:cs+L,h=mi.v?cs+L:cs;
+    ex.save();ex.fillStyle='rgba(255,210,74,.10)';ex.fillRect(px,py,w,h);ex.strokeStyle='#ffd24a88';ex.lineWidth=1;ex.setLineDash([4,3]);ex.strokeRect(px+.5,py+.5,w-1,h-1);
+    const ex0=mi.v?px:px+L,ey0=mi.v?py+L:py;ex.strokeStyle='#ffffff66';ex.strokeRect(ex0+3,ey0+3,cs-6,cs-6);ex.setLineDash([]);
+    const o=mi.d*(.5-.5*Math.cos(tm*1.6*2/Math.sqrt(mi.d*2)))*cs,bx=mi.v?px:px+o,by=mi.v?py+o:py;
+    ex.fillStyle='#6a6f94';ex.fillRect(bx+2,by+2,cs-4,cs-4);ex.strokeStyle='#ffd24a';ex.lineWidth=2;ex.strokeRect(bx+4,by+4,cs-8,cs-8);
+    ex.strokeStyle='#fff';ex.lineWidth=1.5;ex.beginPath();if(!mi.v){ex.moveTo(bx+cs*.2,by+cs/2);ex.lineTo(bx+cs*.8,by+cs/2)}else{ex.moveTo(bx+cs/2,by+cs*.2);ex.lineTo(bx+cs/2,by+cs*.8)}ex.stroke();
+    ex.fillStyle='#fff';ex.font='bold '+(cs*.32|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(mi.d,bx+cs/2,by+cs*.3);ex.restore()}
+}
+setInterval(()=>{if(!editorEl.hidden&&eg.length&&eg.some(r=>r.some(c=>mvInfo(c)))&&!epaint)eRender()},50);
 function eRender(){
   const r=ec.getBoundingClientRect();ec.width=r.width*dpr;ec.height=r.height*dpr;
   ex.setTransform(dpr,0,0,dpr,0,0);
@@ -1340,11 +1352,11 @@ function eRender(){
       if(v==='S'){const q=cs*.12,iw=cs-2*m-2*q;ex.fillStyle='#0b2a3a';const fr=[[px+cs-m-q,py+m+q,q,iw],[px+m+q,py+cs-m-q,iw,q],[px+m,py+m+q,q,iw],[px+m+q,py+m,iw,q]][esa];ex.fillRect(...fr)}}
     if(v==='M'){ex.fillStyle='#7a5530';for(let i=0;i<3;i++){ex.beginPath();ex.arc(px+cs*(.3+.2*i),py+cs*(.3+.2*((i*2)%3)),cs*.1,0,7);ex.fill()}}
     else if(v==='B'){ex.fillStyle='#f064ff';ex.fillRect(px+cs*.18,py+cs*.18,cs*.64,cs*.64)}
-    else if(mvInfo(v)){const mi=mvInfo(v);ex.save();ex.strokeStyle='#ffffff44';ex.lineWidth=1;ex.setLineDash([3,3]);ex.strokeRect(px+.5,py+.5,mi.v?cs-1:cs*(mi.d+1)-1,mi.v?cs*(mi.d+1)-1:cs-1);ex.restore();ex.fillStyle='#6a6f94';ex.fillRect(px+2,py+2,cs-4,cs-4);ex.strokeStyle='#ffd24a';ex.lineWidth=2;ex.strokeRect(px+4,py+4,cs-8,cs-8);ex.strokeStyle='#fff';ex.beginPath();if(!mi.v){ex.moveTo(px+cs*.2,py+cs/2);ex.lineTo(px+cs*.8,py+cs/2)}else{ex.moveTo(px+cs/2,py+cs*.2);ex.lineTo(px+cs/2,py+cs*.8)}ex.stroke();ex.fillStyle='#fff';ex.font='bold '+(cs*.35|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(mi.d,px+cs/2,py+cs*.28)}
     else if(v>='1'&&v<='3'){ex.strokeStyle=PCOL[v];ex.lineWidth=3;ex.beginPath();ex.arc(px+cs/2,py+cs/2,cs*.36,0,7);ex.stroke();ex.fillStyle=PCOL[v];ex.font='bold '+(cs*.45|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(v,px+cs/2,py+cs/2+1)}
     const ovp=eov[x+','+y];if(ovp)for(const [cc,kk,oo] of ovp){ex.fillStyle=ECOL[cc];ex.beginPath();polyOf(x,y,[kk,oo]).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}
     ex.lineWidth=1;ex.strokeStyle='#ffffff14';ex.strokeRect(px+.5,py+.5,cs-1,cs-1);
   }
+  eMovers(cs);
   if(cornerMode()){
     ex.strokeStyle='rgba(255,255,255,.2)';ex.lineWidth=1;ex.beginPath();
     for(let x=0;x<cols;x++){const X=eo.x+(x+.5)*cs;ex.moveTo(X,eo.y);ex.lineTo(X,eo.y+rows*cs)}
