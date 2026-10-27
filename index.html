@@ -386,6 +386,8 @@ function fillTile(x,y){
   const sh=shapes[x+','+y];if(!sh){ctx.fillRect(x*U,y*U,U,U);return}
   ctx.beginPath();polyOf(x,y,sh).forEach(([X,Y],i)=>i?ctx.lineTo(X*U,Y*U):ctx.moveTo(X*U,Y*U));ctx.closePath();ctx.fill();
 }
+function chk(c,px,py,s,pts){c.save();if(pts){c.beginPath();pts.forEach(([X,Y],i)=>i?c.lineTo(X,Y):c.moveTo(X,Y));c.closePath();c.clip()}
+  const n=4,q=s/n;c.fillStyle='#fff';c.fillRect(px,py,s,s);c.fillStyle='#111';for(let i=0;i<n;i++)for(let j=0;j<n;j++)if((i+j)%2)c.fillRect(px+i*q,py+j*q,q+.5,q+.5);c.restore()}
 // tile pieces: the base piece (char + optional shape) plus layered partial wall/lava pieces in layers['x,y']=[[c,kind,orient],...]
 function piecesAt(x,y,types){
   const key=x+','+y,r=[],c=(grid[y]&&grid[y][x])||'#';
@@ -485,9 +487,10 @@ function draw(){
       ctx.fillStyle=(x+y)%2?'#1b1b26':'#1e1e2a';ctx.fillRect(x*U,y*U,U,U);
       if(k==='L'){const g=.5+.5*Math.sin(t*4+x+y);ctx.fillStyle=`rgb(${230+20*g|0},${70+50*g|0},20)`;fillTile(x,y);if(!shapes[x+','+y]){ctx.fillStyle='#ffd24a55';ctx.fillRect(x*U+6,y*U+6,U-12,U-12)}}
       const shp=shapes[x+','+y];
-      if(shp&&(k==='I'||k==='G'||k==='P')){ctx.fillStyle=k==='I'?'#8fd8ff':k==='G'?'#2fd37a':'rgba(255,226,80,'+(.75+.25*Math.sin(t*6))+')';fillTile(x,y)}
+      if(shp&&k==='G')chk(ctx,x*U,y*U,U,polyOf(x,y,shp).map(([X,Y])=>[X*U,Y*U]));
+      else if(shp&&(k==='I'||k==='P')){ctx.fillStyle=k==='I'?'#8fd8ff':k==='G'?'#2fd37a':'rgba(255,226,80,'+(.75+.25*Math.sin(t*6))+')';fillTile(x,y)}
       else if(k==='I'){ctx.fillStyle='#8fd8ff';ctx.fillRect(x*U,y*U,U,U);ctx.fillStyle='rgba(255,255,255,'+(.25+.12*Math.sin(t*2+x+y))+')';ctx.fillRect(x*U+4,y*U+4,U-8,U-8);ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x*U+9,y*U+U-9);ctx.lineTo(x*U+U-9,y*U+9);ctx.moveTo(x*U+9,y*U+U-20);ctx.lineTo(x*U+20,y*U+9);ctx.stroke()}
-      if(k==='G'&&!shp){ctx.fillStyle='#2fd37a';ctx.fillRect(x*U+4,y*U+4,U-8,U-8)}
+      if(k==='G'&&!shp)chk(ctx,x*U,y*U,U)
       if(k==='P'&&!shp){const a=.75+.25*Math.sin(t*6),pn=tile(x,y-1)==='P',ps=tile(x,y+1)==='P',pw=tile(x-1,y)==='P',pe=tile(x+1,y)==='P';
         const pad=(m)=>[x*U+(pw?0:m),y*U+(pn?0:m),U-(pw?0:m)-(pe?0:m),U-(pn?0:m)-(ps?0:m)];
         ctx.fillStyle='#b89a1a';ctx.fillRect(...pad(3));ctx.fillStyle='rgba(255,226,80,'+a+')';ctx.fillRect(...pad(6))}
@@ -1116,7 +1119,7 @@ const ICONS={
   'S':sv('<rect x="3" y="3" width="18" height="18" rx="2" fill="#5ec8ff"/><rect x="16" y="5" width="3" height="14" fill="#0b2a3a"/>'),
   'sel':sv('<rect x="3" y="3" width="14" height="14" rx="1" fill="rgba(94,200,255,.25)" stroke="#5ec8ff" stroke-width="1.8" stroke-dasharray="3 2"/><path d="M13 13l8 3-3.5 1.5L16 21z" fill="#fff"/>'),
   'txt':sv('<rect x="2" y="4" width="20" height="16" rx="2" fill="#2a2d44" stroke="#9a9fc0" stroke-width="1.5"/><path d="M7 9h10M12 9v8" stroke="#ffd24a" stroke-width="2.2" stroke-linecap="round" fill="none"/>'),
-  'G':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#2fd37a"/><rect x="6" y="6" width="12" height="12" rx="1" fill="none" stroke="#fff" stroke-width="1.5"/>')
+  'G':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#fff"/><path d="M2 2h5v5H2zM12 2h5v5h-5zM7 7h5v5H7zM17 7h5v5h-5zM2 12h5v5H2zM12 12h5v5h-5zM7 17h5v5H7zM17 17h5v5h-5z" fill="#111"/>')
 };
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" title="'+t[1]+'" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('');
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
@@ -1296,8 +1299,9 @@ function eRender(){
   eo={x:(r.width-cs*cols)/2,y:(r.height-cs*rows)/2,cs};
   for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
     const v=eg[y][x],px=eo.x+x*cs,py=eo.y+y*cs;
-    const sh=eshp[x+','+y];if(sh&&SHT.includes(v)){ex.fillStyle=ECOL['.'];ex.fillRect(px,py,cs,cs);ex.fillStyle=v==='G'?'#2fd37a':ECOL[v];ex.beginPath();polyOf(x,y,sh).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}else{ex.fillStyle=ECOL[v];ex.fillRect(px,py,cs,cs)}
-    if(v==='S'||(v==='G'&&!sh)){ex.fillStyle=v==='S'?'#5ec8ff':'#2fd37a';const m=cs*.15;ex.fillRect(px+m,py+m,cs-2*m,cs-2*m);
+    const sh=eshp[x+','+y];if(sh&&v==='G'){ex.fillStyle=ECOL['.'];ex.fillRect(px,py,cs,cs);chk(ex,px,py,cs,polyOf(x,y,sh).map(([X,Y])=>[eo.x+X*cs,eo.y+Y*cs]))}else if(sh&&SHT.includes(v)){ex.fillStyle=ECOL['.'];ex.fillRect(px,py,cs,cs);ex.fillStyle=v==='G'?'#2fd37a':ECOL[v];ex.beginPath();polyOf(x,y,sh).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}else{ex.fillStyle=ECOL[v];ex.fillRect(px,py,cs,cs)}
+    if(v==='G'&&!sh)chk(ex,px,py,cs);
+    if(v==='S'){ex.fillStyle='#5ec8ff';const m=cs*.15;ex.fillRect(px+m,py+m,cs-2*m,cs-2*m);
       if(v==='S'){const q=cs*.12,iw=cs-2*m-2*q;ex.fillStyle='#0b2a3a';const fr=[[px+cs-m-q,py+m+q,q,iw],[px+m+q,py+cs-m-q,iw,q],[px+m,py+m+q,q,iw],[px+m+q,py+m,iw,q]][esa];ex.fillRect(...fr)}}
     const ovp=eov[x+','+y];if(ovp)for(const [cc,kk,oo] of ovp){ex.fillStyle=ECOL[cc];ex.beginPath();polyOf(x,y,[kk,oo]).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}
     ex.strokeStyle='#ffffff14';ex.strokeRect(px+.5,py+.5,cs-1,cs-1);
