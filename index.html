@@ -344,6 +344,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.vk)commVote(d.vk,+d.vv);
   else if(d.cp)startComm(d.cp);
   else if(d.ct){commTimes(d.ct);popSide('cside')}
+  else if(d.ar)adminRename(d.ar,d.an)
   else if(d.sc)closeSide()
   else if(d.lbo){sideLB('run3','Overall');popSide('lvside')}
   else if(d.cs)commCopy(d.cs);
@@ -775,6 +776,8 @@ async function openLinked(){
   if(await fetchComm(key))startComm(key);else toast('That level link no longer works. It may have been removed.')
 }
 function rvSync(l){const id='cm_'+l.key;if(!pb.crv)pb.crv={};if((pb.crv[id]|0)!==(l.rv|0)){delete pb.cl[id];delete pb.cg[id];pb.crv[id]=l.rv|0;savePB()}}
+function askText(msg,val,yes){return new Promise(res=>{const o=document.createElement('div');o.id='askm';o.innerHTML='<div><p></p><input maxlength="20" autocomplete="off" style="width:100%;box-sizing:border-box;margin-bottom:14px;padding:8px;font:inherit;font-size:16px;color:#eef;background:#12121a;border:1px solid #4a4d63;border-radius:8px"><button data-y="0">Cancel</button><button data-y="1" class="pri"></button></div>';o.querySelector('p').textContent=msg;const inp=o.querySelector('input');inp.value=val||'';o.querySelector('.pri').textContent=yes||'OK';
+  const done=v=>{o.remove();res(v)};o.addEventListener('pointerdown',e=>e.stopPropagation());o.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')done(inp.value.trim());if(e.key==='Escape')done(null)});o.addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(b)done(b.dataset.y==='1'?inp.value.trim():null)});document.body.appendChild(o);inp.focus();inp.select()})}
 function askYes(msg,yes){return new Promise(res=>{const o=document.createElement('div');o.id='askm';o.innerHTML='<div><p></p><button data-y="0">Cancel</button><button data-y="1" class="pri"></button></div>';o.querySelector('p').textContent=msg;o.querySelector('.pri').textContent=yes||'Yes';
   const done=v=>{o.remove();res(v)};o.addEventListener('pointerdown',e=>e.stopPropagation());o.addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(b)done(b.dataset.y==='1')});document.body.appendChild(o)})}
 const lvNote=t=>{const ed=document.getElementById('editor');if(ed&&!ed.hidden){eStat(t||'');return}const e=document.getElementById('lvnote');if(e)e.textContent=t||''},cNote=t=>{document.getElementById('cnote').textContent=t||''};
@@ -1096,14 +1099,15 @@ function httpBackend(base){
     get:async()=>{const j=await call('/db/'+name+qs);return {docs:j.docs.map(d=>({id:d.id,data:()=>d.data}))}},
     orderBy:f=>q(name,qs+(qs?'&':'?')+'orderBy='+encodeURIComponent(f)),
     limit:n=>q(name,qs+(qs?'&':'?')+'limit='+n)});
-  const enter=j=>{token=j.token;me={id:j.id,name:j.name};store.set('boxrunToken',token);return me};
+  const enter=j=>{token=j.token;me={id:j.id,name:j.name,admin:!!j.admin};store.set('boxrunToken',token);return me};
   return {
     db:{collection:name=>q(name,''),
       doc:path=>{const [c,id]=path.split('/');return {
         get:async()=>{try{const j=await call('/db/'+c+'/'+id);return {exists:true,data:()=>j.data}}catch(e){if(e.status===404)return {exists:false,data:()=>({})};throw e}},
         set:async d=>{await call('/db/'+c+'/'+id,{method:'PUT',body:JSON.stringify(d)})}}}},
     users:{id:async()=>me?me.id:null,profiles:async ids=>ids.length?call('/users?ids='+ids.map(encodeURIComponent).join(',')):{}},
-    uid:()=>me?me.id:null,name:()=>me?me.name:null,
+    uid:()=>me?me.id:null,name:()=>me?me.name:null,admin:()=>!!(me&&me.admin),
+    rename:(id,name)=>call('/admin/rename',{method:'POST',body:JSON.stringify({id,name})}),
     async restore(){if(!token)return;try{me=await call('/auth/me')}catch(e){if(e.status===401){token=null;me=null;store.set('boxrunToken','')}else throw e}},
     ping:()=>call('/db/lb?limit=1'),
     async register(n,p){return enter(await call('/auth/register',{method:'POST',body:JSON.stringify({name:n,password:p})}))},
@@ -1154,6 +1158,10 @@ const offMsg=()=>backend==='none'?(window.claude?'Online features are not availa
 const srvLine=()=>backend==='http'?(backendErr?'Server problem: '+backendErr:'Server: '+new URL(BOXRUN_API).host+' (connected)'):backend==='claude'?'Using your claude.ai account':'No server set up';
 const loginForm=()=>'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr">Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
 const cubeSvg=(p,s)=>'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
+async function adminRename(id,old){
+  const n=await askText('New name for '+old+' (3 to 20 letters, numbers, _ . or -)',old,'Rename');if(!n||n===old)return;
+  try{await httpB.rename(id,n);toast(old+' is now '+n);showProfile(id)}catch(e){toast((e&&e.message)||'Could not rename')}
+}
 async function showProfile(id){
   show('profile');const el=document.getElementById('profbody');
   if(backend==='none'){el.innerHTML='<small>'+offMsg()+'</small>';return}
@@ -1174,6 +1182,7 @@ async function showProfile(id){
    +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',st.run?'Done':'Not yet']].map(r=>'<div class="row"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<div class="lbt">Placements</div>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')
+   +(!mine&&backend==='http'&&httpB&&httpB.admin()?'<button data-ar="'+esc(id)+'" data-an="'+esc(name)+'">Rename player (admin)</button>':'')
    +(mine&&backend==='http'?'<button data-a="alogout">Sign out</button><small class="srv">'+srvLine()+'</small>':'');
   defs.forEach(([n,f],i)=>{if(times[f]==null)return;rankOf(f,times[f],id).then(r=>{const c=document.getElementById('rk'+i);if(c&&r)c.textContent=r.rank?'#'+r.rank:'100+'})});
 }
