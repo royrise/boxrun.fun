@@ -469,7 +469,7 @@ function update(dt){
     // shallower approach slides faster and a head-on approach barely moves.
     const onIce=iceUnder(p.x,p.y);if(onIce&&!wasIce)slideA=lastA;wasIce=onIce;const md=onIce?slideA:p.a; // on ice you keep sliding the way you entered, but can still rotate
     const iceF=onIce?(1+Math.cos(p.a-slideA))/2:1; // on ice, turning away from your slide direction costs speed
-    const dist=SPEED*(mode==='endless'?1+.35*Math.min(1,score/1000):1)*iceF*(touching(p.x,p.y,p.a,['P'])?1.5:1)*dt, n=Math.max(1,Math.ceil(dist/0.04)), st=dist/n;
+    const dist=SPEED*(mode==='endless'?1+.35*Math.min(1,score/1000):1)*iceF*(touching(p.x,p.y,p.a,['P'])?1.5:1)*(touching(p.x,p.y,p.a,['M'])?2/3:1)*dt, n=Math.max(1,Math.ceil(dist/0.04)), st=dist/n;
     for(let i=0;i<n;i++){
       const o={x:p.x,y:p.y};
       p.x+=Math.cos(md)*st;p.y+=Math.sin(md)*st;
@@ -514,6 +514,7 @@ function draw(){
       if(k==='P'&&!shp){const a=.75+.25*Math.sin(t*6),pn=tile(x,y-1)==='P',ps=tile(x,y+1)==='P',pw=tile(x-1,y)==='P',pe=tile(x+1,y)==='P';
         const pad=(m)=>[x*U+(pw?0:m),y*U+(pn?0:m),U-(pw?0:m)-(pe?0:m),U-(pn?0:m)-(ps?0:m)];
         ctx.fillStyle='#b89a1a';ctx.fillRect(...pad(3));ctx.fillStyle='rgba(255,226,80,'+a+')';ctx.fillRect(...pad(6))}
+      if(k==='M'){ctx.fillStyle='#5a3d22';ctx.fillRect(x*U,y*U,U,U);ctx.fillStyle='#7a5530';for(let i=0;i<5;i++){const bx=x*U+((i*17+x*7)%30)+4,by=y*U+((i*23+y*11)%30)+4;ctx.beginPath();ctx.arc(bx,by,3+(i%3),0,7);ctx.fill()}ctx.strokeStyle='#3a2512';ctx.lineWidth=2;ctx.strokeRect(x*U+1,y*U+1,U-2,U-2)}
       if(k==='B'){const a=.7+.3*Math.sin(t*7),cx=x*U+U/2,cy=y*U+U/2;ctx.fillStyle='#8a2fa8';ctx.fillRect(x*U+3,y*U+3,U-6,U-6);ctx.fillStyle='rgba(240,100,255,'+a+')';ctx.fillRect(x*U+7,y*U+7,U-14,U-14);ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.arc(cx,cy,U*.22,Math.PI*.15,Math.PI*1.1);ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,U*.22,Math.PI*1.15,Math.PI*2.1);ctx.stroke()}
       if(k>='1'&&k<='3'){const cx=x*U+U/2,cy=y*U+U/2,pc=PCOL[k];ctx.fillStyle=pc+'33';ctx.beginPath();ctx.arc(cx,cy,U*.44,0,7);ctx.fill();ctx.strokeStyle=pc;ctx.lineWidth=3;ctx.lineCap='round';for(let i=0;i<3;i++){const r=U*(.12+.1*i),a0=t*(i%2?-3:3)+i;ctx.beginPath();ctx.arc(cx,cy,r+3,a0,a0+Math.PI*1.4);ctx.stroke()}}
     }
@@ -659,15 +660,15 @@ function cleanOv(o,rows){
   return r;
 }
 // tags: the creator picks the manual ones; the automatic ones are worked out from the level itself
-const TAGS_M=['Easy','Medium','Hard','Extreme','Speedrun','Maze','Precision','Troll'],TAGS_A=['Ice','Pads','Slopes','Portals','Movers','Small','Large'];
+const TAGS_M=['Easy','Medium','Hard','Extreme','Speedrun','Maze','Precision','Troll'],TAGS_A=['Ice','Slow','Pads','Slopes','Portals','Movers','Small','Large'];
 const cleanTg=a=>(Array.isArray(a)?a:[]).filter((t,i,x)=>TAGS_M.includes(t)&&x.indexOf(t)===i).slice(0,4);
 function autoTags(rows,sh,ov){const j=rows.join(''),r=[],area=rows.length*rows[0].length;
-  if(j.includes('I'))r.push('Ice');if(/[PB]/.test(j))r.push('Pads');if(/[123]/.test(j))r.push('Portals');if(/[HVa-p]/.test(j))r.push('Movers');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
+  if(j.includes('I'))r.push('Ice');if(j.includes('M'))r.push('Slow');if(/[PB]/.test(j))r.push('Pads');if(/[123]/.test(j))r.push('Portals');if(/[HVa-p]/.test(j))r.push('Movers');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
   if(area<=300)r.push('Small');if(area>=900)r.push('Large');return r}
 function cleanLvl(L){
   try{
     const rows=(L.rows||[]).map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBHV123a-p]/.test(r)))return null;
+    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBMHV123a-p]/.test(r)))return null;
     if((rows.join('').match(/S/g)||[]).length!==1||!rows.join('').includes('G'))return null;
     const sh={},s0=typeof L.sh==='string'?JSON.parse(L.sh):(L.sh||{});
     for(const k in s0){const v=s0[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)sh[k]=[v[0],v[1]|0]}
@@ -1132,7 +1133,7 @@ async function showLB(field){
 // ---- level editor
 const editorEl=document.getElementById('editor'),ec=document.getElementById('ec'),ex=ec.getContext('2d');
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
-const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','H':'#6a6f94','V':'#6a6f94','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
+const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','H':'#6a6f94','V':'#6a6f94','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
   '#':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.5"/><path d="M2 9h20M2 16h20M9 2v7M15 9v7M9 16v6" stroke="#9a9fc0" stroke-width="1" fill="none"/>'),
@@ -1143,6 +1144,7 @@ const ICONS={
   'S':sv('<rect x="3" y="3" width="18" height="18" rx="2" fill="#5ec8ff"/><rect x="16" y="5" width="3" height="14" fill="#0b2a3a"/>'),
   'sel':sv('<rect x="3" y="3" width="14" height="14" rx="1" fill="rgba(94,200,255,.25)" stroke="#5ec8ff" stroke-width="1.8" stroke-dasharray="3 2"/><path d="M13 13l8 3-3.5 1.5L16 21z" fill="#fff"/>'),
   'txt':sv('<rect x="2" y="4" width="20" height="16" rx="2" fill="#2a2d44" stroke="#9a9fc0" stroke-width="1.5"/><path d="M7 9h10M12 9v8" stroke="#ffd24a" stroke-width="2.2" stroke-linecap="round" fill="none"/>'),
+  'M':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#5a3d22"/><circle cx="8" cy="8" r="2.5" fill="#8a6238"/><circle cx="16" cy="10" r="3" fill="#8a6238"/><circle cx="10" cy="16" r="3" fill="#8a6238"/>'),
   'B':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#8a2fa8"/><path d="M7 15l5-6 5 6" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'),
   'H':sv('<rect x="7" y="5" width="10" height="14" rx="1.5" fill="#6a6f94" stroke="#ffd24a" stroke-width="1.5"/><path d="M1 12h4M19 12h4M3 10l-2 2 2 2M21 10l2 2-2 2" stroke="#fff" stroke-width="1.4" fill="none"/>'),
   'V':sv('<rect x="5" y="7" width="14" height="10" rx="1.5" fill="#6a6f94" stroke="#ffd24a" stroke-width="1.5"/><path d="M12 1v4M12 19v4M10 3l2-2 2 2M10 21l2 2 2-2" stroke="#fff" stroke-width="1.4" fill="none"/>'),
@@ -1282,7 +1284,7 @@ document.getElementById('efile').addEventListener('change',async e=>{
     const d=JSON.parse(await f.text());
     if(!d||d.game!=='boxrun.fun'&&d.game!=='cube-runner'||!Array.isArray(d.rows))throw 0;
     const rows=d.rows.map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBHV123a-p]/.test(r)))throw 0;
+    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBMHV123a-p]/.test(r)))throw 0;
     ePush();esel=new Set();eg=rows.map(r=>r.split(''));eid=null;esa=(d.sa|0)&3;eshp={};eov=cleanOv(d.ov,rows);etx=cleanTx(d.tx,rows);
     for(const k in d.sh||{}){const v=d.sh[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)eshp[k]=[v[0],v[1]|0]}
     document.getElementById('ename').value=String(d.name||'Imported').slice(0,24);
@@ -1336,7 +1338,8 @@ function eRender(){
     if(v==='G'&&!sh)chk(ex,px,py,cs);
     if(v==='S'){ex.fillStyle='#5ec8ff';const m=cs*.15;ex.fillRect(px+m,py+m,cs-2*m,cs-2*m);
       if(v==='S'){const q=cs*.12,iw=cs-2*m-2*q;ex.fillStyle='#0b2a3a';const fr=[[px+cs-m-q,py+m+q,q,iw],[px+m+q,py+cs-m-q,iw,q],[px+m,py+m+q,q,iw],[px+m+q,py+m,iw,q]][esa];ex.fillRect(...fr)}}
-    if(v==='B'){ex.fillStyle='#f064ff';ex.fillRect(px+cs*.18,py+cs*.18,cs*.64,cs*.64)}
+    if(v==='M'){ex.fillStyle='#7a5530';for(let i=0;i<3;i++){ex.beginPath();ex.arc(px+cs*(.3+.2*i),py+cs*(.3+.2*((i*2)%3)),cs*.1,0,7);ex.fill()}}
+    else if(v==='B'){ex.fillStyle='#f064ff';ex.fillRect(px+cs*.18,py+cs*.18,cs*.64,cs*.64)}
     else if(mvInfo(v)){const mi=mvInfo(v);ex.save();ex.strokeStyle='#ffffff44';ex.lineWidth=1;ex.setLineDash([3,3]);ex.strokeRect(px+.5,py+.5,mi.v?cs-1:cs*(mi.d+1)-1,mi.v?cs*(mi.d+1)-1:cs-1);ex.restore();ex.fillStyle='#6a6f94';ex.fillRect(px+2,py+2,cs-4,cs-4);ex.strokeStyle='#ffd24a';ex.lineWidth=2;ex.strokeRect(px+4,py+4,cs-8,cs-8);ex.strokeStyle='#fff';ex.beginPath();if(!mi.v){ex.moveTo(px+cs*.2,py+cs/2);ex.lineTo(px+cs*.8,py+cs/2)}else{ex.moveTo(px+cs/2,py+cs*.2);ex.lineTo(px+cs/2,py+cs*.8)}ex.stroke();ex.fillStyle='#fff';ex.font='bold '+(cs*.35|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(mi.d,px+cs/2,py+cs*.28)}
     else if(v>='1'&&v<='3'){ex.strokeStyle=PCOL[v];ex.lineWidth=3;ex.beginPath();ex.arc(px+cs/2,py+cs/2,cs*.36,0,7);ex.stroke();ex.fillStyle=PCOL[v];ex.font='bold '+(cs*.45|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(v,px+cs/2,py+cs/2+1)}
     const ovp=eov[x+','+y];if(ovp)for(const [cc,kk,oo] of ovp){ex.fillStyle=ECOL[cc];ex.beginPath();polyOf(x,y,[kk,oo]).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}
