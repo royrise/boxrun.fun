@@ -23,6 +23,7 @@ canvas{display:block;width:100%;height:100%}
 @media (pointer:coarse){#msg{display:none!important}#tb{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:3;justify-content:space-between;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 18px);pointer-events:none}
 #tb i{width:clamp(84px,24vw,128px);height:clamp(84px,24vw,128px);border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:46px;line-height:1;text-shadow:0 2px 6px #000;transition:background .06s}
 #tb i.on{background:rgba(94,200,255,.55)}}
+#askm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65)}#askm div{background:#22243a;border:1px solid #4a4d63;border-radius:14px;padding:20px 22px;max-width:320px;text-align:center;color:#eef;font-size:15px}#askm p{margin:0 0 16px}#askm button{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:8px 14px;margin:0 5px;cursor:pointer}#askm .pri{background:#1f6fb5;border-color:#5ec8ff}
 #mn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;background:none!important;color:#fff!important;text-shadow:0 2px 8px #000;font-size:22px!important;line-height:1;padding:6px 12px!important}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
 #menu{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(10,12,20,.9);color:#eef;padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px);overflow:auto}
@@ -360,12 +361,12 @@ function finish(){
   const patch={};
   if(mode==='main')patch[fld(lvl)]=rnd(pb.levels[LID[lvl]],3);
   const cmk=mode==='custom'&&cur&&/^cm_/.test(cur.id)?cur.id.slice(3):null;
-  if(cmk&&pb.cl[cur.id]!=null)patch[cfld(cmk)]=rnd(pb.cl[cur.id],3);
+  if(cmk&&pb.cl[cur.id]!=null)patch[cfk(cmk)]=rnd(pb.cl[cur.id],3);
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
   savePB();
   banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button><button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
-  if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
+  if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
 let movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
@@ -641,6 +642,11 @@ function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins('Locke
 
 // ---- community levels: shared in db as lv/<author> = {levels:{id:{...}}} and vt/<voter> = {v:{levelKey:1|-1}}
 let commList=[],commSort='rel',myVotes={};
+// each time a shared level's layout changes its rv goes up, which starts a fresh speedrun leaderboard (a new field) and clears old local bests
+const cfk=key=>{const l=commList.find(x=>x.key===key);return cfld(l&&l.rv?key+'#'+l.rv:key)};
+function rvSync(l){const id='cm_'+l.key;if(!pb.crv)pb.crv={};if((pb.crv[id]|0)!==(l.rv|0)){delete pb.cl[id];delete pb.cg[id];pb.crv[id]=l.rv|0;savePB()}}
+function askYes(msg,yes){return new Promise(res=>{const o=document.createElement('div');o.id='askm';o.innerHTML='<div><p></p><button data-y="0">Cancel</button><button data-y="1" class="pri"></button></div>';o.querySelector('p').textContent=msg;o.querySelector('.pri').textContent=yes||'Yes';
+  const done=v=>{o.remove();res(v)};o.addEventListener('pointerdown',e=>e.stopPropagation());o.addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(b)done(b.dataset.y==='1')});document.body.appendChild(o)})}
 const lvNote=t=>{const ed=document.getElementById('editor');if(ed&&!ed.hidden){eStat(t||'');return}const e=document.getElementById('lvnote');if(e)e.textContent=t||''},cNote=t=>{document.getElementById('cnote').textContent=t||''};
 function cleanTx(o,rows){
   const r={},w=rows[0].length,h=rows.length;let n=0;
@@ -673,7 +679,7 @@ function cleanLvl(L){
     const sh={},s0=typeof L.sh==='string'?JSON.parse(L.sh):(L.sh||{});
     for(const k in s0){const v=s0[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)sh[k]=[v[0],v[1]|0]}
     const ov=cleanOv(L.ov,rows),tg=cleanTg(L.tg);
-    return {name:String(L.name||'Untitled').slice(0,24),rows,sh,ov,tx:cleanTx(L.tx,rows),sa:(L.sa|0)&3,at:+L.at||0,tg,tags:tg.concat(autoTags(rows,sh,ov))};
+    return {name:String(L.name||'Untitled').slice(0,24),rows,sh,ov,tx:cleanTx(L.tx,rows),sa:(L.sa|0)&3,at:+L.at||0,tg,rv:Math.max(0,Math.min(9999,L.rv|0)),tags:tg.concat(autoTags(rows,sh,ov))};
   }catch(e){return null}
 }
 async function commLoad(){
@@ -713,7 +719,7 @@ async function showComm(){
   show('comm');cNote('');const el=document.getElementById('clist');el.textContent='Loading\u2026';
   const list=await commLoad();
   if(list===null){el.textContent='';cNote(backend==='none'?offMsg():'Could not load community levels. Try again in a moment.');return}
-  commList=list;for(const k in cCache)delete cCache[k];renderComm();
+  commList=list;list.forEach(rvSync);for(const k in cCache)delete cCache[k];renderComm();
 }
 async function commShare(id){
   const c=customs.find(c=>c.id===id);if(!c)return;
@@ -722,8 +728,10 @@ async function commShare(id){
     const ref=db.doc('lv/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};d.levels=d.levels||{};
     const prev=d.levels[id];
     if(!prev&&Object.keys(d.levels).length>=20){lvNote('You can share up to 20 levels. Remove one first.');return}
-    d.levels[id]={name:c.name,rows:c.rows,sh:JSON.stringify(c.sh||{}),ov:JSON.stringify(c.ov||{}),tx:JSON.stringify(c.tx||{}),sa:c.sa||0,tg:cleanTg(c.tg),at:prev?prev.at:Date.now()};
-    await ref.set(d);lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');
+    const nl={name:c.name,rows:c.rows,sh:JSON.stringify(c.sh||{}),ov:JSON.stringify(c.ov||{}),tx:JSON.stringify(c.tx||{}),sa:c.sa||0,tg:cleanTg(c.tg),at:prev?prev.at:Date.now()},gs=o=>JSON.stringify([o.rows,o.sh,o.ov,o.tx,o.sa|0]),chg=!!prev&&gs(prev)!==gs(nl);
+    if(chg&&!await askYes('Are you sure? The speedrun leaderboard will reset.','Update level')){lvNote('Update cancelled.');return}
+    nl.rv=(prev?prev.rv|0:0)+(chg?1:0);d.levels[id]=nl;
+    await ref.set(d);for(const k in cCache)delete cCache[k];lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');
   }catch(e){lvNote('Could not share the level.')}
 }
 let cTok=0;const cCache={};
@@ -731,7 +739,7 @@ async function commTimes(key){
   const tok=++cTok,l=commList.find(x=>x.key===key),t=document.getElementById('cside-t'),b=document.getElementById('cside-b');if(!l||!b)return;
   t.textContent=l.name;
   if(cCache[key])b.innerHTML=cCache[key];else b.textContent='Loading\u2026';
-  const mine=pb.cl['cm_'+key],rows=lbMerge(await lbTop(cfld(key),8),mine!=null?rnd(mine,3):null);
+  const mine=pb.cl['cm_'+key],rows=lbMerge(await lbTop(cfk(key),8),mine!=null?rnd(mine,3):null);
   const h=lbHTML(rows&&rows.slice(0,8),true,null,'c'+key);cCache[key]=h;if(tok===cTok)b.innerHTML=h;
 }
 {const L=document.getElementById('clist');
@@ -746,9 +754,9 @@ async function commVote(key,val){
   try{await db.doc('vt/'+uid).set({v:myVotes})}catch(e){cNote('Could not save your vote.')}
 }
 function startComm(key){
-  const l=commList.find(x=>x.key===key);if(!l)return;extGhost=pendingGhost;pendingGhost=null;
+  const l=commList.find(x=>x.key===key);if(!l)return;rvSync(l);extGhost=pendingGhost;pendingGhost=null;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
-  delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfld(key)]:rnd(pb.cl['cm_'+key],3)});
+  delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfk(key)]:rnd(pb.cl['cm_'+key],3)});
 }
 function commCopy(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
@@ -1069,7 +1077,7 @@ async function ghPutAll(){
   try{
     const items=[];
     LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]],g=pb.ghosts[LID[i]];if(t!=null&&g&&g.length>1)items.push([fld(i),t,g])});
-    for(const k in pb.cl)if(k.startsWith('cm_')&&pb.cl[k]!=null&&pb.cg[k]&&pb.cg[k].length>1)items.push([cfld(k.slice(3)),pb.cl[k],pb.cg[k]]);
+    for(const k in pb.cl)if(k.startsWith('cm_')&&pb.cl[k]!=null&&pb.cg[k]&&pb.cg[k].length>1)items.push([cfk(k.slice(3)),pb.cl[k],pb.cg[k]]);
     if(!items.length)return;
     const ref=db.doc('gh/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{},F=d.f||{};let ch=false;
     for(const [field,t,g] of items){const old=F[field];if(!old||old.t>t+1e-6){const enc=ghEnc(g);if(JSON.stringify(F).length+enc.length>380000)continue;F[field]={t:rnd(t,3),g:enc};ch=true}}
@@ -1078,7 +1086,7 @@ async function ghPutAll(){
 }
 async function watchGhost(d){
   const ref=d.wr,isM=ref[0]==='m',note=isM?lvNote:cNote;
-  const field=isM?fld(+ref.slice(1)):cfld(ref.slice(1));
+  const field=isM?fld(+ref.slice(1)):cfk(ref.slice(1));
   note('Loading '+d.wn+'\'s ghost\u2026');
   let arr=null;
   try{const sn=await db.doc('gh/'+d.wg).get(),e=sn.exists&&sn.data().f&&sn.data().f[field];arr=e&&ghDec(e.g)}catch(e){}
