@@ -24,6 +24,7 @@ canvas{display:block;width:100%;height:100%}
 #tb i{width:clamp(84px,24vw,128px);height:clamp(84px,24vw,128px);border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:46px;line-height:1;text-shadow:0 2px 6px #000;transition:background .06s}
 #tb i.on{background:rgba(94,200,255,.55)}}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);max-width:90vw;background:#22243a;border:1px solid #5ec8ff;color:#eef;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;word-break:break-all;text-align:center}#toast.on{opacity:1}
+#achlist{display:flex;flex-direction:column;gap:6px;text-align:left;max-height:34vh;overflow:auto;margin:6px 0}.ach{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid #4a4d63;border-radius:8px;opacity:.7}.ach.done{opacity:1;border-color:#2fd37a}.ach i{width:18px;height:18px;border-radius:4px;border:1px solid #fff6;flex:none}.ach span{flex:1;min-width:0}.ach small{display:block;opacity:.7;font-size:12px}.ach em{font-style:normal;font-size:13px;opacity:.9}
 #askm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65)}#askm div{background:#22243a;border:1px solid #4a4d63;border-radius:14px;padding:20px 22px;max-width:320px;text-align:center;color:#eef;font-size:15px}#askm p{margin:0 0 16px}#askm button{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:8px 14px;margin:0 5px;cursor:pointer}#askm .pri{background:#1f6fb5;border-color:#5ec8ff}
 #mn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;background:none!important;color:#fff!important;text-shadow:0 2px 8px #000;font-size:22px!important;line-height:1;padding:6px 12px!important}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
@@ -155,7 +156,7 @@ canvas{display:block;width:100%;height:100%}
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
- <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
+ <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><div class="lbt">Achievements</div><div id="achlist"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track that never ends. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
@@ -364,7 +365,7 @@ function finish(){
   const prev=bestOf(),isPB=mode!=='test'&&(prev==null||rnd(lt,3)<rnd(prev,3));
   if(isPB){rec.push([gt,p.x,p.y,p.a]);const gh=rec.map(s=>[rnd(s[0],3),rnd(s[1],2),rnd(s[2],2),rnd(s[3],2)].concat(s[4]?[1]:[]));
     if(mode==='main'){pb.levels[LID[lvl]]=rnd(lt,3);pb.ghosts[LID[lvl]]=gh}else{pb.cl[cur.id]=rnd(lt,3);pb.cg[cur.id]=gh}}
-  if(mode!=='test')pb.completions=(pb.completions||0)+1;
+  if(mode!=='test'){pb.completions=(pb.completions||0)+1;if(attempts===1&&(mode==='main'||(cur&&/^cm_/.test(cur.id))))bump('flaw')}
   let txt=mode==='test'?(cur.tut?'Nice! You know the basics.':'Test run '+fmt(lt)+' (not saved)'):'Level time '+fmt(lt)+(prev==null?' \u00b7 First clear!':isPB?' \u00b7 New best! (was '+fmt(prev)+')':rnd(lt,3)===rnd(prev,3)?' \u00b7 Tied your best':' \u00b7 Best '+fmt(prev));
   txt+='<br>Attempts: '+attempts;
   const patch={};
@@ -372,7 +373,7 @@ function finish(){
   const cmk=mode==='custom'&&cur&&/^cm_/.test(cur.id)?cur.id.slice(3):null;
   if(cmk&&pb.cl[cur.id]!=null)patch[cfk(cmk)]=rnd(pb.cl[cur.id],3);
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
-  savePB();
+  checkAch();savePB();
   banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
   if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
@@ -479,8 +480,9 @@ function update(dt){
     // that points into the wall leaves speed * cos(angle to wall) along it, so a
     // shallower approach slides faster and a head-on approach barely moves.
     const onIce=iceUnder(p.x,p.y);if(onIce&&!wasIce)slideA=lastA;wasIce=onIce;const md=onIce?slideA:p.a; // on ice you keep sliding the way you entered, but can still rotate
+    if(onIce)bump('iceT',dt);const inMud=touching(p.x,p.y,p.a,['M']);if(inMud)bump('mudT',dt);achT+=dt;if(achT>2){achT=0;if(!checkAch())savePB()}
     const iceF=onIce?(1+Math.cos(p.a-slideA))/2:1; // on ice, turning away from your slide direction costs speed
-    const dist=SPEED*(mode==='endless'?1+.35*Math.min(1,score/1000):1)*iceF*(touching(p.x,p.y,p.a,['P'])?1.5:1)*(touching(p.x,p.y,p.a,['M'])?2/3:1)*dt, n=Math.max(1,Math.ceil(dist/0.04)), st=dist/n;
+    const dist=SPEED*(mode==='endless'?1+.35*Math.min(1,score/1000):1)*iceF*(touching(p.x,p.y,p.a,['P'])?1.5:1)*(inMud?2/3:1)*dt, n=Math.max(1,Math.ceil(dist/0.04)), st=dist/n;
     for(let i=0;i<n;i++){
       const o={x:p.x,y:p.y};
       p.x+=Math.cos(md)*st;p.y+=Math.sin(md)*st;
@@ -488,11 +490,11 @@ function update(dt){
     }
     if(mode==='endless'){const v=cur.dist[Math.floor(p.y)*cur.N+Math.floor(p.x)];if(v>score)score=v;if(cur.gen){for(const q of cur.gen.ensure(score)){p.x+=q.ox;p.y+=q.oy;cp.x+=q.ox;cp.y+=q.oy;rec.length=0}cur.dist=cur.gen.dist}}
     cpT=Math.max(0,cpT-dt);
-    {const fx=Math.floor(p.x),fy=Math.floor(p.y),k=fx+','+fy;if(tile(fx,fy)==='C'&&cp.k!==k){cp={x:fx+.5,y:fy+.5,a:p.a,k};cpT=.6}}
+    {const fx=Math.floor(p.x),fy=Math.floor(p.y),k=fx+','+fy;if(tile(fx,fy)==='C'&&cp.k!==k){cp={x:fx+.5,y:fy+.5,a:p.a,k};cpT=.6;bump('cps')}}
     bcd=Math.max(0,bcd-dt);tpK=Math.max(0,tpK-dt/.5);
-    if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){bturn=Math.PI;bcd=1}
+    if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){bturn=Math.PI;bcd=1;bump('bounces')}
     {const ch=tile(Math.floor(p.x),Math.floor(p.y));
-      if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
+      if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){bump('tps');tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
     if(gt-lastRec>=1/30){rec.push([gt,p.x,p.y,p.a]);lastRec=gt}
     if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}}
     else if(touching(p.x,p.y,p.a,['G'])){if(mode==='endless')endRun(true);else finish()}
@@ -589,7 +591,7 @@ function sync(){let l=false,r=false;touches.forEach(v=>v?r=true:l=true);keys.lef
 addEventListener('pointerdown',e=>{touches.set(e.pointerId,e.clientX>W/2);sync()});
 ['pointerup','pointercancel'].forEach(n=>addEventListener(n,e=>{touches.delete(e.pointerId);sync()}));
 let mode='main',cur=null,shapes={},layers={},texts=[];
-if(!pb.cl)pb.cl={};if(!pb.cg)pb.cg={};
+if(!pb.cl)pb.cl={};if(!pb.cg)pb.cg={};if(!pb.ach)pb.ach={};if(!pb.st)pb.st={};
 // the tutorial became Level 1: shift saved levels/ghosts down one and retire old-format run times
 if(!pb.v){pb.levels.unshift(null);pb.ghosts.unshift(null);pb.run=null;pb.v=2}
 if(pb.v<3){pb.run=null;pb.v=3}
@@ -640,20 +642,57 @@ const COLORS=[
  {id:'neon',n:'Neon',h:'#ff2fd0',t:'Complete 50 levels',u:S=>S.comp>=50},
  {id:'gold',n:'Gold',h:'#e8c21a',t:'Clear 20 different levels',u:S=>S.clear>=20},
  {id:'void',n:'Void',h:'#000000',t:'Die 500 times',u:S=>S.dead>=500},
+ {id:'spectre',n:'Spectre',h:'#e6ecff',t:'Achievement: Flawless',u:S=>S.ach.flawless},
+ {id:'frost',n:'Frost',h:'#bfefff',t:'Achievement: Ice Skater',u:S=>S.ach.skater},
+ {id:'violet',n:'Violet',h:'#8f5bff',t:'Achievement: Portal Hopper',u:S=>S.ach.portal},
+ {id:'bubble',n:'Bubblegum',h:'#ff8fd0',t:'Achievement: Bouncy',u:S=>S.ach.bounce},
+ {id:'mud',n:'Mud',h:'#8a6238',t:'Achievement: Stuck in the Mud',u:S=>S.ach.mud},
+ {id:'jade',n:'Jade',h:'#00a86b',t:'Achievement: Checkpoint Charlie',u:S=>S.ach.flag},
+ {id:'steel',n:'Steel',h:'#9aa5b8',t:'Achievement: Marathoner',u:S=>S.ach.marathon},
+ {id:'diamond',n:'Diamond',h:'#7df9ff',t:'Achievement: Edge of Madness',u:S=>S.ach.diamond},
+ {id:'orchid',n:'Orchid',h:'#da70d6',t:'Achievement: Explorer',u:S=>S.ach.explorer},
+ {id:'amber',n:'Amber',h:'#ffbf00',t:'Achievement: Creator',u:S=>S.ach.creator},
+ {id:'silver',n:'Silver',h:'#c0c0c8',t:'Achievement: Fan',u:S=>S.ach.fan},
+ {id:'crimson',n:'Crimson',h:'#c0143c',t:'Achievement: Weekly Warrior',u:S=>S.ach.weekly},
  {id:'prism',n:'Prismatic',h:'rainbow',t:'Finish a full run of all 25 levels',u:S=>S.run}
 ];
-const skinStats=()=>({comp:pb.completions||0,dead:pb.deaths||0,clear:LEVELS.filter((_,i)=>pb.levels[LID[i]]!=null).length,tut:pb.levels.tutorial!=null,run:pb.run!=null});
+const skinStats=()=>({comp:pb.completions||0,dead:pb.deaths||0,clear:LEVELS.filter((_,i)=>pb.levels[LID[i]]!=null).length,tut:pb.levels.tutorial!=null,run:pb.run!=null,ach:pb.ach||{}});
 const colOf=id=>COLORS.find(c=>c.id===id)||COLORS[0];
 const skinCol=id=>{const h=colOf(id).h;return h==='rainbow'?'hsl('+((t*90)%360)+',90%,60%)':h};
 function buildSkins(note){
   const S=skinStats();
   for(const k of ['p','s'])document.getElementById('sw'+k).innerHTML=COLORS.map((c,i)=>{const ok=c.u(S);
     return '<button class="swb'+(pb.skin[k]===c.id?' on':'')+(ok?'':' lock')+'" data-sk="'+k+'" data-ci="'+i+'" title="'+esc(c.n+(ok?'':' - '+c.t))+'" style="background:'+(c.h==='rainbow'?'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)':c.h)+'">'+(ok?'':'\u{1F512}')+'</button>'}).join('');
+  document.getElementById('achlist').innerHTML=ACH.map(a=>{const v=Math.min(a.v(),a.max),done=!!pb.ach[a.id],col=colOf(a.c);return '<div class="ach'+(done?' done':'')+'"><i style="background:'+(col.h==='rainbow'?'#fff':col.h)+'"></i><span><b>'+esc(a.n)+'</b><small>'+esc(a.d)+'</small></span><em>'+(done?'\u2713':(a.max>1?Math.floor(v)+'/'+a.max:'0/1'))+'</em></div>'}).join('');
   document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
   document.getElementById('skinprev').innerHTML='<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
 }
 function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins('Locked: '+c.n+' - '+c.t);return}pb.skin[k]=c.id;savePB();buildSkins(c.n+' selected')}
 
+// ---- achievements: each one unlocks a cube colour. Counters live in pb.st, unlocked ids in pb.ach
+const bump=(k,n)=>{pb.st[k]=(pb.st[k]||0)+(n==null?1:n)};
+const commClears=()=>Object.keys(pb.cl).filter(k=>/^cm_/.test(k)&&pb.cl[k]!=null).length;
+const ACH=[
+ {id:'flawless',n:'Flawless',d:'Clear 10 levels on your first attempt',v:()=>pb.st.flaw||0,max:10,c:'spectre'},
+ {id:'skater',n:'Ice Skater',d:'Slide on ice for 60 seconds in total',v:()=>pb.st.iceT||0,max:60,c:'frost'},
+ {id:'portal',n:'Portal Hopper',d:'Use portals 30 times',v:()=>pb.st.tps||0,max:30,c:'violet'},
+ {id:'bounce',n:'Bouncy',d:'Hit 30 bounce pads',v:()=>pb.st.bounces||0,max:30,c:'bubble'},
+ {id:'mud',n:'Stuck in the Mud',d:'Spend 60 seconds in mud',v:()=>pb.st.mudT||0,max:60,c:'mud'},
+ {id:'flag',n:'Checkpoint Charlie',d:'Touch 25 checkpoints',v:()=>pb.st.cps||0,max:25,c:'jade'},
+ {id:'marathon',n:'Marathoner',d:'Reach 500 m in Endless',v:()=>pb.endBest||0,max:500,c:'steel'},
+ {id:'diamond',n:'Edge of Madness',d:'Reach 1000 m in Endless',v:()=>pb.endBest||0,max:1000,c:'diamond'},
+ {id:'explorer',n:'Explorer',d:'Clear 5 community levels',v:commClears,max:5,c:'orchid'},
+ {id:'creator',n:'Creator',d:'Share a level with the community',v:()=>pb.st.shares||0,max:1,c:'amber'},
+ {id:'fan',n:'Fan',d:'Watch 3 replays',v:()=>pb.st.replays||0,max:3,c:'silver'},
+ {id:'weekly',n:'Weekly Warrior',d:'Finish the weekly challenge',v:()=>pb.st.weekly||0,max:1,c:'crimson'}
+];
+function checkAch(){
+  let fresh=null;
+  for(const a of ACH)if(!pb.ach[a.id]&&a.v()>=a.max){pb.ach[a.id]=Date.now();fresh=a}
+  if(fresh){savePB();toast('Achievement unlocked: '+fresh.n+' \u00b7 new colour '+colOf(fresh.c).n)}
+  return fresh;
+}
+let achT=0;
 // ---- community levels: shared in db as lv/<author> = {levels:{id:{...}}} and vt/<voter> = {v:{levelKey:1|-1}}
 let commList=[],commSort='rel',myVotes={};
 // each time a shared level's layout changes its rv goes up, which starts a fresh speedrun leaderboard (a new field) and clears old local bests
@@ -763,7 +802,7 @@ async function commShare(id){
     const nl={name:c.name,rows:c.rows,sh:JSON.stringify(c.sh||{}),ov:JSON.stringify(c.ov||{}),tx:JSON.stringify(c.tx||{}),sa:c.sa||0,tg:cleanTg(c.tg),at:prev?prev.at:Date.now()},gs=o=>JSON.stringify([o.rows,o.sh,o.ov,o.tx,o.sa|0]),chg=!!prev&&gs(prev)!==gs(nl);
     if(chg&&!await askYes('Are you sure? The speedrun leaderboard will reset.','Update level')){lvNote('Update cancelled.');return}
     nl.rv=(prev?prev.rv|0:0)+(chg?1:0);d.levels[id]=nl;
-    await ref.set(d);for(const k in cCache)delete cCache[k];lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');copyLink(uid+'_'+id);
+    await ref.set(d);for(const k in cCache)delete cCache[k];lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');copyLink(uid+'_'+id);bump('shares');checkAch();savePB();
   }catch(e){lvNote('Could not share the level.')}
 }
 let cTok=0;const cCache={};
@@ -934,7 +973,7 @@ function openEndless(){
 function endRun(done){
   state='over';timer=1e9;
   const d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
-  if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;savePB();
+  if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
   banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
   if(curWeekly)weeklyDone(d);
@@ -1033,7 +1072,7 @@ async function pullMine(){
     const l=await db.doc('lb/'+uid).get();
     if(l.exists){const d=l.data();LEVELS.forEach((_,i)=>{const t=d[fld(i)];if(typeof t==='number'&&(pb.levels[LID[i]]==null||t<pb.levels[LID[i]]))pb.levels[LID[i]]=t});if(typeof d.run3==='number'&&(pb.run==null||d.run3<pb.run))pb.run=d.run3}
     const f=await db.doc('pf/'+uid).get();
-    if(f.exists){const st=f.data().stats||{};pb.completions=Math.max(pb.completions||0,st.comp|0);pb.deaths=Math.max(pb.deaths||0,st.dead|0);pb.endBest=Math.max(pb.endBest||0,st.endBest|0)}
+    if(f.exists){const st=f.data().stats||{};pb.completions=Math.max(pb.completions||0,st.comp|0);pb.deaths=Math.max(pb.deaths||0,st.dead|0);pb.endBest=Math.max(pb.endBest||0,st.endBest|0);(f.data().ach||[]).forEach(id=>{if(ACH.some(a=>a.id===id)&&!pb.ach[id])pb.ach[id]=Date.now()})}
     savePB();
   }catch(e){}
 }
@@ -1044,7 +1083,7 @@ function levelInfo(xp){let l=1;while(xp>=xpNeed(l+1))l++;return {l,cur:xp-xpNeed
 let pfT=0;
 function pushProfile(now){
   if(!db||!uid)return;clearTimeout(pfT);
-  const go=async()=>{try{const S=skinStats();await db.doc('pf/'+uid).set({skin:{p:pb.skin.p,s:pb.skin.s},stats:{comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0},xp:xpOf(),at:Date.now()})}catch(e){}};
+  const go=async()=>{try{const S=skinStats();await db.doc('pf/'+uid).set({skin:{p:pb.skin.p,s:pb.skin.s},stats:{comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0},xp:xpOf(),ach:Object.keys(pb.ach),at:Date.now()})}catch(e){}};
   if(now)go();else pfT=setTimeout(go,1500);
 }
 async function rankOf(field,t,id){
@@ -1127,7 +1166,7 @@ async function openReplay(u,ref,name,watch){
   try{const sn=await db.doc('gh/'+u).get(),e=sn.exists&&sn.data().f&&sn.data().f[field];arr=e&&ghDec(e.g)}catch(e){}
   if(!arr){toast('No replay is available for that run.');return}
   if(!name){name='Player';try{if(usersNS){const pr=await usersNS.profiles([u]);name=(pr[u]&&pr[u].name)||name}}catch(e){}}
-  menuEl.hidden=true;startRef(ref,name,arr,watch!==false)
+  menuEl.hidden=true;if(watch!==false){bump('replays');checkAch();savePB()}startRef(ref,name,arr,watch!==false)
 }
 async function watchGhost(d){
   const ref=d.wr,isM=ref[0]==='m',note=isM?lvNote:cNote;
