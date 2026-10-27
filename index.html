@@ -1297,6 +1297,7 @@ async function showLB(field){
 
 // ---- level editor
 const editorEl=document.getElementById('editor'),ec=document.getElementById('ec'),ex=ec.getContext('2d');
+let efill=false;const NOFILL=['S','H','V','1','2','3','sel','txt'];
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
 const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['>','Wind right'],['<','Wind left'],['^','Wind up'],['v','Wind down'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
@@ -1322,13 +1323,14 @@ const ICONS={
   '1':sv('<circle cx="12" cy="12" r="9" fill="#b36bff33" stroke="#b36bff" stroke-width="2"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="bold" fill="#b36bff">1</text>'),
   '2':sv('<circle cx="12" cy="12" r="9" fill="#ff6bd633" stroke="#ff6bd6" stroke-width="2"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="bold" fill="#ff6bd6">2</text>'),
   '3':sv('<circle cx="12" cy="12" r="9" fill="#4fffc033" stroke="#4fffc0" stroke-width="2"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="bold" fill="#4fffc0">3</text>'),
+  'bucket':sv('<path d="M5 11l7-7 7 7-6.5 6.5a2.5 2.5 0 01-3.5 0z" fill="#cfd3ea" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/><path d="M7.5 11h9" stroke="#6a6f94" stroke-width="1.4"/><path d="M19 14.5c1.3 2 2 3 2 4a2 2 0 01-4 0c0-1 .7-2 2-4z" fill="#5ec8ff"/><path d="M5 11a3.5 3.5 0 010-5" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>'),
   'G':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#fff"/><path d="M2 2h5v5H2zM12 2h5v5h-5zM7 7h5v5H7zM17 7h5v5h-5zM2 12h5v5H2zM12 12h5v5h-5zM7 17h5v5H7zM17 17h5v5h-5z" fill="#111"/>')
 };
-document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" title="'+t[1]+'" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('');
+document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" title="'+t[1]+'" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('')+'<button data-bucket="1" title="Fill (paint bucket)" aria-label="Fill">'+ICONS.bucket+'</button>';
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
 for(const c of 'abcdefghijklmnop')ECOL[c]='#1e1e2a';
 let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t;
-function markTool(){document.querySelectorAll('#epal button').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
+function markTool(){if(NOFILL.includes(etool))efill=false;document.querySelectorAll('#epal button[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const bk=document.querySelector('#epal [data-bucket]');if(bk){bk.classList.toggle('on',efill);bk.disabled=NOFILL.includes(etool)}ec.style.cursor=efill?'cell':'';const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
 let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
 // selection: a set of 'x,y' tiles; drag a rectangle (Shift/+ Add adds, Alt removes), then Delete clears them
 let esel=new Set(),selA=null,selB=null,selMode='set',selAdd=false;
@@ -1575,6 +1577,15 @@ function ePaint(e,first){
   }
   setPieces(x,y,list);eRender();
 }
+function eFill(x0,y0){
+  if(y0<0||x0<0||y0>=eg.length||x0>=eg[0].length||eg[y0][x0]==='S')return;
+  const sig=(x,y)=>eg[y][x]==='S'?'S':JSON.stringify(ePieces(x,y)),want=sig(x0,y0),erase=etool==='.',nl=erase?[]:[[mvChar(etool),'f',0]];
+  if(sig(x0,y0)===JSON.stringify(nl)&&!(etx[x0+','+y0]&&erase))return;
+  const seen=new Set([x0+','+y0]),q=[[x0,y0]],hit=[];
+  while(q.length){const [x,y]=q.pop();hit.push([x,y]);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(ny<0||nx<0||ny>=eg.length||nx>=eg[0].length||seen.has(k))continue;if(sig(nx,ny)===want){seen.add(k);q.push([nx,ny])}}}
+  ePush();for(const [x,y] of hit){if(erase)delete etx[x+','+y];setPieces(x,y,nl.map(p=>p.slice()))}
+  eStat('Filled '+hit.length+' tile'+(hit.length===1?'':'s')+'.');eRender();
+}
 function ePieces(x,y){
   const key=x+','+y,c=eg[y][x];if(c==='.'||c==='S')return [];
   const sh=eshp[key];return [[c,sh?sh[0]:'f',sh?sh[1]:0]].concat((eov[key]||[]).map(v=>v.slice()));
@@ -1584,12 +1595,12 @@ function setPieces(x,y,list){
   if(list.length&&list[0][1]!=='f')eshp[key]=[list[0][1],list[0][2]];else delete eshp[key];
   const rest=list.slice(1).filter(p=>p[1]!=='f');if(rest.length)eov[key]=rest;else delete eov[key];
 }
-ec.addEventListener('pointerdown',e=>{ec.setPointerCapture(e.pointerId);if(etool==='sel'){const c=cellAt(e);if(paste){commitPaste(c);return}if(esel.has(c[0]+','+c[1])&&!(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||selAdd)){startMove(c);return}selA=selB=c;selMode=e.altKey?'sub':(e.shiftKey||e.ctrlKey||e.metaKey||selAdd)?'add':'set';eRender();return}epaint=true;ePush();ePaint(e,true)});
+ec.addEventListener('pointerdown',e=>{ec.setPointerCapture(e.pointerId);if(etool==='sel'){const c=cellAt(e);if(paste){commitPaste(c);return}if(esel.has(c[0]+','+c[1])&&!(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||selAdd)){startMove(c);return}selA=selB=c;selMode=e.altKey?'sub':(e.shiftKey||e.ctrlKey||e.metaKey||selAdd)?'add':'set';eRender();return}if(efill&&!NOFILL.includes(etool)){const c=cellAt(e);eFill(c[0],c[1]);return}epaint=true;ePush();ePaint(e,true)});
 ec.addEventListener('pointerleave',()=>{if(eHover){eHover=null;eRender()}});
 ec.addEventListener('pointermove',e=>{lastCell=cellAt(e);
   {const rr=ec.getBoundingClientRect(),fx=(e.clientX-rr.left-eo.x)/eo.cs,fy=(e.clientY-rr.top-eo.y)/eo.cs,hx=Math.floor(fx),hy=Math.floor(fy);
    const nh=cornerMode()&&hx>=0&&hy>=0&&hx<eg[0].length&&hy<eg.length?{x:hx,y:hy,q:fx-hx<.5?(fy-hy<.5?0:3):(fy-hy<.5?1:2)}:null;
-   if(JSON.stringify(nh)!==JSON.stringify(eHover)){eHover=nh;if(!epaint)eRender()}}if(etool==='sel')ec.style.cursor=paste?'copy':mv?'grabbing':esel.has(lastCell.join(','))?'move':'crosshair';else ec.style.cursor='';if(selA){selB=lastCell;eRender()}else if(mv)moveTo(lastCell);else if(paste)pasteHover(lastCell);else if(epaint)ePaint(e)});
+   if(JSON.stringify(nh)!==JSON.stringify(eHover)){eHover=nh;if(!epaint)eRender()}}if(etool==='sel')ec.style.cursor=paste?'copy':mv?'grabbing':esel.has(lastCell.join(','))?'move':'crosshair';else ec.style.cursor=efill?'cell':'';if(selA){selB=lastCell;eRender()}else if(mv)moveTo(lastCell);else if(paste)pasteHover(lastCell);else if(epaint)ePaint(e)});
 ['pointerup','pointercancel'].forEach(n=>ec.addEventListener(n,()=>{epaint=false;selCommit();if(mv){mv=null;selNote()}draftSoon()}));
 editorEl.addEventListener('pointerdown',e=>e.stopPropagation());
 addEventListener('resize',()=>{if(!editorEl.hidden)eRender()});
@@ -1601,6 +1612,7 @@ function eValid(){
 }
 editorEl.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.bucket){if(NOFILL.includes(etool))return;efill=!efill;markTool();eStat(efill?'Fill on: click a tile to fill the whole connected area with the selected tile. Click the bucket again to turn it off.':'');return}
   if(b.dataset.t){const prev=etool;etool=b.dataset.t;if(SHT.includes(prev)&&SHT.includes(etool))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
