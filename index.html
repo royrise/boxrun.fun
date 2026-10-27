@@ -93,6 +93,10 @@ canvas{display:block;width:100%;height:100%}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
 .gbtn{font-size:12px!important;padding:2px 8px!important;margin-right:6px;border-radius:8px!important}
+#csearch{width:min(220px,50vw);padding:7px 10px;font:inherit;font-size:15px;border-radius:8px;border:1px solid #4a4d63;background:#1c1c28;color:#eef}
+#ctags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:2px 0 8px}.panel .tgb{font-size:13px;padding:3px 10px;border-radius:999px}.panel .tgb.on{background:#1f6fb5;border-color:#5ec8ff}
+.tgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.tgp{font-size:11px;padding:1px 7px;border-radius:999px;background:#2a2d44;border:1px solid #4a4d63;opacity:.9}
+#etags .tgb{font-size:13px;padding:3px 10px;border-radius:999px}
 #cwrap{display:flex;gap:18px;text-align:left}#cleft{flex:3;min-width:0}#cside{flex:2;min-width:0}@media(hover:hover){#clist [data-ct]{display:none}}#cside{align-self:flex-start;position:sticky;top:0}#cside .lbt{font-weight:600;margin-bottom:6px;opacity:.85}
 #cleft{max-height:62vh;overflow-y:auto;padding-right:6px}
 @media(max-width:640px){#cwrap{flex-direction:column}#cside{order:-1;max-height:34vh;overflow:auto;width:100%;position:static}#cleft{max-height:none}}
@@ -140,7 +144,7 @@ canvas{display:block;width:100%;height:100%}
 </div>
 </div></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
- <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
@@ -153,8 +157,9 @@ canvas{display:block;width:100%;height:100%}
  <div id="etools">
   <div class="erow"><input id="ename" maxlength="24" placeholder="Level name" value="My level">
    <span class="grp"><input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
-   <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="share" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
+   <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="tags" title="Choose tags so people can find your level">Tags</button><button data-e="share" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="back">Back</button></span></div>
+  <div class="erow" id="etags" hidden><span>Tags (up to 4):</span></div>
   <div class="erow"><span id="epal"></span><select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select></div>
   <div class="erow"><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
  </div>
@@ -626,6 +631,12 @@ function cleanOv(o,rows){
       if(L.length)r[k]=L}}catch(e){}
   return r;
 }
+// tags: the creator picks the manual ones; the automatic ones are worked out from the level itself
+const TAGS_M=['Easy','Medium','Hard','Extreme','Speedrun','Maze','Precision','Troll'],TAGS_A=['Ice','Pads','Slopes','Small','Large'];
+const cleanTg=a=>(Array.isArray(a)?a:[]).filter((t,i,x)=>TAGS_M.includes(t)&&x.indexOf(t)===i).slice(0,4);
+function autoTags(rows,sh,ov){const j=rows.join(''),r=[],area=rows.length*rows[0].length;
+  if(j.includes('I'))r.push('Ice');if(j.includes('P'))r.push('Pads');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
+  if(area<=300)r.push('Small');if(area>=900)r.push('Large');return r}
 function cleanLvl(L){
   try{
     const rows=(L.rows||[]).map(String),w=rows[0].length;
@@ -633,7 +644,8 @@ function cleanLvl(L){
     if((rows.join('').match(/S/g)||[]).length!==1||!rows.join('').includes('G'))return null;
     const sh={},s0=typeof L.sh==='string'?JSON.parse(L.sh):(L.sh||{});
     for(const k in s0){const v=s0[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)sh[k]=[v[0],v[1]|0]}
-    return {name:String(L.name||'Untitled').slice(0,24),rows,sh,ov:cleanOv(L.ov,rows),tx:cleanTx(L.tx,rows),sa:(L.sa|0)&3,at:+L.at||0};
+    const ov=cleanOv(L.ov,rows),tg=cleanTg(L.tg);
+    return {name:String(L.name||'Untitled').slice(0,24),rows,sh,ov,tx:cleanTx(L.tx,rows),sa:(L.sa|0)&3,at:+L.at||0,tg,tags:tg.concat(autoTags(rows,sh,ov))};
   }catch(e){return null}
 }
 async function commLoad(){
@@ -647,8 +659,9 @@ async function commLoad(){
     return list;
   }catch(e){return null}
 }
+let cQ='';const cTags=new Set();
 function commSorted(){
-  const now=Date.now(),net=l=>l.up-l.down,L=commList.slice();
+  const now=Date.now(),net=l=>l.up-l.down,q=cQ.trim().toLowerCase(),L=commList.filter(l=>(!q||l.name.toLowerCase().includes(q)||(l.byName||'').toLowerCase().includes(q))&&[...cTags].every(t=>l.tags.includes(t)));
   if(commSort==='az')return L.sort((a,b)=>a.name.localeCompare(b.name));
   const f={rel:l=>(net(l)+1)/Math.pow(1+(now-l.at)/864e5,1.2),up:l=>l.up,net,new:l=>l.at,old:l=>-l.at}[commSort];
   return L.sort((a,b)=>f(b)-f(a)||b.at-a.at);
@@ -656,11 +669,15 @@ function commSorted(){
 const ago=ms=>{const m=(Date.now()-ms)/6e4;return m<60?Math.max(1,m|0)+' min ago':m<1440?(m/60|0)+' h ago':(m/1440|0)+' d ago'};
 function renderComm(){
   const el=document.getElementById('clist');
-  if(!commList.length){el.innerHTML='<small>No community levels yet. Share one from Level Select.</small>';return}
-  el.innerHTML=commSorted().map(l=>{
+  if(!commList.length){el.innerHTML='<small>No community levels yet. Share one from the Level Editor.</small>';return}
+  const have=new Set(commList.flatMap(l=>l.tags));
+  document.getElementById('ctags').innerHTML=TAGS_M.concat(TAGS_A).filter(t=>have.has(t)||cTags.has(t)).map(t=>'<button class="tgb'+(cTags.has(t)?' on':'')+'" data-tf="'+t+'">'+t+'</button>').join('');
+  const list=commSorted();
+  if(!list.length){el.innerHTML='<small>No levels match. Try a different search or remove a tag.</small>';return}
+  el.innerHTML=list.map(l=>{
     const mine=l.by===uid,v=myVotes[l.key]||0;
     return '<div class="cw"><div class="cr"><div class="vt"><button data-vk="'+l.key+'" data-vv="1" class="'+(v>0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25b2</button><b>'+(l.up-l.down)+'</b><button data-vk="'+l.key+'" data-vv="-1" class="'+(v<0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25bc</button></div>'+
-    '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+'</small></div>'+
+    '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+'</small>'+(l.tags.length?'<span class="tgs">'+l.tags.map(t=>'<span class="tgp">'+t+'</span>').join('')+'</span>':'')+'</div>'+
     '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+'<button data-ct="'+l.key+'" title="Fastest times on this level">Times</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div></div>';
   }).join('');
 }
@@ -677,7 +694,7 @@ async function commShare(id){
     const ref=db.doc('lv/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};d.levels=d.levels||{};
     const prev=d.levels[id];
     if(!prev&&Object.keys(d.levels).length>=20){lvNote('You can share up to 20 levels. Remove one first.');return}
-    d.levels[id]={name:c.name,rows:c.rows,sh:JSON.stringify(c.sh||{}),ov:JSON.stringify(c.ov||{}),tx:JSON.stringify(c.tx||{}),sa:c.sa||0,at:prev?prev.at:Date.now()};
+    d.levels[id]={name:c.name,rows:c.rows,sh:JSON.stringify(c.sh||{}),ov:JSON.stringify(c.ov||{}),tx:JSON.stringify(c.tx||{}),sa:c.sa||0,tg:cleanTg(c.tg),at:prev?prev.at:Date.now()};
     await ref.set(d);lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');
   }catch(e){lvNote('Could not share the level.')}
 }
@@ -707,7 +724,7 @@ function startComm(key){
 }
 function commCopy(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
-  customs.push({id:'c'+Date.now().toString(36),name:l.name,rows:l.rows.slice(),sh:JSON.parse(JSON.stringify(l.sh)),ov:JSON.parse(JSON.stringify(l.ov||{})),tx:JSON.parse(JSON.stringify(l.tx||{})),sa:l.sa});saveCustoms();cNote('Saved "'+l.name+'" to My levels.');
+  customs.push({id:'c'+Date.now().toString(36),name:l.name,rows:l.rows.slice(),sh:JSON.parse(JSON.stringify(l.sh)),ov:JSON.parse(JSON.stringify(l.ov||{})),tx:JSON.parse(JSON.stringify(l.tx||{})),sa:l.sa,tg:(l.tg||[]).slice()});saveCustoms();cNote('Saved "'+l.name+'" to My levels.');
 }
 async function commRemove(key){
   const l=commList.find(x=>x.key===key);if(!l||l.by!==uid||!db)return;
@@ -715,6 +732,8 @@ async function commRemove(key){
   catch(e){cNote('Could not remove the level.')}
 }
 document.getElementById('csort').addEventListener('change',e=>{commSort=e.target.value;renderComm()});
+document.getElementById('csearch').addEventListener('input',e=>{cQ=e.target.value;renderComm()});
+document.getElementById('ctags').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(!b)return;e.stopPropagation();const t=b.dataset.tf;cTags.has(t)?cTags.delete(t):cTags.add(t);renderComm()});
 
 // ---- endless mode: a seeded, winding track with hazards that get harder; score = distance along the track
 let curSeed='',score=0,curSet=false,curWeekly=false;
@@ -1102,7 +1121,7 @@ const ICONS={
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" title="'+t[1]+'" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('');
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
 function markTool(){document.querySelectorAll('#epal button').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';updRot()}
-let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null;
+let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
 // selection: a set of 'x,y' tiles; drag a rectangle (Shift/+ Add adds, Alt removes), then Delete clears them
 let esel=new Set(),selA=null,selB=null,selMode='set',selAdd=false;
 const cellAt=e=>{const r=ec.getBoundingClientRect(),x=Math.floor((e.clientX-r.left-eo.x)/eo.cs),y=Math.floor((e.clientY-r.top-eo.y)/eo.cs);return [Math.max(0,Math.min(eg[0].length-1,x)),Math.max(0,Math.min(eg.length-1,y))]};
@@ -1239,6 +1258,11 @@ function eRot(){eori=(eori+1)%4;document.getElementById('erot').textContent=GLYP
 document.getElementById('eshape').addEventListener('change',e=>{if(SHT.includes(etool)){toolShape[etool]=e.target.value;updRot();eStat(e.target.value==='f'?'':(e.target.value==='q'||e.target.value==='s')?'Each tile is split into 4. Click the quarter where it should go. Click it again to remove it.':'Partial blocks stack: place another block on the same tile to overlap them.');eRender()}});
 const cornerMode=()=>SHT.includes(etool)&&(toolShape[etool]==='q'||toolShape[etool]==='s');
 function updRot(){const q=cornerMode(),b=document.getElementById('erot');b.disabled=q;b.title=q?'Corner pieces go in the quarter of the tile you click':'Rotate shape (R)'}
+function renderETags(){const el=document.getElementById('etags');if(!el)return;
+  el.innerHTML='<span>Tags (up to 4):</span>'+TAGS_M.map(t=>'<button class="tgb'+(etg.includes(t)?' on':'')+'" data-tg="'+t+'">'+t+'</button>').join('')+'<small>Ice, pads, slopes and size are added automatically.</small>'}
+document.getElementById('etags').addEventListener('click',e=>{const b=e.target.closest('[data-tg]');if(!b)return;const t=b.dataset.tg;
+  if(etg.includes(t))etg=etg.filter(x=>x!==t);else if(etg.length<4)etg.push(t);else eStat('A level can have up to 4 tags.');
+  eDirty=true;renderETags()});
 function eStat(t){document.getElementById('estat').textContent=t}
 // drafts: unsaved editor work is kept automatically (one per level being edited) and restored the next time you open it
 let draftT=0,eDirty=false,eRestored=false;
@@ -1256,7 +1280,7 @@ function openEditor(id){
     eshp=c&&c.sh?JSON.parse(JSON.stringify(c.sh)):{};
     eov=c&&c.ov?JSON.parse(JSON.stringify(c.ov)):{};
     etx=c&&c.tx?JSON.parse(JSON.stringify(c.tx)):{};
-    esa=c?(c.sa||0):0;
+    esa=c?(c.sa||0):0;etg=c?cleanTg(c.tg):[];renderETags();
     eg=c?c.rows.map(r=>r.split('')):newGrid(20,12,true);document.getElementById('ename').value=c?c.name:'My level';
     eDirty=false;eRestored=false;const dr=readDrafts()[id||'new'];
     if(dr&&Array.isArray(dr.rows)&&dr.rows.length&&dr.rows.every(r=>typeof r==='string'&&r.length===dr.rows[0].length)){
@@ -1351,7 +1375,7 @@ editorEl.addEventListener('click',e=>{
   if(b.dataset.t){const prev=etool;etool=b.dataset.t;if(SHT.includes(prev)&&SHT.includes(etool))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
-  if(paste&&['save','share','test','export','back','new','resize','import'].includes(a))cancelPaste();
+  if(paste&&['save','share','tags','test','export','back','new','resize','import'].includes(a))cancelPaste();
   if(a==='rot')eRot();
   else if(a==='selall')selAll();
   else if(a==='selcopy')selCopy();
@@ -1360,7 +1384,7 @@ editorEl.addEventListener('click',e=>{
   else if(a==='seldel')selClear();
   else if(a==='selnone'){esel=new Set();selNote();eRender()}
   else if(a==='seladd'){selAdd=!selAdd;b.classList.toggle('on',selAdd)}
-  else if(a==='new'){ePush();esel=new Set();eid=null;eg=newGrid(20,12,true);eshp={};eov={};etx={};esa=0;document.getElementById('ename').value='My level';document.getElementById('ew').value=20;document.getElementById('eh').value=12;eDirty=false;dropDraft('new');eRender();eStat('New level')}
+  else if(a==='new'){ePush();esel=new Set();eid=null;eg=newGrid(20,12,true);eshp={};eov={};etx={};esa=0;etg=[];renderETags();document.getElementById('ename').value='My level';document.getElementById('ew').value=20;document.getElementById('eh').value=12;eDirty=false;dropDraft('new');eRender();eStat('New level')}
   else if(a==='export')eExport();
   else if(a==='import')document.getElementById('efile').click();
   else if(a==='back'){editorEl.hidden=true;showMenu(true)}
@@ -1372,11 +1396,12 @@ editorEl.addEventListener('click',e=>{
     const nov={};for(const k in eov){const [sx,sy]=k.split(',').map(Number),nx=sx+ox,ny=sy+oy;if(nx>=0&&ny>=0&&nx<w&&ny<h)nov[nx+','+ny]=eov[k]}
     const ntx={};for(const k in etx){const [sx,sy]=k.split(',').map(Number),nx=sx+ox,ny=sy+oy;if(nx>=0&&ny>=0&&nx<w&&ny<h)ntx[nx+','+ny]=etx[k]}
     ePush();esel=new Set();eg=g;eshp=ns;eov=nov;etx=ntx;eRender();draftSoon();eStat(eg.flat().includes('S')?'':'The start tile was cropped out. Place it again.')}
+  else if(a==='tags'){const t=document.getElementById('etags');t.hidden=!t.hidden;renderETags()}
   else if(a==='share'){if(!eValid())return;document.querySelector('[data-e=save]').click();if(eid&&!eDirty)commShare(eid);else eStat('Could not save the level, so it was not shared.')}
   else if(a==='test'){const rows=eValid();if(rows){editorEl.hidden=true;mode='test';cur={id:null,name,rows,sh:eshpClean(),ov:eovClean(),tx:etxClean(),sa:esa};fullRun=false;total=0;deaths=0;load(0)}}
   else if(a==='save'){const rows=eValid();if(!rows)return;
-    if(eid){const c=customs.find(c=>c.id===eid);if(c){const sh=eshpClean(),ov=eovClean(),tx=etxClean();if(c.rows.join()!==rows.join()||JSON.stringify(c.sh||{})!==JSON.stringify(sh)||JSON.stringify(c.ov||{})!==JSON.stringify(ov)||(c.sa||0)!==esa){delete pb.cl[eid];delete pb.cg[eid];savePB()}c.name=name;c.rows=rows;c.sh=sh;c.ov=ov;c.tx=tx;c.sa=esa}}
-    else{eid='c'+Date.now().toString(36);customs.push({id:eid,name,rows,sh:eshpClean(),ov:eovClean(),tx:etxClean(),sa:esa})}
+    if(eid){const c=customs.find(c=>c.id===eid);if(c){const sh=eshpClean(),ov=eovClean(),tx=etxClean();if(c.rows.join()!==rows.join()||JSON.stringify(c.sh||{})!==JSON.stringify(sh)||JSON.stringify(c.ov||{})!==JSON.stringify(ov)||(c.sa||0)!==esa){delete pb.cl[eid];delete pb.cg[eid];savePB()}c.name=name;c.rows=rows;c.sh=sh;c.ov=ov;c.tx=tx;c.sa=esa;c.tg=etg.slice()}}
+    else{eid='c'+Date.now().toString(36);customs.push({id:eid,name,rows,sh:eshpClean(),ov:eovClean(),tx:etxClean(),sa:esa,tg:etg.slice()})}
     const ok=saveCustoms();
     if(ok){dropDraft(eid);dropDraft('new');eDirty=false;eStat('Saved \u2713 (kept in this browser). Tip: Back up all, in Level Select, keeps a copy in a file.');try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
     else eStat('Could not save: this browser is blocking storage. Use Export to keep the level.')}
