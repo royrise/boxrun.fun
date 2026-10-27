@@ -54,7 +54,8 @@ canvas{display:block;width:100%;height:100%}
 .icol{display:flex;flex-direction:column;gap:12px}
 #p-main .icons{display:grid;grid-template-columns:repeat(3,64px);gap:12px;justify-content:center;align-items:start;margin-top:8px}
 #p-main .ib.playbig{grid-column:1/-1;width:auto;gap:10px;font-weight:800;letter-spacing:.1em}
-#p-main a.ib{grid-column:2;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;cursor:pointer;text-decoration:none;box-sizing:border-box}
+#p-main .icrow{grid-column:1/-1;display:flex;justify-content:center;gap:12px}
+#p-main a.ib{color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;cursor:pointer;text-decoration:none;box-sizing:border-box}
 #p-main .ib{position:relative;width:64px;height:64px;padding:0;display:flex;align-items:center;justify-content:center}
 #p-main .ib::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:max-content;max-width:170px;text-align:center;font-size:13px;line-height:1.3;background:#000d;color:#fff;padding:5px 9px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .1s;z-index:3}
 #p-main .ib:hover::after{opacity:1;transition:opacity .15s .5s}
@@ -132,12 +133,16 @@ canvas{display:block;width:100%;height:100%}
 <button class="ib" data-a="prof" aria-label="Profile" data-tip="Profile: your account, level, stats and placements"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
 <button class="ib" data-a="skins" aria-label="Skins" data-tip="Skins: choose your cube's colours and unlock more"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg></button>
 </div>
+<div class="icrow">
+<button class="ib" data-a="weekly" aria-label="Weekly challenge" data-tip="Weekly challenge: one track for everyone, resets every Monday"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z" fill="currentColor" stroke="none"/></svg></button>
 <a class="ib" href="https://discord.gg/Fg7P6tZBhH" target="_blank" rel="noopener noreferrer" aria-label="Discord" data-tip="Discord: join the community"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></a>
+</div>
 </div></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
+ <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-stats" hidden><h2>Statistics</h2><div id="statlist"></div><button data-a="back">Back</button></div>
@@ -285,7 +290,7 @@ function ghostAt(){
 function nextLevel(){if(state!=='win')return;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else showMenu()}
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
-function show(id){['main','levels','stats','lb','skins','comm','endless','profile'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+function show(id){['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
 function showMenu(f){if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
@@ -316,9 +321,9 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.cs)commCopy(d.cs);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
-  else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
+  else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
-document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(mode==='endless'){const k=b.dataset.b;if(k==='again')startEndless(curSeed,curSet);else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
+document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(mode==='endless'){const k=b.dataset.b;if(k==='again')startEndless(curSeed,curSet,curWeekly);else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
 document.getElementById('banner').addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('mn').addEventListener('pointerdown',e=>{e.stopPropagation();showMenu()});
 // PB ghost on/off (the ghost is still recorded while hidden)
@@ -426,7 +431,7 @@ function update(dt){
   if(state==='menu')return;
   if(state==='play'){lt+=dt;gt+=dt;total+=dt;lastA=p.a}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
-  document.getElementById('esub').textContent=mode==='endless'?(curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:'';
+  document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:'';
   if(state==='play'){
     const turn=(keys.right?1:0)-(keys.left?1:0);
     // turning: if rotating would put a corner into a wall, push out; if that fails, cancel the turn
@@ -521,7 +526,7 @@ addEventListener('keydown',e=>{
   }
   if(!editorEl.hidden||['INPUT','TEXTAREA'].includes(e.target.tagName))return;
   if(e.key.toLowerCase()==='g'&&!e.repeat){setGhost(pb.ghostOn===false);return}
-  if(state==='over'&&mode==='endless'){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){startEndless(curSeed,curSet);return}}
+  if(state==='over'&&mode==='endless'){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){startEndless(curSeed,curSet,curWeekly);return}}
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
   if(e.key==='Escape'){showMenu();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
@@ -709,7 +714,7 @@ async function commRemove(key){
 document.getElementById('csort').addEventListener('change',e=>{commSort=e.target.value;renderComm()});
 
 // ---- endless mode: a seeded, winding track with hazards that get harder; score = distance along the track
-let curSeed='',score=0,curSet=false;
+let curSeed='',score=0,curSet=false,curWeekly=false;
 const randSeed=()=>Math.random().toString(36).slice(2,8).toUpperCase();
 function genEndless(seed){
   let h=2166136261;for(const c of seed){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}
@@ -785,8 +790,8 @@ function genEndless(seed){
   if(!reached&&far){for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++)g[y+b][x+a]='.';for(let b=0;b<2;b++)for(let a=0;a<2;a++)g[far[1]+b][far[0]+a]='G'}
   return {rows:g.map(r=>r.join('')),sh,sa,dist,N};
 }
-function startEndless(seed,isSet){
-  curSet=!!isSet;curSeed=String(seed).slice(0,12)||randSeed();const G=genEndless(curSeed);
+function startEndless(seed,isSet,weekly){
+  curWeekly=!!weekly;curSet=!!isSet;curSeed=String(seed).slice(0,12)||randSeed();const G=genEndless(curSeed);
   menuEl.hidden=true;mode='endless';cur={id:null,name:'Endless',rows:G.rows,sh:G.sh,sa:G.sa,dist:G.dist,N:G.N};
   fullRun=false;total=0;deaths=0;load(0);
 }
@@ -802,7 +807,7 @@ function endStart(){
     pb.endSeed=v;savePB();startEndless(v,true)}
   else startEndless(randSeed(),false);
 }
-function endNew(){if(curSet){showMenu();openEndless()}else startEndless(randSeed(),false)}
+function endNew(){if(curWeekly){showMenu();openWeekly()}else if(curSet){showMenu();openEndless()}else startEndless(randSeed(),false)}
 function openEndless(){
   show('endless');endUI();document.getElementById('eseed').value=pb.endSeed||'';
   document.getElementById('ebest').textContent=pb.endBest?'Best distance: '+pb.endBest+' m':'No runs yet';
@@ -811,9 +816,40 @@ function endRun(done){
   state='over';timer=1e9;
   const d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;savePB();
-  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">Endless \u00b7 '+(curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">Retry seed (R)</button><button class="pri" data-b="new">'+(curSet?'Change seed':'New seed')+' (Enter)</button><button data-b="menu">Menu</button></div>';
+  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':'Retry seed')+' (R)</button><button class="pri" data-b="new">'+(curWeekly?'Weekly board':curSet?'Change seed':'New seed')+' (Enter)</button><button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
+  if(curWeekly)weeklyDone(d);
 }
+// ---- weekly challenge: one fixed track per week (Monday 00:00 UTC), same for everyone. Board score: further is better (stored inverted so lower is better).
+const weekIdx=()=>Math.floor((Date.now()-Date.UTC(1970,0,5))/(7*864e5));
+const weekSeed=()=>'WK'+weekIdx(),wfld=()=>'w'+weekIdx();
+const wval=(d,time)=>Math.round((99000-d+Math.min(time||0,999)/10000)*1e5)/1e5,wdist=v=>Math.round(99000-Math.floor(v+1e-6)),wfmt=v=>wdist(v)+' m';
+function wLeft(){const ms=(weekIdx()+1)*7*864e5+Date.UTC(1970,0,5)-Date.now(),h=Math.floor(ms/36e5);return (h>=24?Math.floor(h/24)+' d ':'')+(h%24)+' h left'}
+async function weeklyBoard(mine,limit){
+  const raw=await lbTop(wfld(),50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,mine);
+  if(all===null)return null;
+  let rows=all.slice(0,limit);const mi=all.findIndex(r=>r.me);
+  if(mi>=limit){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(wfld(),mine,uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}
+  return rows;
+}
+async function weeklyDone(d){
+  if(!pb.wk)pb.wk={};const k=weekIdx(),v=wval(d,lt);
+  if(d>0&&(pb.wk[k]==null||v<pb.wk[k])){pb.wk[k]=v;for(const o in pb.wk)if(+o<k-8)delete pb.wk[o];savePB()}
+  const mine=pb.wk[k];
+  if(mine!=null)await lbPut({[wfld()]:mine});
+  const rows=await weeklyBoard(mine,8),b=document.getElementById('banner');
+  if(state==='over'&&curWeekly&&b){const box=document.createElement('div');box.innerHTML='<div class="lbt">Weekly leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
+}
+async function openWeekly(){
+  show('weekly');if(!pb.wk)pb.wk={};
+  const mine=pb.wk[weekIdx()];
+  document.getElementById('wsub').textContent='Everyone runs the same track this week \u00b7 '+wLeft();
+  document.getElementById('wbest').textContent=mine!=null?'Your best this week: '+wfmt(mine):'No run yet this week';
+  const bd=document.getElementById('wboard');bd.textContent='Loading\u2026';
+  if(mine!=null)lbPut({[wfld()]:mine});
+  bd.innerHTML=lbHTML(await weeklyBoard(mine,10),true,wfmt);
+}
+function startWeekly(){startEndless(weekSeed(),true,true)}
 
 // ---- online features. Inside claude.ai they use its built-in database. On your own website they use your server: set window.BOXRUN_API
 // (see boxrun-server/README.md). With neither, the game still works fully offline.
@@ -947,10 +983,10 @@ async function lbTop(field,n){
     if(usersNS&&rows.length){try{const ps=await usersNS.profiles(rows.map(r=>r.id));rows.forEach(r=>names[r.id]=ps[r.id]&&ps[r.id].name)}catch(e){}}
     return rows.map(r=>({id:r.id,t:r.t,name:names[r.id]||'Player',me:r.id===uid}))}catch(e){return null}
 }
-function lbHTML(rows,link){
+function lbHTML(rows,link,f){f=f||fmt;
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
-  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+fmt(r.t)+'</b></div>').join('');
+  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+f(r.t)+'</b></div>').join('');
 }
 // the board can lag behind a write you just made, so make sure your own time is shown
 function lbMerge(rows,t){
