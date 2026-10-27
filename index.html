@@ -199,6 +199,7 @@ const LEGACY={tutorial:'lv2_0','lava-field':'lv2_1','pillar-pass':'lv2_2'}; // l
 const fld=n=>LEGACY[LID[n]]||'t_'+LID[n];
 // ---- main levels 4-25 (built from small recipes; the outer wall ring is added automatically)
 const LSH=[],LSA=[];
+const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='tutorial-2'; // level 2 teaches every mechanic level 1 doesn't; its new id starts a fresh leaderboard
 (()=>{
   const add=(w,h,fn)=>{
     const g=Array.from({length:h},()=>Array(w).fill('.')),sh={};let sa=0;
@@ -550,7 +551,7 @@ function draw(){
   }
   for(const m of movers){ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(m.x*U+.5,m.y*U+.5,(m.v?1:m.d+1)*U-1,(m.v?m.d+1:1)*U-1);ctx.setLineDash([])}
   for(const poly of moverPolys()){const x=poly[0][0]*U,y=poly[0][1]*U;ctx.fillStyle='#6a6f94';ctx.fillRect(x,y,U,U);ctx.strokeStyle='#ffd24a';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,U-4,U-4);ctx.beginPath();ctx.moveTo(x+6,y+U-6);ctx.lineTo(x+U-6,y+6);ctx.stroke()}
-  const labs=mode==='main'&&lvl===0?TUT.labels:(cur&&cur.labels)||texts;
+  const labs=mode==='main'&&lvl===0?TUT.labels:mode==='main'&&lvl===1?TUT2.labels:(cur&&cur.labels)||texts;
   if(labs){
     ctx.font='14px system-ui,sans-serif';ctx.textBaseline='top';
     for(const L of labs){
@@ -630,6 +631,41 @@ function makeTutorial(){
     {x:30,y:1.5,c:'#e8541a',t:['Orange lava kills you instantly','and restarts the level.','Find the gap.']},
     {x:30,y:8,c:'#e8c21a',t:['Yellow speed pad: 50% faster','while you stand on it.']},
     {x:38.5,y:8,c:'#2fd37a',t:['Green goal: touch it to finish!','Your time and best are saved.']}
+  ]};
+}
+function makeTutorial2(){
+  const W=150,H=11,g=[],sh={};
+  for(let y=0;y<H;y++){g.push([]);for(let x=0;x<W;x++)g[y].push(x===0||y===0||x===W-1||y===H-1?'#':'.')}
+  const R=(x1,y1,x2,y2,c)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)g[y][x]=c};
+  g[5][2]='S';
+  R(11,1,19,9,'I');                                   // ice
+  R(22,1,23,3,'#');R(22,7,23,9,'#');                  // gap to aim for
+  const dia=(x,y)=>{g[y][x]=g[y][x+1]=g[y+1][x]=g[y+1][x+1]='#';sh[x+','+y]=['h',2];sh[(x+1)+','+y]=['h',3];sh[x+','+(y+1)]=['h',1];sh[(x+1)+','+(y+1)]=['h',0]};
+  dia(31,4);dia(37,5);                                // slopes
+  R(46,3,46,7,'B');                                   // bounce pad
+  R(60,1,60,3,'#');R(60,7,60,9,'#');R(64,1,65,9,'#');// portals
+  g[4][60]='1';g[5][60]='2';g[6][60]='3';g[4][68]='1';g[5][68]='2';g[6][68]='3';
+  R(76,7,88,9,'#');g[1][80]='m';g[1][84]='m';         // moving walls (vertical, 5 tiles)
+  R(94,2,99,8,'M');                                   // mud
+  R(104,1,109,9,'K');                                 // crumbling floor
+  R(117,1,117,9,'C');                                 // checkpoint
+  R(124,1,125,3,'L');R(124,7,125,9,'L');              // lava with a gap
+  R(130,1,135,8,'v');R(130,9,135,9,'L');              // wind pushing towards lava
+  R(146,3,147,7,'G');
+  const sign=(x,y,c,t)=>({x,y,c,t});
+  return {name:'Tutorial 2',rows:g.map(r=>r.join('')),sh,labels:[
+    sign(1.5,1.5,'#5ec8ff',['Level 2: everything new.','Follow the track, one section at a time.']),
+    sign(11,8,'#8fd8ff',['Ice: you keep sliding the way you','entered. Turning barely changes it.']),
+    sign(26,1.5,'#4a4d63',['Aim for the gap.']),
+    sign(28,8,'#4a4d63',['Slopes: angled blocks deflect you.','Slide along them.']),
+    sign(42,8,'#8a2fa8',['Bounce pad: it turns you around.','Steer around it, or use it.']),
+    sign(53,1.5,'#b36bff',['Portals: enter one, leave','from the matching number.']),
+    sign(71,1.5,'#6a6f94',['Moving walls slide back','and forth. Time your run.']),
+    sign(91,1.5,'#8a6238',['Mud slows you by a third.']),
+    sign(100,8,'#9aa0c8',['Cracked floor falls away','soon after you touch it.','Keep moving!']),
+    sign(112,1.5,'#2fd37a',['Checkpoint: if you die you','respawn here. Your timer keeps going.']),
+    sign(127,1.5,'#bfeaff',['Wind pushes you.','Steer against it, away from lava.']),
+    sign(139,1.5,'#2fd37a',['Finish line: touch it to win.'])
   ]};
 }
 function startCustom(id){menuEl.hidden=true;mode='custom';cur=customs.find(c=>c.id===id);fullRun=false;total=0;deaths=0;load(0)}
