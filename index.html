@@ -972,6 +972,7 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
   };
   // The track never ends: segments are added ahead of the player as they run (the walk only depends on the seed, so it is the same for everyone).
   // The world is a window that is re-centred on the end of the track now and then, and old track far behind the head is forgotten.
+  const recent=[];
   const rebase=()=>{
     const ox=(N>>1)-x,oy=(N>>1)-y;if(!ox&&!oy)return null;
     const og=g.map(r=>r.slice()),od=dist,ou=used,osh=Object.assign({},sh);
@@ -980,6 +981,7 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
       if(qy>=0&&qy<N&&qx>=0&&qx<N){g[yy][xx]=og[qy][qx];dist[yy*N+xx]=od[qy*N+qx];used[yy*N+xx]=ou[qy*N+qx]}else g[yy][xx]='L'}}
     for(const k in sh)delete sh[k];
     for(const k in osh){const [a,b]=k.split(',').map(Number),na=a+ox,nb=b+oy;if(na>=0&&nb>=0&&na<N&&nb<N)sh[na+','+nb]=osh[k]}
+    if(nb)for(const S of recent){S.x+=ox;S.y+=oy}                      // the recent-segment list must move with the world, or the safety net below clears the wrong tiles and opens holes in the lava
     x+=ox;y+=oy;sx+=ox;sy+=oy;return {ox,oy};
   };
   // can you get from the start of the previous stretch to the end of this one (through gaps at least 2 tiles wide)? segs = [{x,y,dir,w,L}, ...]
@@ -996,7 +998,6 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
       for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const na=a+dx,nb=b+dy;if(na>=x0&&na<x1&&nb>=y0&&nb<y1&&!seen[(nb-y0)*bw+na-x0]&&clr(na,nb)){seen[(nb-y0)*bw+na-x0]=1;qs.push([na,nb])}}}
     return {ok:false,far,box:[x0,x1,y0,y1]};
   };
-  const recent=[];
   const step=()=>{
     const seg=segN++,e=Math.min(1,d0/1000),r=nb?.55+.45*e:.3+.7*e,w=nb||d0<150?5:d0<850?4:3;let L=2*w+Math.round(18-8*e)+((rnd()*(10-4*e))|0),d=null;   // difficulty climbs steadily until 1000 m, then stays at its hardest
     if(seg%8===0)for(let i=0;i<N*N;i++)if(dist[i]>=0&&dist[i]<d0-400)used[i]=0;   // forget track far behind the head so there is always room
@@ -1008,7 +1009,7 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
     if(recent.length>1){                                           // safety net: make sure the recent track can really be driven; if a hazard cuts it, clear the hazards where it is cut
       let c=connected(recent);
       if(!c.ok){const [bx0,bx1,by0,by1]=c.box;
-        for(let yy=by0;yy<by1;yy++)for(let xx=bx0;xx<bx1;xx++){const dv=dist[yy*N+xx];if(dv>=c.far-50&&dv<=c.far+90){g[yy][xx]=g[yy][xx]==='#'||g[yy][xx]==='L'||g[yy][xx]==='P'||g[yy][xx]==='I'?'.':g[yy][xx];delete sh[xx+','+yy]}}
+        for(let yy=by0;yy<by1;yy++)for(let xx=bx0;xx<bx1;xx++){const dv=dist[yy*N+xx];if((!nb||dv>=0)&&dv>=c.far-50&&dv<=c.far+90){g[yy][xx]=g[yy][xx]==='#'||g[yy][xx]==='L'||g[yy][xx]==='P'||g[yy][xx]==='I'?'.':g[yy][xx];delete sh[xx+','+yy]}}
         c=connected(recent);
         if(!c.ok)for(const S of recent)cells(S,(cx,cy)=>{g[cy][cx]='.';delete sh[cx+','+cy]})}}
     // mostly lava along the track: only the first stretches and a few later ones (about 1 in 8 at full difficulty) get a safe stone edge
