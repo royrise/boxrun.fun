@@ -92,6 +92,7 @@ canvas{display:block;width:100%;height:100%}
 @media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
+.gbtn{font-size:12px!important;padding:2px 8px!important;margin-right:6px;border-radius:8px!important}
 #cwrap{display:flex;gap:18px;text-align:left}#cleft{flex:3;min-width:0}#cside{flex:2;min-width:0}@media(hover:hover){#clist [data-ct]{display:none}}#cside{align-self:flex-start;position:sticky;top:0}#cside .lbt{font-weight:600;margin-bottom:6px;opacity:.85}
 #cleft{max-height:62vh;overflow-y:auto;padding-right:6px}
 @media(max-width:640px){#cwrap{flex-direction:column}#cside{order:-1;max-height:34vh;overflow:auto;width:100%;position:static}#cleft{max-height:none}}
@@ -275,7 +276,7 @@ function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootD
 function respawn(){if(state==='win'||state==='menu')return;p={x:cp.x,y:cp.y,a:cp.a};attempts++;wasIce=false;lt=0;state='play';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
-let rec=[],lastRec=0,ghost=null,gi=0,gt=0;
+let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
 const rnd=(v,n)=>Math.round(v*10**n)/10**n;
 // where the PB ghost is at the current level time: [x,y,angle] or null
 function ghostAt(){
@@ -287,12 +288,12 @@ function ghostAt(){
   const f=(gt-a[0])/(b[0]-a[0]);
   return [a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f,a[3]+(b[3]-a[3])*f];
 }
-function nextLevel(){if(state!=='win')return;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else showMenu()}
+function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else showMenu()}
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
 function show(id){['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
-function showMenu(f){if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
-function startLevel(n,full){mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
+function showMenu(f){extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
+function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
   let h=LEVELS.map((_,i)=>'<div class="crow"><button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button><button class="lbbtn" data-lbs="'+i+'" title="Show the leaderboard for level '+(i+1)+'" aria-label="Leaderboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button></div>').join('');
   h+='<h3 class="sec">Custom levels</h3>'+(customs.length?customs.map(c=>'<div class="crow"><button data-c="'+c.id+'">'+esc(c.name)+'<small>'+(pb.cl[c.id]!=null?'Best '+fmt(pb.cl[c.id]):'Not cleared')+'</small></button><button data-sh="'+c.id+'" title="Share to the community">Share</button><button data-e2="'+c.id+'">Edit</button><button data-x="'+c.id+'">\u2715</button></div>').join(''):'<small>None yet. Make one in the Level Editor.</small>');
@@ -312,7 +313,8 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.e2)openEditor(d.e2);
   else if(d.x){customs=customs.filter(c=>c.id!==d.x);delete pb.cl[d.x];delete pb.cg[d.x];saveCustoms();savePB();buildLevels()}
   else if(d.u)showProfile(d.u);
-  else if(d.lbs!=null)sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs));
+  else if(d.wg)watchGhost(d);
+  else if(d.lbs!=null)sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);
   else if(d.sk)pickSkin(d.sk,+d.ci);
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
@@ -351,7 +353,7 @@ function finish(){
   savePB();
   banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button><button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
-  if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
+  if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
 function load(n,keep){
@@ -361,7 +363,7 @@ function load(n,keep){
   texts=mode==='main'?[]:txLabels(cur.tx);
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
-  if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=ghostOf()||null;gi=0;
+  if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=(extGhost&&(mode==='main'||mode==='custom')?extGhost.arr:ghostOf())||null;gi=0;
 }
 const tile=(x,y)=>(grid[y]&&grid[y][x])||'#';
 
@@ -431,7 +433,7 @@ function update(dt){
   if(state==='menu')return;
   if(state==='play'){lt+=dt;gt+=dt;total+=dt;lastA=p.a}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
-  document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:'';
+  document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?'Racing '+extGhost.name:'';
   if(state==='play'){
     const turn=(keys.right?1:0)-(keys.left?1:0);
     // turning: if rotating would put a corner into a wall, push out; if that fails, cancel the turn
@@ -685,7 +687,7 @@ async function commTimes(key){
   t.textContent=l.name;
   if(cCache[key])b.innerHTML=cCache[key];else b.textContent='Loading\u2026';
   const mine=pb.cl['cm_'+key],rows=lbMerge(await lbTop(cfld(key),8),mine!=null?rnd(mine,3):null);
-  const h=lbHTML(rows&&rows.slice(0,8),true);cCache[key]=h;if(tok===cTok)b.innerHTML=h;
+  const h=lbHTML(rows&&rows.slice(0,8),true,null,'c'+key);cCache[key]=h;if(tok===cTok)b.innerHTML=h;
 }
 {const L=document.getElementById('clist');
  L.addEventListener('mouseover',e=>{const r=e.target.closest('.cr');if(!r)return;const b=r.querySelector('[data-ct]');if(b&&b.dataset.ct!==L.dataset.cur){L.dataset.cur=b.dataset.ct;commTimes(b.dataset.ct)}})}
@@ -699,7 +701,7 @@ async function commVote(key,val){
   try{await db.doc('vt/'+uid).set({v:myVotes})}catch(e){cNote('Could not save your vote.')}
 }
 function startComm(key){
-  const l=commList.find(x=>x.key===key);if(!l)return;
+  const l=commList.find(x=>x.key===key);if(!l)return;extGhost=pendingGhost;pendingGhost=null;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
   delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfld(key)]:rnd(pb.cl['cm_'+key],3)});
 }
@@ -818,6 +820,7 @@ function genEndless(seed){
   return {g,sh,sa,N,ensure,get dist(){return dist}};
 }
 function startEndless(seed,isSet,weekly){
+  extGhost=null;
   curWeekly=!!weekly;curSet=!!isSet;curSeed=String(seed).slice(0,12)||randSeed();const G=genEndless(curSeed);
   menuEl.hidden=true;mode='endless';cur={id:null,name:'Endless',gen:G,rows:[],sh:G.sh,sa:G.sa,dist:G.dist,N:G.N};
   fullRun=false;total=0;deaths=0;load(0);
@@ -934,7 +937,7 @@ async function initBackend(){
       uid=httpB.uid();
     }
   }catch(e){db=null;uid=null}
-  if(db&&uid&&!backendErr){await pullMine();syncPBs();pushProfile(true)}
+  if(db&&uid&&!backendErr){await pullMine();syncPBs();ghPutAll();pushProfile(true)}
 }
 initBackend();
 // bring your server-side times and stats onto this device (a new browser, or after clearing site data); the faster time always wins
@@ -992,12 +995,50 @@ async function showProfile(id){
 async function acctDo(kind){
   const n=document.getElementById('au').value.trim(),p=document.getElementById('ap').value,e=document.getElementById('aerr');
   e.textContent='One moment\u2026';
-  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();pushProfile(true);showProfile()}catch(er){e.textContent=er.message||'Could not sign in.'}
+  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);showProfile()}catch(er){e.textContent=er.message||'Could not sign in.'}
 }
 async function acctOut(){await httpB.logout();uid=null;showProfile()}
 document.getElementById('profbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ap')acctDo('login')});
 
 const cfld=key=>{let a=2166136261,b=5381;for(let i=0;i<key.length;i++){const c=key.charCodeAt(i);a=Math.imul(a^c,16777619);b=(Math.imul(b,33)^c)>>>0}return 'x'+(a>>>0).toString(36)+b.toString(36)};
+// ---- ghosts shared online: gh/<player> = {f:{<board field>:{t:time, g:compressed run}}}
+const zz=n=>n<0?-2*n-1:2*n,uz=n=>n&1?-(n+1)/2:n/2,b36=n=>n.toString(36);
+function ghEnc(g){
+  const out=[];let pt=0,px=0,py=0,pa=0;
+  g.forEach((e,i)=>{if(i%2&&i<g.length-1&&!e[4]&&!(g[i+1]&&g[i+1][4]))return;          // keep every other sample (and every jump), the playback interpolates
+    const t=Math.round(e[0]*100),x=Math.round(e[1]*50),y=Math.round(e[2]*50),a=Math.round(e[3]*50);
+    out.push([zz(t-pt),zz(x-px),zz(y-py),zz(a-pa)].map(b36).join(',')+(e[4]?'!':''));pt=t;px=x;py=y;pa=a});
+  return out.join(';');
+}
+function ghDec(str){
+  const out=[];let t=0,x=0,y=0,a=0;
+  for(const part of String(str).split(';')){if(!part)continue;const fl=part.endsWith('!'),v=part.replace('!','').split(',').map(q=>uz(parseInt(q,36)));
+    if(v.length!==4||v.some(n=>!isFinite(n)))return null;t+=v[0];x+=v[1];y+=v[2];a+=v[3];out.push([t/100,x/50,y/50,a/50].concat(fl?[1]:[]))}
+  return out.length>1?out:null;
+}
+let ghBusy=false;
+async function ghPutAll(){
+  if(!db||!uid||ghBusy)return;ghBusy=true;
+  try{
+    const items=[];
+    LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]],g=pb.ghosts[LID[i]];if(t!=null&&g&&g.length>1)items.push([fld(i),t,g])});
+    for(const k in pb.cl)if(k.startsWith('cm_')&&pb.cl[k]!=null&&pb.cg[k]&&pb.cg[k].length>1)items.push([cfld(k.slice(3)),pb.cl[k],pb.cg[k]]);
+    if(!items.length)return;
+    const ref=db.doc('gh/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{},F=d.f||{};let ch=false;
+    for(const [field,t,g] of items){const old=F[field];if(!old||old.t>t+1e-6){const enc=ghEnc(g);if(JSON.stringify(F).length+enc.length>380000)continue;F[field]={t:rnd(t,3),g:enc};ch=true}}
+    if(ch)await ref.set({f:F});
+  }catch(e){}finally{ghBusy=false}
+}
+async function watchGhost(d){
+  const ref=d.wr,isM=ref[0]==='m',note=isM?lvNote:cNote;
+  const field=isM?fld(+ref.slice(1)):cfld(ref.slice(1));
+  note('Loading '+d.wn+'\'s ghost\u2026');
+  let arr=null;
+  try{const sn=await db.doc('gh/'+d.wg).get(),e=sn.exists&&sn.data().f&&sn.data().f[field];arr=e&&ghDec(e.g)}catch(e){}
+  if(!arr){note(d.wn+' has not uploaded a ghost for this run yet.');return}
+  note('');pendingGhost={name:d.wn,arr};
+  if(isM)startLevel(+ref.slice(1),false);else startComm(ref.slice(1));
+}
 async function lbPut(patch){
   if(!db||!uid)return;
   try{const ref=db.doc('lb/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};let ch=false;
@@ -1012,10 +1053,10 @@ async function lbTop(field,n){
     if(usersNS&&rows.length){try{const ps=await usersNS.profiles(rows.map(r=>r.id));rows.forEach(r=>names[r.id]=ps[r.id]&&ps[r.id].name)}catch(e){}}
     return rows.map(r=>({id:r.id,t:r.t,name:names[r.id]||'Player',me:r.id===uid}))}catch(e){return null}
 }
-function lbHTML(rows,link,f){f=f||fmt;
+function lbHTML(rows,link,f,ref){f=f||fmt;
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
-  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+f(r.t)+'</b></div>').join('');
+  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+f(r.t)+'</b></div>').join('');
 }
 // the board can lag behind a write you just made, so make sure your own time is shown
 function lbMerge(rows,t){
@@ -1026,15 +1067,15 @@ function lbMerge(rows,t){
 }
 // level select side board: overall by default, the hovered level otherwise
 let sideTok=0;const sideCache={};
-async function sideLB(f,title){
+async function sideLB(f,title,ref){
   const tok=++sideTok,b=document.getElementById('lvsideb');
   document.getElementById('lvsidet').textContent=title;
   if(sideCache[f])b.innerHTML=sideCache[f];else b.textContent='Loading…';
-  const h=lbHTML(await lbTop(f,8),true);sideCache[f]=h;if(tok===sideTok)b.innerHTML=h;
+  const h=lbHTML(await lbTop(f,8),true,null,ref);sideCache[f]=h;if(tok===sideTok)b.innerHTML=h;
 }
 {const L=document.getElementById('lvlist');
- L.addEventListener('mouseover',e=>{const b=e.target.closest('button[data-l]');if(b)sideLB(fld(+b.dataset.l),'Level '+(+b.dataset.l+1)+' \u00b7 '+lvName(+b.dataset.l))});
- L.addEventListener('mouseleave',()=>sideLB('run3','Overall'))}
+ L.addEventListener('mouseover',e=>{const b=e.target.closest('button[data-l]');if(b)sideLB(fld(+b.dataset.l),'Level '+(+b.dataset.l+1)+' \u00b7 '+lvName(+b.dataset.l),'m'+b.dataset.l)});
+ document.getElementById('lvwrap').addEventListener('mouseleave',()=>sideLB('run3','Overall'))}
 async function showLB(field){
   show('lb');
   document.getElementById('lbtabs').innerHTML=[['run3','Overall']].concat(LEVELS.map((_,i)=>[fld(i),'Lvl '+(i+1)])).map(t=>'<button data-lb="'+t[0]+'"'+(t[0]===field?' class="on"':'')+'>'+t[1]+'</button>').join('');
