@@ -204,7 +204,7 @@ const TUT=makeTutorial();LEVELS.unshift(TUT.rows);
 // stable ids for the main levels: records are stored by id (not position), so levels can be reordered safely
 const LID=["tutorial", "lava-field", "pillar-pass", "snake", "lava-ribbon", "hairpin-pads", "staircase", "square-spiral", "lava-waves", "zigzag-bridges", "pad-chicane", "maze", "lava-maze", "slope-hairpins", "pad-maze", "lava-stairs", "lava-mines", "switchbacks", "lava-spiral", "slope-tunnel", "lava-combs", "rapids", "spiral-out", "mega-maze", "finale"];
 const LEGACY={tutorial:'lv2_0','lava-field':'lv2_1','pillar-pass':'lv2_2'}; // leaderboard fields that already exist
-const fld=n=>LEGACY[LID[n]]||'t_'+LID[n];
+const fld=n=>LEGACY[LID[n]]||'t_'+(typeof backend!=='undefined'&&backend==='http'?LID[n].replace(/-/g,'_'):LID[n]);   // the own-server API only allows letters, digits and _ in field names, so hyphenated level ids (lava-field...) were rejected there
 // ---- main levels 4-25 (built from small recipes; the outer wall ring is added automatically)
 const LSH=[],LSA=[];
 const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='tutorial-2'; // level 2 teaches every mechanic level 1 doesn't; its new id starts a fresh leaderboard
