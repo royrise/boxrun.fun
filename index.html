@@ -23,6 +23,7 @@ canvas{display:block;width:100%;height:100%}
 @media (pointer:coarse){#msg{display:none!important}#tb{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:3;justify-content:space-between;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 18px);pointer-events:none}
 #tb i{width:clamp(84px,24vw,128px);height:clamp(84px,24vw,128px);border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:46px;line-height:1;text-shadow:0 2px 6px #000;transition:background .06s}
 #tb i.on{background:rgba(94,200,255,.55)}}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);max-width:90vw;background:#22243a;border:1px solid #5ec8ff;color:#eef;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;word-break:break-all;text-align:center}#toast.on{opacity:1}
 #askm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65)}#askm div{background:#22243a;border:1px solid #4a4d63;border-radius:14px;padding:20px 22px;max-width:320px;text-align:center;color:#eef;font-size:15px}#askm p{margin:0 0 16px}#askm button{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:8px 14px;margin:0 5px;cursor:pointer}#askm .pri{background:#1f6fb5;border-color:#5ec8ff}
 #mn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;background:none!important;color:#fff!important;text-shadow:0 2px 8px #000;font-size:22px!important;line-height:1;padding:6px 12px!important}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
@@ -334,6 +335,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.cp)startComm(d.cp);
   else if(d.ct)commTimes(d.ct);
   else if(d.cs)commCopy(d.cs);
+  else if(d.cl)copyLink(d.cl);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
   else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
@@ -648,6 +650,20 @@ function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins('Locke
 let commList=[],commSort='rel',myVotes={};
 // each time a shared level's layout changes its rv goes up, which starts a fresh speedrun leaderboard (a new field) and clears old local bests
 const cfk=key=>{const l=commList.find(x=>x.key===key);return cfld(l&&l.rv?key+'#'+l.rv:key)};
+const levelLink=key=>(backend==='http'&&/^https?:/.test(location.protocol)?location.origin+location.pathname:'https://boxrun.fun/')+'?level='+encodeURIComponent(key);
+function toast(m){let e=document.getElementById('toast');if(!e){e=document.createElement('div');e.id='toast';document.body.appendChild(e)}e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3200)}
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){}try{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();if(ok)return true}catch(e){}return false}
+async function copyLink(key){const u=levelLink(key);toast(await copyText(u)?'Link copied: '+u:'Copy this link: '+u)}
+async function openLinked(){
+  let key;try{key=new URL(location.href).searchParams.get('level')}catch(e){}
+  if(!key||!db)return;
+  const us=[];for(let i=key.indexOf('_');i>0;i=key.indexOf('_',i+1))us.push(i);
+  for(const i of us){const by=key.slice(0,i),id=key.slice(i+1);
+    try{const sn=await db.doc('lv/'+by).get();const raw=sn.exists&&(sn.data().levels||{})[id];if(!raw)continue;const c=cleanLvl(raw);if(!c)continue;
+      const l=Object.assign(c,{key,by,id,up:0,down:0,byName:'Player'});if(!commList.some(x=>x.key===key))commList.push(l);rvSync(l);startComm(key);
+      try{history.replaceState(null,'',location.pathname)}catch(e){}return}catch(e){}}
+  toast('That level link no longer works. It may have been removed.')
+}
 function rvSync(l){const id='cm_'+l.key;if(!pb.crv)pb.crv={};if((pb.crv[id]|0)!==(l.rv|0)){delete pb.cl[id];delete pb.cg[id];pb.crv[id]=l.rv|0;savePB()}}
 function askYes(msg,yes){return new Promise(res=>{const o=document.createElement('div');o.id='askm';o.innerHTML='<div><p></p><button data-y="0">Cancel</button><button data-y="1" class="pri"></button></div>';o.querySelector('p').textContent=msg;o.querySelector('.pri').textContent=yes||'Yes';
   const done=v=>{o.remove();res(v)};o.addEventListener('pointerdown',e=>e.stopPropagation());o.addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(b)done(b.dataset.y==='1')});document.body.appendChild(o)})}
@@ -716,7 +732,7 @@ function renderComm(){
     const mine=l.by===uid,v=myVotes[l.key]||0;
     return '<div class="cw"><div class="cr"><div class="vt"><button data-vk="'+l.key+'" data-vv="1" class="'+(v>0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25b2</button><b>'+(l.up-l.down)+'</b><button data-vk="'+l.key+'" data-vv="-1" class="'+(v<0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25bc</button></div>'+
     '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+'</small>'+(l.tags.length?'<span class="tgs">'+l.tags.map(t=>'<span class="tgp">'+t+'</span>').join('')+'</span>':'')+'</div>'+
-    '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+'<button data-ct="'+l.key+'" title="Fastest times on this level">Times</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div></div>';
+    '<button data-cp="'+l.key+'">Play</button><button data-cs="'+l.key+'" title="Save a copy to My levels">Copy</button>'+'<button data-ct="'+l.key+'" title="Fastest times on this level">Times</button><button data-cl="'+l.key+'" title="Copy a link to this level">Link</button>'+(mine?'<button data-cr="'+l.key+'" title="Remove from the community">Remove</button>':'')+'</div></div>';
   }).join('');
 }
 async function showComm(){
@@ -735,7 +751,7 @@ async function commShare(id){
     const nl={name:c.name,rows:c.rows,sh:JSON.stringify(c.sh||{}),ov:JSON.stringify(c.ov||{}),tx:JSON.stringify(c.tx||{}),sa:c.sa||0,tg:cleanTg(c.tg),at:prev?prev.at:Date.now()},gs=o=>JSON.stringify([o.rows,o.sh,o.ov,o.tx,o.sa|0]),chg=!!prev&&gs(prev)!==gs(nl);
     if(chg&&!await askYes('Are you sure? The speedrun leaderboard will reset.','Update level')){lvNote('Update cancelled.');return}
     nl.rv=(prev?prev.rv|0:0)+(chg?1:0);d.levels[id]=nl;
-    await ref.set(d);for(const k in cCache)delete cCache[k];lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');
+    await ref.set(d);for(const k in cCache)delete cCache[k];lvNote(prev?'Updated your shared copy of "'+c.name+'".':'"'+c.name+'" is now shared. Find it under Community levels.');copyLink(uid+'_'+id);
   }catch(e){lvNote('Could not share the level.')}
 }
 let cTok=0;const cCache={};
@@ -998,7 +1014,7 @@ async function initBackend(){
   }catch(e){db=null;uid=null}
   if(db&&uid&&!backendErr){await pullMine();syncPBs();ghPutAll();pushProfile(true)}
 }
-initBackend();
+initBackend().then(openLinked);
 // bring your server-side times and stats onto this device (a new browser, or after clearing site data); the faster time always wins
 async function pullMine(){
   try{
