@@ -939,7 +939,7 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
     };
     const undo=m=>snap.splice(m).forEach(([a,b])=>{g[b][a]='.';delete sh[a+','+b]});
     const pick=()=>{
-      if(nb&&rnd()<.3){const u=rnd();return u<.3?'crum':u<.6?'wind':u<.8?'mud':w>=4?'bnc':'wind'}
+      if(nb&&rnd()<.5){const u=rnd();return u<.3?'crum':u<.6?'wind':u<.8?'mud':w>=4?'bnc':'wind'}
       if(r>.6&&rnd()<.8)return rnd()<.4?'bar':'mine';
       const t=rnd();return t<.30?'mine':t<.56?'bar':t<.66?'pad':t<.76?'ice':t<.86&&w>=5?'dia':'pil';
     };
@@ -964,6 +964,9 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
     for(let k=z0+((rnd()*3)|0);k<=end;){
       const mark=snap.length,span=place(pick(),k);
       if(!passable())undo(mark);
+      if(nb){                                                   // chaos mode: a second obstacle is often layered on top of the first, and they come much closer together
+        let sp=span;if(rnd()<.6){const m2=snap.length,s2=place(pick(),k+((rnd()*3)|0));if(!passable())undo(m2);sp=Math.max(sp,s2)}
+        k+=Math.max(2,sp>>1)+((rnd()*3)|0);continue}
       k+=Math.max(span,smin)+((rnd()*(smax-smin+1))|0);
     }
   };
@@ -995,7 +998,7 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
   };
   const recent=[];
   const step=()=>{
-    const seg=segN++,e=Math.min(1,d0/1000),r=.3+.7*e,w=d0<150?5:d0<850?4:3;let L=2*w+Math.round(18-8*e)+((rnd()*(10-4*e))|0),d=null;   // difficulty climbs steadily until 1000 m, then stays at its hardest
+    const seg=segN++,e=Math.min(1,d0/1000),r=nb?.55+.45*e:.3+.7*e,w=nb||d0<150?5:d0<850?4:3;let L=2*w+Math.round(18-8*e)+((rnd()*(10-4*e))|0),d=null;   // difficulty climbs steadily until 1000 m, then stays at its hardest
     if(seg%8===0)for(let i=0;i<N*N;i++)if(dist[i]>=0&&dist[i]<d0-400)used[i]=0;   // forget track far behind the head so there is always room
     if(seg===0)d=dir;else{const opts=[(dir+1)%4,(dir+3)%4];if(rnd()<.5)opts.reverse();if(rnd()<.2)opts.push(dir);for(const o of opts)if(fits(o,w,L)){d=o;break}
       if(d===null){L=2*w+10;for(const o of opts)if(fits(o,w,L)){d=o;break}}
