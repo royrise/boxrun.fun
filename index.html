@@ -1024,7 +1024,7 @@ function genEndless(seed,nb){   // nb: also use the newer blocks (crumbling floo
 }
 function startEndless(seed,isSet,weekly){
   extGhost=null;
-  curWeekly=!!weekly;curSet=!!isSet;curSeed=String(seed).slice(0,12)||randSeed();const G=genEndless(curSeed,!weekly);
+  curWeekly=!!weekly;curSet=!!isSet;curSeed=String(seed).slice(0,12)||randSeed();const G=genEndless(curSeed,true);
   menuEl.hidden=true;mode='endless';cur={id:null,name:'Endless',gen:G,rows:[],sh:G.sh,sa:G.sa,dist:G.dist,N:G.N};
   fullRun=false;total=0;deaths=0;load(0);
 }
@@ -1057,7 +1057,7 @@ function endRun(done){
 }
 // ---- weekly challenge: one fixed track per week (Monday 00:00 UTC), same for everyone. Board score: further is better (stored inverted so lower is better).
 const weekIdx=()=>Math.floor((Date.now()-Date.UTC(1970,0,5))/(7*864e5));
-const weekSeed=()=>'WK'+weekIdx(),wfld=()=>'w'+weekIdx();
+const weekSeed=()=>'WN'+weekIdx(),wfld=()=>'wn'+weekIdx(),wkKey=()=>'n'+weekIdx();   // 'WN'/'wn'/'n' = the new-style endless track and its own fresh leaderboard (the old 'WK'/'w' weeks are retired)
 const wval=(d,time)=>Math.round((99000-d+Math.min(time||0,999)/10000)*1e5)/1e5,wdist=v=>Math.round(99000-Math.floor(v+1e-6)),wfmt=v=>wdist(v)+' m';
 function wLeft(){const ms=(weekIdx()+1)*7*864e5+Date.UTC(1970,0,5)-Date.now(),h=Math.floor(ms/36e5);return (h>=24?Math.floor(h/24)+' d ':'')+(h%24)+' h left'}
 async function weeklyBoard(mine,limit){
@@ -1068,8 +1068,8 @@ async function weeklyBoard(mine,limit){
   return rows;
 }
 async function weeklyDone(d){
-  if(!pb.wk)pb.wk={};const k=weekIdx(),v=wval(d,lt);
-  if(d>0&&(pb.wk[k]==null||v<pb.wk[k])){pb.wk[k]=v;for(const o in pb.wk)if(+o<k-8)delete pb.wk[o];savePB()}
+  if(!pb.wk)pb.wk={};const k=wkKey(),v=wval(d,lt);
+  if(d>0&&(pb.wk[k]==null||v<pb.wk[k])){pb.wk[k]=v;for(const o in pb.wk)if(o[0]!=='n'||+o.slice(1)<weekIdx()-8)delete pb.wk[o];savePB()}
   const mine=pb.wk[k];
   if(mine!=null)await lbPut({[wfld()]:mine});
   const rows=await weeklyBoard(mine,8),b=document.getElementById('banner');
@@ -1077,7 +1077,7 @@ async function weeklyDone(d){
 }
 async function openWeekly(){
   show('weekly');if(!pb.wk)pb.wk={};
-  const mine=pb.wk[weekIdx()];
+  const mine=pb.wk[wkKey()];
   document.getElementById('wsub').textContent='Everyone runs the same track this week \u00b7 '+wLeft();
   document.getElementById('wbest').textContent=mine!=null?'Your best this week: '+wfmt(mine):'No run yet this week';
   const bd=document.getElementById('wboard');bd.textContent='Loading\u2026';
