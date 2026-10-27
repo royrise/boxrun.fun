@@ -99,6 +99,9 @@ canvas{display:block;width:100%;height:100%}
 #lvleft{overflow-y:auto;min-height:0;padding-right:6px}
 #lvside{align-self:flex-start}
 .panel .lbbtn{padding:6px 10px;display:flex;align-items:center}
+@media(min-width:641px){.lbo{display:none}}
+@media(max-width:640px){#lvside,#cside{display:none}#lvside.pop,#cside.pop{display:block;position:fixed;inset:0;z-index:20;background:#101018;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 16px;max-height:none!important;overflow:auto;width:auto!important;order:0;align-self:stretch!important;box-sizing:border-box}.pop .sideclose{display:block;font:inherit;font-size:16px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer;position:sticky;bottom:0;width:100%;margin-top:14px}}
+.sideclose{display:none}
 @media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
@@ -149,8 +152,8 @@ canvas{display:block;width:100%;height:100%}
 <a class="ib" href="https://discord.gg/Fg7P6tZBhH" target="_blank" rel="noopener noreferrer" aria-label="Discord" data-tip="Discord: join the community"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg><span>Discord</span></a>
 </div>
 </div></div>
- <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
- <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><button class="lbo" data-lbo="1">Overall leaderboard</button><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
@@ -307,7 +310,8 @@ function ghostAt(){
 function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else showMenu()}
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
-function show(id){document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+const narrow=()=>matchMedia('(max-width:640px)').matches,popSide=id=>{if(!narrow())return;const e=document.getElementById(id);if(!e._ph){e._ph=document.createComment(id);e.before(e._ph)}menuEl.appendChild(e);e.classList.add('pop')},closeSide=()=>document.querySelectorAll('#lvside,#cside').forEach(e=>{e.classList.remove('pop');if(e._ph&&e._ph.parentNode){e._ph.replaceWith(e);e._ph=null}});
+function show(id){closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
 function showMenu(f){spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
@@ -332,12 +336,14 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.wg)watchGhost(d);
   else if(d.rw)openReplay(d.rw,d.wr,d.wn,true);
   else if(d.rl)copyText(replayLink(d.rl,d.wr)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));
-  else if(d.lbs!=null)sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);
+  else if(d.lbs!=null){sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);popSide('lvside')}
   else if(d.sk)pickSkin(d.sk,+d.ci);
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
   else if(d.cp)startComm(d.cp);
-  else if(d.ct)commTimes(d.ct);
+  else if(d.ct){commTimes(d.ct);popSide('cside')}
+  else if(d.sc)closeSide()
+  else if(d.lbo){sideLB('run3','Overall');popSide('lvside')}
   else if(d.cs)commCopy(d.cs);
   else if(d.cl)copyLink(d.cl);
   else if(d.cr)commRemove(d.cr);
