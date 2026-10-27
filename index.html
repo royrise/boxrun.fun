@@ -19,6 +19,10 @@ canvas{display:block;width:100%;height:100%}
 #msg{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:13px;opacity:.8;color:#fff;text-shadow:0 1px 4px #000}
 #time{font-family:Orbitron,sans-serif;font-variant-numeric:tabular-nums;font-size:clamp(22px,5vw,32px);font-weight:800;padding:0 18px!important}
 #hud{justify-content:center;padding-top:4vh;flex-direction:column;align-items:center;gap:0}
+#tb{display:none}
+@media (pointer:coarse){#msg{display:none!important}#tb{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:3;justify-content:space-between;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 18px);pointer-events:none}
+#tb i{width:clamp(84px,24vw,128px);height:clamp(84px,24vw,128px);border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:46px;line-height:1;text-shadow:0 2px 6px #000;transition:background .06s}
+#tb i.on{background:rgba(94,200,255,.55)}}
 #mn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;background:none!important;color:#fff!important;text-shadow:0 2px 8px #000;font-size:22px!important;line-height:1;padding:6px 12px!important}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
 #menu{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(10,12,20,.9);color:#eef;padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px);overflow:auto}
@@ -152,6 +156,7 @@ canvas{display:block;width:100%;height:100%}
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-stats" hidden><h2>Statistics</h2><div id="statlist"></div><button data-a="back">Back</button></div>
 </div>
+<div id="tb"><i id="tbl">◀</i><i id="tbr">▶</i></div>
 <div id="msg">Hold ← / → (or A / D) to turn · R restart level · G ghost on/off · touch: hold left/right side</div>
 <div id="editor" hidden>
  <div id="etools">
@@ -545,7 +550,7 @@ addEventListener('keydown',e=>{
 });
 addEventListener('keyup',e=>{if(map[e.key])keys[map[e.key]]=false});
 const touches=new Map();
-function sync(){let l=false,r=false;touches.forEach(v=>v?r=true:l=true);keys.left=l;keys.right=r}
+function sync(){let l=false,r=false;touches.forEach(v=>v?r=true:l=true);keys.left=l;keys.right=r;tbl.classList.toggle('on',l);tbr.classList.toggle('on',r)}
 addEventListener('pointerdown',e=>{touches.set(e.pointerId,e.clientX>W/2);sync()});
 ['pointerup','pointercancel'].forEach(n=>addEventListener(n,e=>{touches.delete(e.pointerId);sync()}));
 let mode='main',cur=null,shapes={},layers={},texts=[];
