@@ -323,7 +323,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.lb)showLB(d.lb);
   else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
-document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(mode==='endless'){const k=b.dataset.b;if(k==='again')startEndless(curSeed,curSet,curWeekly);else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
+document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
 document.getElementById('banner').addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('mn').addEventListener('pointerdown',e=>{e.stopPropagation();showMenu()});
 // PB ghost on/off (the ghost is still recorded while hidden)
@@ -526,9 +526,10 @@ addEventListener('keydown',e=>{
   }
   if(!editorEl.hidden||['INPUT','TEXTAREA'].includes(e.target.tagName))return;
   if(e.key.toLowerCase()==='g'&&!e.repeat){setGhost(pb.ghostOn===false);return}
-  if(state==='over'&&mode==='endless'){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){startEndless(curSeed,curSet,curWeekly);return}}
+  if(state==='over'&&mode==='endless'){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){endRetry();return}}
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
   if(e.key==='Escape'){showMenu();return}
+  if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(state==='play'||state==='dead')endRetry();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
   if(map[e.key]){keys[map[e.key]]=true;e.preventDefault()}
 });
@@ -811,6 +812,8 @@ function endStart(){
     pb.endSeed=v;savePB();startEndless(v,true)}
   else startEndless(randSeed(),false);
 }
+// restart: random-seed runs get a brand new track every time; set-seed and weekly runs replay the same one
+function endRetry(){if(curSet||curWeekly)startEndless(curSeed,curSet,curWeekly);else startEndless(randSeed(),false)}
 function endNew(){if(curWeekly){showMenu();openWeekly()}else if(curSet){showMenu();openEndless()}else startEndless(randSeed(),false)}
 function openEndless(){
   show('endless');endUI();document.getElementById('eseed').value=pb.endSeed||'';
@@ -820,7 +823,7 @@ function endRun(done){
   state='over';timer=1e9;
   const d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;savePB();
-  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':'Retry seed')+' (R)</button><button class="pri" data-b="new">'+(curWeekly?'Weekly board':curSet?'Change seed':'New seed')+' (Enter)</button><button data-b="menu">Menu</button></div>';
+  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
   if(curWeekly)weeklyDone(d);
 }
