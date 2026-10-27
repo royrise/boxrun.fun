@@ -22,8 +22,10 @@ canvas{display:block;width:100%;height:100%}
 #tb{display:none}
 @media (pointer:coarse){#msg{display:none!important}#tb{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:3;justify-content:space-between;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 18px);pointer-events:none}
 #tb i{width:clamp(84px,24vw,128px);height:clamp(84px,24vw,128px);border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:46px;line-height:1;text-shadow:0 2px 6px #000;transition:background .06s}
+#menu:not([hidden])~#tb,#editor:not([hidden])~#tb{display:none!important}
 #tb i.on{background:rgba(94,200,255,.55)}}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);max-width:90vw;background:#22243a;border:1px solid #5ec8ff;color:#eef;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;word-break:break-all;text-align:center}#toast.on{opacity:1}
+#topback{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:7;width:46px;height:46px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#2a2d44;color:#eef;border:1px solid #4a4d63;cursor:pointer}#topback[hidden]{display:none}
 #askm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65)}#askm div{background:#22243a;border:1px solid #4a4d63;border-radius:14px;padding:20px 22px;max-width:320px;text-align:center;color:#eef;font-size:15px}#askm p{margin:0 0 16px}#askm button{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:8px 14px;margin:0 5px;cursor:pointer}#askm .pri{background:#1f6fb5;border-color:#5ec8ff}
 #mn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;background:none!important;color:#fff!important;text-shadow:0 2px 8px #000;font-size:22px!important;line-height:1;padding:6px 12px!important}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
@@ -133,6 +135,7 @@ canvas{display:block;width:100%;height:100%}
 <div id="hud"><span id="time"></span><span id="esub"></span><button id="mn" aria-label="Menu">←</button><button id="gh" aria-label="Toggle PB ghost" title="PB ghost on/off (G)"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0114 0v10l-2.5-2-2 2-2.5-2-2.5 2-2-2z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg></button></div>
 <div id="banner"></div>
 <div id="menu">
+<button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
  <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub">Steer. Survive. Don’t touch the lava.</p><div class="icons">
 <button class="ib playbig" data-a="play" aria-label="Play" data-tip="Play: start a full run from Level 1"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span>PLAY</span></button>
 <button class="ib playbig" data-a="endless" aria-label="Endless" data-tip="Endless: a random track from a seed. Go as far as you can"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-3-3.5-4-5.5-4a4 4 0 000 8c2 0 3.5-1 5.5-4zm0 0c2 3 3.5 4 5.5 4a4 4 0 000-8c-2 0-3.5 1-5.5 4z"/></svg><span>ENDLESS</span></button>
@@ -304,7 +307,7 @@ function ghostAt(){
 function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else showMenu()}
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
-function show(id){['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+function show(id){document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
 function showMenu(f){spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
