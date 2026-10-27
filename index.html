@@ -24,7 +24,6 @@ canvas{display:block;width:100%;height:100%}
 #tb i{width:clamp(84px,24vw,128px);height:clamp(84px,24vw,128px);border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:46px;line-height:1;text-shadow:0 2px 6px #000;transition:background .06s}
 #tb i.on{background:rgba(94,200,255,.55)}}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);max-width:90vw;background:#22243a;border:1px solid #5ec8ff;color:#eef;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;word-break:break-all;text-align:center}#toast.on{opacity:1}
-#achlist{display:flex;flex-direction:column;gap:6px;text-align:left;max-height:34vh;overflow:auto;margin:6px 0}.ach{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid #4a4d63;border-radius:8px;opacity:.7}.ach.done{opacity:1;border-color:#2fd37a}.ach i{width:18px;height:18px;border-radius:4px;border:1px solid #fff6;flex:none}.ach span{flex:1;min-width:0}.ach small{display:block;opacity:.7;font-size:12px}.ach em{font-style:normal;font-size:13px;opacity:.9}
 #askm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65)}#askm div{background:#22243a;border:1px solid #4a4d63;border-radius:14px;padding:20px 22px;max-width:320px;text-align:center;color:#eef;font-size:15px}#askm p{margin:0 0 16px}#askm button{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:8px 14px;margin:0 5px;cursor:pointer}#askm .pri{background:#1f6fb5;border-color:#5ec8ff}
 #mn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;background:none!important;color:#fff!important;text-shadow:0 2px 8px #000;font-size:22px!important;line-height:1;padding:6px 12px!important}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
@@ -156,7 +155,7 @@ canvas{display:block;width:100%;height:100%}
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
- <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><div class="lbt">Achievements</div><div id="achlist"></div><button data-a="back">Back</button></div>
+ <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track that never ends. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
@@ -642,18 +641,18 @@ const COLORS=[
  {id:'neon',n:'Neon',h:'#ff2fd0',t:'Complete 50 levels',u:S=>S.comp>=50},
  {id:'gold',n:'Gold',h:'#e8c21a',t:'Clear 20 different levels',u:S=>S.clear>=20},
  {id:'void',n:'Void',h:'#000000',t:'Die 500 times',u:S=>S.dead>=500},
- {id:'spectre',n:'Spectre',h:'#e6ecff',t:'Achievement: Flawless',u:S=>S.ach.flawless},
- {id:'frost',n:'Frost',h:'#bfefff',t:'Achievement: Ice Skater',u:S=>S.ach.skater},
- {id:'violet',n:'Violet',h:'#8f5bff',t:'Achievement: Portal Hopper',u:S=>S.ach.portal},
- {id:'bubble',n:'Bubblegum',h:'#ff8fd0',t:'Achievement: Bouncy',u:S=>S.ach.bounce},
- {id:'mud',n:'Mud',h:'#8a6238',t:'Achievement: Stuck in the Mud',u:S=>S.ach.mud},
- {id:'jade',n:'Jade',h:'#00a86b',t:'Achievement: Checkpoint Charlie',u:S=>S.ach.flag},
- {id:'steel',n:'Steel',h:'#9aa5b8',t:'Achievement: Marathoner',u:S=>S.ach.marathon},
- {id:'diamond',n:'Diamond',h:'#7df9ff',t:'Achievement: Edge of Madness',u:S=>S.ach.diamond},
- {id:'orchid',n:'Orchid',h:'#da70d6',t:'Achievement: Explorer',u:S=>S.ach.explorer},
- {id:'amber',n:'Amber',h:'#ffbf00',t:'Achievement: Creator',u:S=>S.ach.creator},
- {id:'silver',n:'Silver',h:'#c0c0c8',t:'Achievement: Fan',u:S=>S.ach.fan},
- {id:'crimson',n:'Crimson',h:'#c0143c',t:'Achievement: Weekly Warrior',u:S=>S.ach.weekly},
+ {id:'spectre',n:'Spectre',h:'#e6ecff',t:'Clear 10 levels on your first attempt',u:S=>S.ach.flawless},
+ {id:'frost',n:'Frost',h:'#bfefff',t:'Slide on ice for 60 seconds in total',u:S=>S.ach.skater},
+ {id:'violet',n:'Violet',h:'#8f5bff',t:'Use portals 30 times',u:S=>S.ach.portal},
+ {id:'bubble',n:'Bubblegum',h:'#ff8fd0',t:'Hit 30 bounce pads',u:S=>S.ach.bounce},
+ {id:'mud',n:'Mud',h:'#8a6238',t:'Spend 60 seconds in mud',u:S=>S.ach.mud},
+ {id:'jade',n:'Jade',h:'#00a86b',t:'Touch 25 checkpoints',u:S=>S.ach.flag},
+ {id:'steel',n:'Steel',h:'#9aa5b8',t:'Reach 500 m in Endless',u:S=>S.ach.marathon},
+ {id:'diamond',n:'Diamond',h:'#7df9ff',t:'Reach 1000 m in Endless',u:S=>S.ach.diamond},
+ {id:'orchid',n:'Orchid',h:'#da70d6',t:'Clear 5 community levels',u:S=>S.ach.explorer},
+ {id:'amber',n:'Amber',h:'#ffbf00',t:'Share a level with the community',u:S=>S.ach.creator},
+ {id:'silver',n:'Silver',h:'#c0c0c8',t:'Watch 3 replays',u:S=>S.ach.fan},
+ {id:'crimson',n:'Crimson',h:'#c0143c',t:'Finish the weekly challenge',u:S=>S.ach.weekly},
  {id:'prism',n:'Prismatic',h:'rainbow',t:'Finish a full run of all 25 levels',u:S=>S.run}
 ];
 const skinStats=()=>({comp:pb.completions||0,dead:pb.deaths||0,clear:LEVELS.filter((_,i)=>pb.levels[LID[i]]!=null).length,tut:pb.levels.tutorial!=null,run:pb.run!=null,ach:pb.ach||{}});
@@ -663,8 +662,7 @@ function buildSkins(note){
   const S=skinStats();
   for(const k of ['p','s'])document.getElementById('sw'+k).innerHTML=COLORS.map((c,i)=>{const ok=c.u(S);
     return '<button class="swb'+(pb.skin[k]===c.id?' on':'')+(ok?'':' lock')+'" data-sk="'+k+'" data-ci="'+i+'" title="'+esc(c.n+(ok?'':' - '+c.t))+'" style="background:'+(c.h==='rainbow'?'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)':c.h)+'">'+(ok?'':'\u{1F512}')+'</button>'}).join('');
-  document.getElementById('achlist').innerHTML=ACH.map(a=>{const v=Math.min(a.v(),a.max),done=!!pb.ach[a.id],col=colOf(a.c);return '<div class="ach'+(done?' done':'')+'"><i style="background:'+(col.h==='rainbow'?'#fff':col.h)+'"></i><span><b>'+esc(a.n)+'</b><small>'+esc(a.d)+'</small></span><em>'+(done?'\u2713':(a.max>1?Math.floor(v)+'/'+a.max:'0/1'))+'</em></div>'}).join('');
-  document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
+    document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
   document.getElementById('skinprev').innerHTML='<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
 }
 function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins('Locked: '+c.n+' - '+c.t);return}pb.skin[k]=c.id;savePB();buildSkins(c.n+' selected')}
@@ -689,7 +687,7 @@ const ACH=[
 function checkAch(){
   let fresh=null;
   for(const a of ACH)if(!pb.ach[a.id]&&a.v()>=a.max){pb.ach[a.id]=Date.now();fresh=a}
-  if(fresh){savePB();toast('Achievement unlocked: '+fresh.n+' \u00b7 new colour '+colOf(fresh.c).n)}
+  if(fresh){savePB();toast('New colour unlocked: '+colOf(fresh.c).n+' \u00b7 '+fresh.d)}
   return fresh;
 }
 let achT=0;
