@@ -166,7 +166,7 @@ canvas{display:block;width:100%;height:100%}
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="back">Back</button></span></div>
   <div class="erow" id="etags" hidden><span>Tags (up to 4):</span></div>
   <div class="erow"><span id="epal"></span><select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select></div>
-  <div class="erow"><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
+  <div class="erow"><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="mvbar" hidden>Move distance <button id="mvm" title="Shorter">−</button> <b id="mvd">2</b> tiles <button id="mvp" title="Longer">+</button></span><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
  </div>
  <canvas id="ec"></canvas>
 </div>
@@ -267,6 +267,7 @@ const LSH=[],LSA=[];
     [[14,11],[18,13],[48,7],[52,9]].forEach(([x,y])=>o.r(x,y,x,y,'L'));[[16,19],[24,22],[32,19]].forEach(([x,y])=>o.dia(x,y));o.dia(16,2);o.dia(24,4)}); // 25 finale
 })();
 
+const mvInfo=c=>c==='H'?{v:0,d:2}:c==='V'?{v:1,d:2}:c>='a'&&c<='h'?{v:0,d:c.charCodeAt(0)-96}:c>='i'&&c<='p'?{v:1,d:c.charCodeAt(0)-104}:null;
 const PCOL={'1':'#b36bff','2':'#ff6bd6','3':'#4fffc0'};
 const U=44, SIZE=0.7, H=SIZE/2, SPEED=4, TURN=2.6;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -284,7 +285,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;bcd=0;tpLock=false;p={x:cp.x,y:cp.y,a:cp.a};attempts++;wasIce=false;lt=0;state='play';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;gi=0}
+function respawn(){if(state==='win'||state==='menu')return;bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};attempts++;wasIce=false;lt=0;state='play';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
@@ -367,14 +368,14 @@ function finish(){
   if(mode==='main'||cmk){const f=cmk?cfld(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
-let movers=[],portals={},bcd=0,tpLock=false;
+let movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
 function load(n,keep){
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
   layers=(mode==='main'?null:cur.ov)||{};
   texts=mode==='main'?[]:txLabels(cur.tx);
-  movers=[];portals={};bcd=0;tpLock=false;
-  for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x];if(gc==='H'||gc==='V'){movers.push({x,y,v:gc==='V'});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
+  movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;
+  for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
   if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=(extGhost&&(mode==='main'||mode==='custom')?extGhost.arr:ghostOf())||null;gi=0;
@@ -423,7 +424,7 @@ function sat(px,py,a,poly,mtv){
   }
   return mtv?[bn[0]*(best+1e-4),bn[1]*(best+1e-4)]:true;
 }
-const moverPolys=()=>movers.map(m=>{const d=2*(.5-.5*Math.cos(lt*1.6)),x=m.v?m.x:m.x+d,y=m.v?m.y+d:m.y;return [[x,y],[x+1,y],[x+1,y+1],[x,y+1]]});
+const moverPolys=()=>movers.map(m=>{const d=m.d*(.5-.5*Math.cos(lt*1.6*2/Math.sqrt(m.d*2))),x=m.v?m.x:m.x+d,y=m.v?m.y+d:m.y;return [[x,y],[x+1,y],[x+1,y+1],[x,y+1]]});
 function touching(px,py,a,types){
   const x0=Math.floor(px-1),x1=Math.floor(px+1),y0=Math.floor(py-1),y1=Math.floor(py+1);
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)
@@ -455,6 +456,7 @@ function update(dt){
   document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?'Racing '+extGhost.name:'';
   if(state==='play'){
     if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}
+    if(bturn>0){const r=Math.min(bturn,dt*Math.PI/.4),o={x:p.x,y:p.y,a:p.a};p.a+=r;if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y;p.a=o.a+bturn;if(touching(p.x,p.y,p.a,['#'])){p.a=o.a}else{slideA+=bturn;bturn=0}}else{bturn-=r;slideA+=r}}
     const turn=(keys.right?1:0)-(keys.left?1:0);
     // turning: if rotating would put a corner into a wall, push out; if that fails, cancel the turn
     if(turn){
@@ -474,10 +476,10 @@ function update(dt){
       if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y}
     }
     if(mode==='endless'){const v=cur.dist[Math.floor(p.y)*cur.N+Math.floor(p.x)];if(v>score)score=v;if(cur.gen){for(const q of cur.gen.ensure(score)){p.x+=q.ox;p.y+=q.oy;cp.x+=q.ox;cp.y+=q.oy;rec.length=0}cur.dist=cur.gen.dist}}
-    bcd=Math.max(0,bcd-dt);
-    if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){p.a+=Math.PI;slideA+=Math.PI;bcd=.5}
+    bcd=Math.max(0,bcd-dt);tpK=Math.max(0,tpK-dt/.5);
+    if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){bturn=Math.PI;bcd=1}
     {const ch=tile(Math.floor(p.x),Math.floor(p.y));
-      if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
+      if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
     if(gt-lastRec>=1/30){rec.push([gt,p.x,p.y,p.a]);lastRec=gt}
     if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}}
     else if(touching(p.x,p.y,p.a,['G'])){if(mode==='endless')endRun(true);else finish()}
@@ -494,9 +496,10 @@ function draw(){
   ctx.fillStyle='#14141c';ctx.fillRect(0,0,W,Hh);
   const sc=Math.max(.9,Math.min(1.8,Math.min(W,Hh)/420));
   ctx.translate(W/2,Hh/2);ctx.scale(sc,sc);
-  ctx.rotate(-p.a-Math.PI/2);ctx.translate(-p.x*U,-p.y*U);
+  const te=tpK*tpK*(3-2*tpK),cx=p.x+(tpFrom.x-p.x)*te,cy=p.y+(tpFrom.y-p.y)*te;
+  ctx.rotate(-p.a-Math.PI/2);ctx.translate(-cx*U,-cy*U);
   const vr=Math.hypot(W,Hh)/sc/U/2+2;
-  for(let y=Math.floor(p.y-vr);y<=p.y+vr;y++)for(let x=Math.floor(p.x-vr);x<=p.x+vr;x++){
+  for(let y=Math.floor(cy-vr);y<=cy+vr;y++)for(let x=Math.floor(cx-vr);x<=cx+vr;x++){
     const k=tile(x,y);
     if(y<0||x<0||y>=grid.length||x>=grid[0].length)continue;
     if(k==='#'){const sh=shapes[x+','+y];if(sh){ctx.fillStyle=(x+y)%2?'#1b1b26':'#1e1e2a';ctx.fillRect(x*U,y*U,U,U)}ctx.fillStyle='#4a4d63';fillTile(x,y);if(!sh){ctx.strokeStyle='#5d6180';ctx.strokeRect(x*U+.5,y*U+.5,U-1,U-1)}}
@@ -516,7 +519,7 @@ function draw(){
     }
     const OV=layers[x+','+y];if(OV)for(const [cc,kk,oo] of OV)drawOv(cc,polyOf(x,y,[kk,oo]),x,y);
   }
-  for(const m of movers){ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(m.x*U+.5,m.y*U+.5,(m.v?1:3)*U-1,(m.v?3:1)*U-1);ctx.setLineDash([])}
+  for(const m of movers){ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(m.x*U+.5,m.y*U+.5,(m.v?1:m.d+1)*U-1,(m.v?m.d+1:1)*U-1);ctx.setLineDash([])}
   for(const poly of moverPolys()){const x=poly[0][0]*U,y=poly[0][1]*U;ctx.fillStyle='#6a6f94';ctx.fillRect(x,y,U,U);ctx.strokeStyle='#ffd24a';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,U-4,U-4);ctx.beginPath();ctx.moveTo(x+6,y+U-6);ctx.lineTo(x+U-6,y+6);ctx.stroke()}
   const labs=mode==='main'&&lvl===0?TUT.labels:(cur&&cur.labels)||texts;
   if(labs){
@@ -532,7 +535,8 @@ function draw(){
   }
   const gp=(state==='menu'||pb.ghostOn===false)?null:ghostAt();
   if(gp){const gs=SIZE*U;ctx.save();ctx.translate(gp[0]*U,gp[1]*U);ctx.rotate(gp[2]);ctx.globalAlpha=.4;ctx.fillStyle='#fff';ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.globalAlpha=.8;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle='#fff';ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8);ctx.restore()}
-  ctx.save();ctx.translate(p.x*U,p.y*U);ctx.rotate(p.a);
+  if(tpK>0){ctx.lineWidth=4;ctx.strokeStyle='rgba(200,150,255,'+tpK*.8+')';for(const q of [tpFrom,p]){ctx.beginPath();ctx.arc(q.x*U,q.y*U,U*(.3+(1-tpK)*1.1),0,7);ctx.stroke()}}
+  ctx.save();ctx.translate(p.x*U,p.y*U);ctx.rotate(p.a);ctx.scale(1-.6*tpK,1-.6*tpK);ctx.globalAlpha=1-.5*tpK;
   const s=SIZE*U;
   ctx.fillStyle=state==='dead'?'#ff4d4d':skinCol(pb.skin.p);ctx.fillRect(-s/2,-s/2,s,s);
   ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8); // front marker
@@ -658,12 +662,12 @@ function cleanOv(o,rows){
 const TAGS_M=['Easy','Medium','Hard','Extreme','Speedrun','Maze','Precision','Troll'],TAGS_A=['Ice','Pads','Slopes','Portals','Movers','Small','Large'];
 const cleanTg=a=>(Array.isArray(a)?a:[]).filter((t,i,x)=>TAGS_M.includes(t)&&x.indexOf(t)===i).slice(0,4);
 function autoTags(rows,sh,ov){const j=rows.join(''),r=[],area=rows.length*rows[0].length;
-  if(j.includes('I'))r.push('Ice');if(/[PB]/.test(j))r.push('Pads');if(/[123]/.test(j))r.push('Portals');if(/[HV]/.test(j))r.push('Movers');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
+  if(j.includes('I'))r.push('Ice');if(/[PB]/.test(j))r.push('Pads');if(/[123]/.test(j))r.push('Portals');if(/[HVa-p]/.test(j))r.push('Movers');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
   if(area<=300)r.push('Small');if(area>=900)r.push('Large');return r}
 function cleanLvl(L){
   try{
     const rows=(L.rows||[]).map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBHV123]/.test(r)))return null;
+    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBHV123a-p]/.test(r)))return null;
     if((rows.join('').match(/S/g)||[]).length!==1||!rows.join('').includes('G'))return null;
     const sh={},s0=typeof L.sh==='string'?JSON.parse(L.sh):(L.sh||{});
     for(const k in s0){const v=s0[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)sh[k]=[v[0],v[1]|0]}
@@ -1128,7 +1132,7 @@ async function showLB(field){
 // ---- level editor
 const editorEl=document.getElementById('editor'),ec=document.getElementById('ec'),ex=ec.getContext('2d');
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
-const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','H':'#6a6f94','V':'#6a6f94','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
+const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','H':'#6a6f94','V':'#6a6f94','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
   '#':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.5"/><path d="M2 9h20M2 16h20M9 2v7M15 9v7M9 16v6" stroke="#9a9fc0" stroke-width="1" fill="none"/>'),
@@ -1149,7 +1153,9 @@ const ICONS={
 };
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" title="'+t[1]+'" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('');
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
-function markTool(){document.querySelectorAll('#epal button').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';updRot()}
+for(const c of 'abcdefghijklmnop')ECOL[c]='#6a6f94';
+let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t;
+function markTool(){document.querySelectorAll('#epal button').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
 let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
 // selection: a set of 'x,y' tiles; drag a rectangle (Shift/+ Add adds, Alt removes), then Delete clears them
 let esel=new Set(),selA=null,selB=null,selMode='set',selAdd=false;
@@ -1276,7 +1282,7 @@ document.getElementById('efile').addEventListener('change',async e=>{
     const d=JSON.parse(await f.text());
     if(!d||d.game!=='boxrun.fun'&&d.game!=='cube-runner'||!Array.isArray(d.rows))throw 0;
     const rows=d.rows.map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBHV123]/.test(r)))throw 0;
+    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBHV123a-p]/.test(r)))throw 0;
     ePush();esel=new Set();eg=rows.map(r=>r.split(''));eid=null;esa=(d.sa|0)&3;eshp={};eov=cleanOv(d.ov,rows);etx=cleanTx(d.tx,rows);
     for(const k in d.sh||{}){const v=d.sh[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)eshp[k]=[v[0],v[1]|0]}
     document.getElementById('ename').value=String(d.name||'Imported').slice(0,24);
@@ -1286,6 +1292,7 @@ document.getElementById('efile').addEventListener('change',async e=>{
 function eRot(){eori=(eori+1)%4;document.getElementById('erot').textContent=GLYPH[eori]}
 document.getElementById('eshape').addEventListener('change',e=>{if(SHT.includes(etool)){toolShape[etool]=e.target.value;updRot();eStat(e.target.value==='f'?'':(e.target.value==='q'||e.target.value==='s')?'Each tile is split into 4. Click the quarter where it should go. Click it again to remove it.':'Partial blocks stack: place another block on the same tile to overlap them.');eRender()}});
 const cornerMode=()=>SHT.includes(etool)&&(toolShape[etool]==='q'||toolShape[etool]==='s');
+for(const [id,dd] of [['mvm',-1],['mvp',1]])document.getElementById(id).addEventListener('click',()=>{mvd=Math.max(1,Math.min(8,mvd+dd));document.getElementById('mvd').textContent=mvd});
 function updRot(){const q=cornerMode(),b=document.getElementById('erot');b.disabled=q;b.title=q?'Corner pieces go in the quarter of the tile you click':'Rotate shape (R)'}
 function renderETags(){const el=document.getElementById('etags');if(!el)return;
   el.innerHTML='<span>Tags (up to 4):</span>'+TAGS_M.map(t=>'<button class="tgb'+(etg.includes(t)?' on':'')+'" data-tg="'+t+'">'+t+'</button>').join('')+'<small>Ice, pads, slopes and size are added automatically.</small>'}
@@ -1330,7 +1337,7 @@ function eRender(){
     if(v==='S'){ex.fillStyle='#5ec8ff';const m=cs*.15;ex.fillRect(px+m,py+m,cs-2*m,cs-2*m);
       if(v==='S'){const q=cs*.12,iw=cs-2*m-2*q;ex.fillStyle='#0b2a3a';const fr=[[px+cs-m-q,py+m+q,q,iw],[px+m+q,py+cs-m-q,iw,q],[px+m,py+m+q,q,iw],[px+m+q,py+m,iw,q]][esa];ex.fillRect(...fr)}}
     if(v==='B'){ex.fillStyle='#f064ff';ex.fillRect(px+cs*.18,py+cs*.18,cs*.64,cs*.64)}
-    else if(v==='H'||v==='V'){ex.fillStyle='#6a6f94';ex.fillRect(px+2,py+2,cs-4,cs-4);ex.strokeStyle='#ffd24a';ex.lineWidth=2;ex.strokeRect(px+4,py+4,cs-8,cs-8);ex.strokeStyle='#fff';ex.beginPath();if(v==='H'){ex.moveTo(px+cs*.2,py+cs/2);ex.lineTo(px+cs*.8,py+cs/2)}else{ex.moveTo(px+cs/2,py+cs*.2);ex.lineTo(px+cs/2,py+cs*.8)}ex.stroke()}
+    else if(mvInfo(v)){const mi=mvInfo(v);ex.save();ex.strokeStyle='#ffffff44';ex.lineWidth=1;ex.setLineDash([3,3]);ex.strokeRect(px+.5,py+.5,mi.v?cs-1:cs*(mi.d+1)-1,mi.v?cs*(mi.d+1)-1:cs-1);ex.restore();ex.fillStyle='#6a6f94';ex.fillRect(px+2,py+2,cs-4,cs-4);ex.strokeStyle='#ffd24a';ex.lineWidth=2;ex.strokeRect(px+4,py+4,cs-8,cs-8);ex.strokeStyle='#fff';ex.beginPath();if(!mi.v){ex.moveTo(px+cs*.2,py+cs/2);ex.lineTo(px+cs*.8,py+cs/2)}else{ex.moveTo(px+cs/2,py+cs*.2);ex.lineTo(px+cs/2,py+cs*.8)}ex.stroke();ex.fillStyle='#fff';ex.font='bold '+(cs*.35|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(mi.d,px+cs/2,py+cs*.28)}
     else if(v>='1'&&v<='3'){ex.strokeStyle=PCOL[v];ex.lineWidth=3;ex.beginPath();ex.arc(px+cs/2,py+cs/2,cs*.36,0,7);ex.stroke();ex.fillStyle=PCOL[v];ex.font='bold '+(cs*.45|0)+'px system-ui';ex.textAlign='center';ex.textBaseline='middle';ex.fillText(v,px+cs/2,py+cs/2+1)}
     const ovp=eov[x+','+y];if(ovp)for(const [cc,kk,oo] of ovp){ex.fillStyle=ECOL[cc];ex.beginPath();polyOf(x,y,[kk,oo]).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}
     ex.lineWidth=1;ex.strokeStyle='#ffffff14';ex.strokeRect(px+.5,py+.5,cs-1,cs-1);
@@ -1367,7 +1374,7 @@ function ePaint(e,first){
   if(etool==='S'&&!(first&&eg[y][x]==='S'))eg.forEach(row=>row.forEach((v,i)=>{if(v==='S')row[i]='.'}));
   if(etool==='S'&&first&&eg[y][x]==='S'){esa=(esa+1)%4;eRender();return}
   // a tile holds a list of pieces [char, kind, orient]: an optional floor piece (pad/ice/goal) first, then walls/lava. Partial pieces layer on top of each other.
-  const isHaz=t=>t==='#'||t==='L',kind=SHT.includes(etool)?toolShape[etool]:'f',np=[etool,kind,kind==='f'?0:(kind==='q'||kind==='s')?quad:eori],cur0=ePieces(x,y);let list;
+  const isHaz=t=>t==='#'||t==='L',kind=SHT.includes(etool)?toolShape[etool]:'f',np=[mvChar(etool),kind,kind==='f'?0:(kind==='q'||kind==='s')?quad:eori],cur0=ePieces(x,y);let list;
   if(etool==='.')list=[];
   else if(etool==='S')list=[np];
   else{
