@@ -100,6 +100,7 @@ canvas{display:block;width:100%;height:100%}
 @media(max-width:640px){#lvwrap{flex-direction:column}#lvside{order:-1;max-height:34vh;overflow:auto;width:100%}}
 #editor{position:fixed;inset:0;z-index:6;background:#12121a;color:#eef;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #editor[hidden]{display:none}
+.gbtn svg{vertical-align:-2px}
 .gbtn{font-size:12px!important;padding:2px 8px!important;margin-right:6px;border-radius:8px!important}
 #csearch{width:min(220px,50vw);padding:7px 10px;font:inherit;font-size:15px;border-radius:8px;border:1px solid #4a4d63;background:#1c1c28;color:#eef}
 #ctags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:2px 0 8px}.panel .tgb{font-size:13px;padding:3px 10px;border-radius:999px}.panel .tgb.on{background:#1f6fb5;border-color:#5ec8ff}
@@ -308,7 +309,7 @@ function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
 function show(id){['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
-function showMenu(f){extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
+function showMenu(f){spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
   let h=LEVELS.map((_,i)=>'<div class="crow"><button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button><button class="lbbtn" data-lbs="'+i+'" title="Show the leaderboard for level '+(i+1)+'" aria-label="Leaderboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button></div>').join('');
@@ -330,6 +331,8 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.x){customs=customs.filter(c=>c.id!==d.x);delete pb.cl[d.x];delete pb.cg[d.x];saveCustoms();savePB();buildLevels()}
   else if(d.u)showProfile(d.u);
   else if(d.wg)watchGhost(d);
+  else if(d.rw)openReplay(d.rw,d.wr,d.wn,true);
+  else if(d.rl)copyText(replayLink(d.rl,d.wr)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));
   else if(d.lbs!=null)sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);
   else if(d.sk)pickSkin(d.sk,+d.ci);
   else if(d.sh)commShare(d.sh);
@@ -342,7 +345,9 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.lb)showLB(d.lb);
   else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
-document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
+document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
+  if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch')startRef(specInfo.ref,specInfo.name,specInfo.arr,true);else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else showMenu();return}
+  if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
 document.getElementById('banner').addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('mn').addEventListener('pointerdown',e=>{e.stopPropagation();showMenu()});
 // PB ghost on/off (the ghost is still recorded while hidden)
@@ -368,12 +373,12 @@ function finish(){
   if(cmk&&pb.cl[cur.id]!=null)patch[cfk(cmk)]=rnd(pb.cl[cur.id],3);
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
   savePB();
-  banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button><button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
+  banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
   if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
-let cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
+let spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
 function load(n,keep){
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
@@ -458,7 +463,8 @@ function update(dt){
   if(state==='menu')return;
   if(state==='play'){lt+=dt;gt+=dt;total+=dt;lastA=p.a}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
-  document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?'Racing '+extGhost.name:'';
+  document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
+  if(spec){if(state==='play'){const g=ghostAt();if(g){p.x=g[0];p.y=g[1];p.a=g[2]}const end=ghost&&ghost.length?ghost[ghost.length-1][0]:0;if(gt>end+.6)specEnd()}return}
   if(state==='play'){
     if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}
     if(bturn>0){const r=Math.min(bturn,dt*Math.PI/.4),o={x:p.x,y:p.y,a:p.a};p.a+=r;if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y;p.a=o.a+bturn;if(touching(p.x,p.y,p.a,['#'])){p.a=o.a}else{slideA+=bturn;bturn=0}}else{bturn-=r;slideA+=r}}
@@ -542,7 +548,7 @@ function draw(){
       ctx.restore();
     }
   }
-  const gp=(state==='menu'||pb.ghostOn===false)?null:ghostAt();
+  const gp=(state==='menu'||spec||pb.ghostOn===false)?null:ghostAt();
   if(gp){const gs=SIZE*U;ctx.save();ctx.translate(gp[0]*U,gp[1]*U);ctx.rotate(gp[2]);ctx.globalAlpha=.4;ctx.fillStyle='#fff';ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.globalAlpha=.8;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle='#fff';ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8);ctx.restore()}
   if(cpT>0&&cp.k){ctx.lineWidth=4;ctx.strokeStyle='rgba(47,211,122,'+cpT/.6+')';ctx.beginPath();ctx.arc(cp.x*U,cp.y*U,U*(.3+(.6-cpT)*1.6),0,7);ctx.stroke()}
   if(tpK>0){ctx.lineWidth=4;ctx.strokeStyle='rgba(200,150,255,'+tpK*.8+')';for(const q of [tpFrom,p]){ctx.beginPath();ctx.arc(q.x*U,q.y*U,U*(.3+(1-tpK)*1.1),0,7);ctx.stroke()}}
@@ -574,7 +580,7 @@ addEventListener('keydown',e=>{
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
   if(e.key==='Escape'){showMenu();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(state==='play'||state==='dead')endRetry();return}
-  if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
+  if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'&&!spec){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
   if(map[e.key]){keys[map[e.key]]=true;e.preventDefault()}
 });
 addEventListener('keyup',e=>{if(map[e.key])keys[map[e.key]]=false});
@@ -656,15 +662,19 @@ const levelLink=key=>(backend==='http'&&/^https?:/.test(location.protocol)?locat
 function toast(m){let e=document.getElementById('toast');if(!e){e=document.createElement('div');e.id='toast';document.body.appendChild(e)}e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3200)}
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){}try{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();if(ok)return true}catch(e){}return false}
 async function copyLink(key){const u=levelLink(key);toast(await copyText(u)?'Link copied: '+u:'Copy this link: '+u)}
-async function openLinked(){
-  let key;try{key=new URL(location.href).searchParams.get('level')}catch(e){}
-  if(!key||!db)return;
+async function fetchComm(key){
   const us=[];for(let i=key.indexOf('_');i>0;i=key.indexOf('_',i+1))us.push(i);
   for(const i of us){const by=key.slice(0,i),id=key.slice(i+1);
     try{const sn=await db.doc('lv/'+by).get();const raw=sn.exists&&(sn.data().levels||{})[id];if(!raw)continue;const c=cleanLvl(raw);if(!c)continue;
-      const l=Object.assign(c,{key,by,id,up:0,down:0,byName:'Player'});if(!commList.some(x=>x.key===key))commList.push(l);rvSync(l);startComm(key);
-      try{history.replaceState(null,'',location.pathname)}catch(e){}return}catch(e){}}
-  toast('That level link no longer works. It may have been removed.')
+      const l=Object.assign(c,{key,by,id,up:0,down:0,byName:'Player'});if(!commList.some(x=>x.key===key))commList.push(l);rvSync(l);return l}catch(e){}}
+  return null
+}
+async function openLinked(){
+  let key,rp;try{const q=new URL(location.href).searchParams;key=q.get('level');rp=q.get('replay')}catch(e){}
+  if(!db||(!key&&!rp))return;
+  try{history.replaceState(null,'',location.pathname)}catch(e){}
+  if(rp){const i=rp.indexOf('~');if(i>0)await openReplay(rp.slice(0,i),rp.slice(i+1),null,true);else toast('That replay link is not valid.');return}
+  if(await fetchComm(key))startComm(key);else toast('That level link no longer works. It may have been removed.')
 }
 function rvSync(l){const id='cm_'+l.key;if(!pb.crv)pb.crv={};if((pb.crv[id]|0)!==(l.rv|0)){delete pb.cl[id];delete pb.cg[id];pb.crv[id]=l.rv|0;savePB()}}
 function askYes(msg,yes){return new Promise(res=>{const o=document.createElement('div');o.id='askm';o.innerHTML='<div><p></p><button data-y="0">Cancel</button><button data-y="1" class="pri"></button></div>';o.querySelector('p').textContent=msg;o.querySelector('.pri').textContent=yes||'Yes';
@@ -1106,6 +1116,19 @@ async function ghPutAll(){
     if(ch)await ref.set({f:F});
   }catch(e){}finally{ghBusy=false}
 }
+const replayLink=(u,ref)=>(backend==='http'&&/^https?:/.test(location.protocol)?location.origin+location.pathname:'https://boxrun.fun/')+'?replay='+encodeURIComponent(u+'~'+ref);
+function startRef(ref,name,arr,watch){spec=false;pendingGhost={name,arr};specInfo={ref,name,arr};if(ref[0]==='m')startLevel(+ref.slice(1),false);else startComm(ref.slice(1));spec=!!watch}
+function specEnd(){state='win';const end=ghost[ghost.length-1][0];banner.innerHTML='<b>Replay finished</b><small class="lvn">'+esc(specInfo?specInfo.name:'')+' \u00b7 '+fmt(end)+'</small><div class="bb"><button data-b="rewatch">Watch again</button><button data-b="menu">Menu</button><button class="pri" data-b="playit">Race it</button></div>';banner.style.opacity=1}
+async function openReplay(u,ref,name,watch){
+  const isM=ref[0]==='m',field=isM?fld(+ref.slice(1)):cfk(ref.slice(1));
+  if(isM&&!(+ref.slice(1)>=0&&+ref.slice(1)<LEVELS.length)){toast('That replay link is not valid.');return}
+  if(!isM&&!commList.some(l=>l.key===ref.slice(1))&&!await fetchComm(ref.slice(1))){toast('That replay\'s level no longer exists.');return}
+  toast('Loading replay\u2026');let arr=null;
+  try{const sn=await db.doc('gh/'+u).get(),e=sn.exists&&sn.data().f&&sn.data().f[field];arr=e&&ghDec(e.g)}catch(e){}
+  if(!arr){toast('No replay is available for that run.');return}
+  if(!name){name='Player';try{if(usersNS){const pr=await usersNS.profiles([u]);name=(pr[u]&&pr[u].name)||name}}catch(e){}}
+  menuEl.hidden=true;startRef(ref,name,arr,watch!==false)
+}
 async function watchGhost(d){
   const ref=d.wr,isM=ref[0]==='m',note=isM?lvNote:cNote;
   const field=isM?fld(+ref.slice(1)):cfk(ref.slice(1));
@@ -1133,7 +1156,7 @@ async function lbTop(field,n){
 function lbHTML(rows,link,f,ref){f=f||fmt;
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
-  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+f(r.t)+'</b></div>').join('');
+  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+'</b></div>').join('');
 }
 // the board can lag behind a write you just made, so make sure your own time is shown
 function lbMerge(rows,t){
