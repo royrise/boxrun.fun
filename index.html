@@ -343,11 +343,21 @@ function ghostAt(){
   const f=(gt-a[0])/(b[0]-a[0]);
   return [a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f,a[3]+(b[3]-a[3])*f];
 }
-function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else showMenu()}
+function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else menuBack()}
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
 const narrow=()=>matchMedia('(max-width:640px)').matches,popSide=id=>{if(!narrow())return;const e=document.getElementById(id);if(!e._ph){e._ph=document.createComment(id);e.before(e._ph)}menuEl.appendChild(e);e.classList.add('pop')},closeSide=()=>document.querySelectorAll('#lvside,#cside').forEach(e=>{e.classList.remove('pop');if(e._ph&&e._ph.parentNode){e._ph.replaceWith(e);e._ph=null}});
-function show(id){closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+// page history: Back goes to the page you were on before (not always the main menu), and leaving a level returns to the page you launched it from
+let navStack=[],lastPanel='main',navBack=false,resume={stack:[],panel:'main'};
+function show(id){
+  if(id==='main')navStack=[];else if(!navBack&&lastPanel!==id){navStack.push(lastPanel);if(navStack.length>30)navStack.shift()}
+  lastPanel=id;resume={stack:navStack.slice(),panel:id};
+  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+function navPrev(){if(navStack.length){const prev=navStack.pop(),keep=navStack.slice();navBack=true;openPanel(prev);navBack=false;navStack=keep;resume={stack:keep.slice(),panel:prev}}else show('main')}
+function openPanel(id){   // show a panel again, refreshing the ones whose content can change
+  try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
+  show(id)}
+function menuBack(){const r=resume;showMenu();if(r&&r.panel!=='main'){navStack=r.stack.slice();navBack=true;openPanel(r.panel);navBack=false;navStack=r.stack.slice();resume={stack:r.stack.slice(),panel:r.panel}}}
 function showMenu(f){spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
@@ -386,13 +396,13 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.cl)copyLink(d.cl);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
-  else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
+  else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
-  if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch'){if(specInfo.ref==='e')watchEndless(specInfo.seed,specInfo.name,specInfo.arr);else startRef(specInfo.ref,specInfo.name,specInfo.arr,true)}else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else showMenu();return}
-  if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
+  if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch'){if(specInfo.ref==='e')watchEndless(specInfo.seed,specInfo.name,specInfo.arr);else startRef(specInfo.ref,specInfo.name,specInfo.arr,true)}else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else menuBack();return}
+  if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else menuBack();return}if(b.dataset.b==='again')again();else nextLevel()});
 document.getElementById('banner').addEventListener('pointerdown',e=>e.stopPropagation());
-document.getElementById('mn').addEventListener('pointerdown',e=>{e.stopPropagation();showMenu()});
+document.getElementById('mn').addEventListener('pointerdown',e=>{e.stopPropagation();menuBack()});
 document.getElementById('rt').addEventListener('pointerdown',e=>{e.stopPropagation();window.dispatchEvent(new KeyboardEvent('keydown',{key:'r'}))});
 // PB ghost on/off (the ghost is still recorded while hidden)
 function setGhost(v){pb.ghostOn=v;savePB();document.getElementById('gh').classList.toggle('off',!v)}
@@ -663,7 +673,7 @@ addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'&&!e.repeat){setGhost(pb.ghostOn===false);return}
   if(state==='over'&&mode==='endless'){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){endRetry();return}}
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
-  if(e.key==='Escape'){showMenu();return}
+  if(e.key==='Escape'){menuBack();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&spec&&specInfo&&specInfo.ref==='e'){banner.style.opacity=0;banner.innerHTML='';watchEndless(specInfo.seed,specInfo.name,specInfo.arr);return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(state==='play'||state==='dead')endRetry();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'&&!spec){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
