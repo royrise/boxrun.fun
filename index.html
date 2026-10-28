@@ -1242,9 +1242,10 @@ async function showProfile(id){
   const st=mine?(()=>{const S=skinStats();return {comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0}})():(pfd&&pfd.stats)||{};
   const xp=mine?xpOf():(pfd&&pfd.xp)||0,li=levelInfo(xp),times={};
   if(mine){LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)times[fld(i)]=t});if(pb.run!=null)times.run3=pb.run}else if(lbd)Object.assign(times,lbd);
-  const defs=[['Full run (all levels)','run3']].concat(LEVELS.map((_,i)=>['Level '+(i+1)+' \u00b7 '+lvName(i),fld(i)]));
+  const defs=LEVELS.map((_,i)=>['Level '+(i+1)+' \u00b7 '+lvName(i),fld(i)]);
+  const allT=LEVELS.map((_,i)=>times[fld(i)]),combined=allT.every(t=>t!=null)?allT.reduce((a,b)=>a+b,0):null;
   el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s)+'<div><div class="pname">'+esc(name)+'</div><div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
-   +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',st.run?'Done':'Not yet']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
+   +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',times.run3!=null?fmt(times.run3):st.run?'Done':'Not yet'],['Combined best times',combined!=null?fmt(combined):'Clear every level']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
    +(!mine&&backend==='http'&&httpB&&httpB.admin()?'<button data-ar="'+esc(id)+'" data-an="'+esc(name)+'">Rename player (admin)</button>':'')
