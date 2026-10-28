@@ -49,6 +49,10 @@ canvas{display:block;width:100%;height:100%}
 #banner small{display:block;margin-top:6px;font-size:clamp(14px,3.5vw,20px);font-variant-numeric:tabular-nums}
 #banner small.lvn{opacity:.85;margin-top:2px}
 #banner{z-index:4}
+#inpd{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);display:flex;gap:10px;z-index:3;pointer-events:none}
+#inpd span{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:12px;border:2px solid #4a4d63;background:rgba(20,20,30,.72);color:#8a8fb0;transition:background .05s}
+#inpd span.on{background:#5ec8ff;border-color:#fff;color:#0b1020}
+@media (pointer:coarse){#inpd{bottom:110px}}
 #banner .lbw{max-width:360px;margin:12px auto 0;font-size:clamp(17px,4.2vw,22px)}
 #banner .lbw .lbt{font-size:.8em;opacity:.8;margin-bottom:2px;text-align:center}
 #banner .lbw .row{align-items:center;padding:7px 4px}
@@ -167,6 +171,7 @@ canvas{display:block;width:100%;height:100%}
 <body>
 <canvas id="c"></canvas>
 <div id="hud"><span id="time"></span><span id="esub"></span><button id="mn" aria-label="Back to menu">←</button><button id="rt" aria-label="Retry level" title="Retry (R)"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.8-6.1"/><path d="M20 4v5h-5"/></svg></button><button id="gh" aria-label="Toggle PB ghost" title="PB ghost on/off (G)"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0114 0v10l-2.5-2-2 2-2.5-2-2.5 2-2-2z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg></button></div>
+<div id="inpd" hidden aria-hidden="true"><span data-k="l">&#9664;</span><span data-k="r">&#9654;</span></div>
 <div id="banner"></div>
 <div id="menu">
 <button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -384,7 +389,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else{const a=d.a;if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else show('main')}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
-  if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch')startRef(specInfo.ref,specInfo.name,specInfo.arr,true);else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else showMenu();return}
+  if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch'){if(specInfo.ref==='e')watchEndless(specInfo.seed,specInfo.name,specInfo.arr);else startRef(specInfo.ref,specInfo.name,specInfo.arr,true)}else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else showMenu();return}
   if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else showMenu();return}if(b.dataset.b==='again')again();else nextLevel()});
 document.getElementById('banner').addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('mn').addEventListener('pointerdown',e=>{e.stopPropagation();showMenu()});
@@ -418,13 +423,13 @@ function finish(){
 }
 const keys={left:false,right:false};
 const CDN=.5;   // seconds per count (way quicker than a real second)
-let cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
+let eSh={x:0,y:0},cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
 function load(n,keep){
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
   layers=(mode==='main'?null:cur.ov)||{};
   texts=mode==='main'?[]:txLabels(cur.tx);
-  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?3*CDN:0;goT=0;
+  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?3*CDN:0;goT=0;eSh.x=eSh.y=0;
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
@@ -523,8 +528,17 @@ function update(dt){
   if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.5}document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
   if(state==='play'){lt+=dt;gt+=dt;total+=dt;lastA=p.a}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
-  document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
-  if(spec){if(state==='play'){const g=ghostAt();if(g){p.x=g[0];p.y=g[1];p.a=g[2]}const end=ghost&&ghost.length?ghost[ghost.length-1][0]:0;if(gt>end+.6)specEnd()}return}
+  document.getElementById('esub').textContent=mode==='endless'?(spec?'Replay':curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
+  if(spec){
+    const idp=document.getElementById('inpd');let L=false,R=false;
+    if(state==='play'){const g=ghostAt();if(g){
+      if(mode==='endless'&&cur&&cur.gen){const v=cur.dist[Math.floor(g[1]+eSh.y)*cur.N+Math.floor(g[0]+eSh.x)];if(v>score)score=v;for(const q of cur.gen.ensure(score)){eSh.x+=q.ox;eSh.y+=q.oy}cur.dist=cur.gen.dist;p.x=g[0]+eSh.x;p.y=g[1]+eSh.y}else{p.x=g[0];p.y=g[1]}
+      p.a=g[2];
+      const A=ghost[gi],B=ghost[gi+1];if(A&&B&&!B[4]&&B[0]>A[0]){const rate=(B[3]-A[3])/(B[0]-A[0]);if(Math.abs(rate)<TURN*1.4){if(rate>TURN*.45)R=true;else if(rate<-TURN*.45)L=true}}   // the replay has no key log, so the keys are worked out from how fast the cube is turning
+    }const end=ghost&&ghost.length?ghost[ghost.length-1][0]:0;if(gt>end+.6)specEnd()}
+    idp.hidden=state!=='play';idp.querySelector('[data-k=l]').classList.toggle('on',L);idp.querySelector('[data-k=r]').classList.toggle('on',R);
+    return}
+  document.getElementById('inpd').hidden=true;
   if(state==='play'){
     if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}
     if(bturn>0){const r=Math.min(bturn,dt*Math.PI/.4),o={x:p.x,y:p.y,a:p.a};p.a+=r;if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y;p.a=o.a+bturn;if(touching(p.x,p.y,p.a,['#'])){p.a=o.a}else{slideA+=bturn;bturn=0}}else{bturn-=r;slideA+=r}}
@@ -548,14 +562,14 @@ function update(dt){
       p.x+=Math.cos(md)*st+(wv?wv[0]*WIND*dt/n:0);p.y+=Math.sin(md)*st+(wv?wv[1]*WIND*dt/n:0);
       if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y}
     }
-    if(mode==='endless'){const v=cur.dist[Math.floor(p.y)*cur.N+Math.floor(p.x)];if(v>score)score=v;if(cur.gen){for(const q of cur.gen.ensure(score)){for(const m of [crumb,fell]){const o=Object.assign({},m);for(const kk in m)delete m[kk];for(const kk in o){const [a,b]=kk.split(',').map(Number);m[(a+q.ox)+','+(b+q.oy)]=o[kk]}}p.x+=q.ox;p.y+=q.oy;cp.x+=q.ox;cp.y+=q.oy;rec.length=0}cur.dist=cur.gen.dist}}
+    if(mode==='endless'){const v=cur.dist[Math.floor(p.y)*cur.N+Math.floor(p.x)];if(v>score)score=v;if(cur.gen){for(const q of cur.gen.ensure(score)){for(const m of [crumb,fell]){const o=Object.assign({},m);for(const kk in m)delete m[kk];for(const kk in o){const [a,b]=kk.split(',').map(Number);m[(a+q.ox)+','+(b+q.oy)]=o[kk]}}p.x+=q.ox;p.y+=q.oy;cp.x+=q.ox;cp.y+=q.oy;eSh.x+=q.ox;eSh.y+=q.oy}cur.dist=cur.gen.dist}}
     cpT=Math.max(0,cpT-dt);
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),k=fx+','+fy;if(tile(fx,fy)==='C'&&cp.k!==k){cp={x:fx+.5,y:fy+.5,a:p.a,k};cpT=.6;bump('cps')}}
     bcd=Math.max(0,bcd-dt);tpK=Math.max(0,tpK-dt/.5);
     if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){bturn=Math.PI;bcd=1;bump('bounces')}
     {const ch=tile(Math.floor(p.x),Math.floor(p.y));
       if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){bump('tps');tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
-    if(gt-lastRec>=1/30){rec.push([gt,p.x,p.y,p.a]);lastRec=gt}
+    if(gt-lastRec>=1/30){rec.push(mode==='endless'?[gt,p.x-eSh.x,p.y-eSh.y,p.a]:[gt,p.x,p.y,p.a]);lastRec=gt}
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),ck=fx+','+fy;
       for(const q in crumb){crumb[q]-=dt;if(crumb[q]<=0){fell[q]=true;delete crumb[q]}}
       if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
@@ -650,6 +664,7 @@ addEventListener('keydown',e=>{
   if(state==='over'&&mode==='endless'){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){endRetry();return}}
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
   if(e.key==='Escape'){showMenu();return}
+  if(e.key.toLowerCase()==='r'&&!e.repeat&&spec&&specInfo&&specInfo.ref==='e'){banner.style.opacity=0;banner.innerHTML='';watchEndless(specInfo.seed,specInfo.name,specInfo.arr);return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(state==='play'||state==='dead')endRetry();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'&&!spec){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
   if(map[e.key]){keys[map[e.key]]=true;e.preventDefault()}
@@ -1095,13 +1110,24 @@ const withSeed=rows=>{if(rows)rows.forEach(r=>{if(r.me&&!r.sd&&pb.endRS)r.sd=pb.
 async function eBoardLoad(){
   const bd=document.getElementById('eboard');bd.textContent='Loading\u2026';
   if(pb.endRB!=null)lbPut(Object.assign({[EBF]:pb.endRB},pb.endRS?{endsa:encSeed(pb.endRS)[0],endsb:encSeed(pb.endRS)[1]}:{}));
-  bd.innerHTML=lbHTML(withSeed(await weeklyBoard(pb.endRB,10,EBF)),true,wfmt);
+  bd.innerHTML=lbHTML(withSeed(await weeklyBoard(pb.endRB,10,EBF)),true,wfmt,'e');
+}
+// the saved replay is the seed plus the run's positions (in a fixed frame, see eSh). It is thinned out until it fits the server's size limit.
+async function endGhostPut(r,seed,t){
+  if(!db||!uid||!r||r.length<2||!seed)return;
+  for(let tries=0;tries<8;tries++){
+    const enc=seed+'|'+ghEnc(r);
+    if(enc.length<=58000){try{const ref=db.doc('gh/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{},F=d.f||{};F[EBF]={t:rnd(t,5),g:enc};if(JSON.stringify(F).length<=380000)await ref.set({f:F})}catch(e){}return}
+    r=r.filter((_,i)=>i%2===0||i===r.length-1);
+  }
 }
 async function endBoardDone(d){
-  const v=wval(d,lt);if(pb.endRB==null||v<pb.endRB){pb.endRB=v;pb.endRS=String(curSeed).toUpperCase().slice(0,6);savePB()}
+  const v=wval(d,lt),better=pb.endRB==null||v<pb.endRB;if(better){pb.endRB=v;pb.endRS=String(curSeed).toUpperCase().slice(0,6);savePB()}
+  const runRec=rec.slice(),runSeed=pb.endRS;
   if(pb.endRB!=null)await lbPut(Object.assign({[EBF]:pb.endRB},pb.endRS?{endsa:encSeed(pb.endRS)[0],endsb:encSeed(pb.endRS)[1]}:{}));
+  if(better&&uid)await endGhostPut(runRec,runSeed,v);   // the replay is only kept for a personal best by a signed-in player
   const rows=withSeed(await weeklyBoard(pb.endRB,8,EBF)),b=document.getElementById('banner');
-  if(state==='over'&&mode==='endless'&&!curSet&&!curWeekly&&b){const box=document.createElement('div');box.className='lbw';box.innerHTML='<div class="lbt">Endless leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
+  if(state==='over'&&mode==='endless'&&!curSet&&!curWeekly&&b){const box=document.createElement('div');box.className='lbw';box.innerHTML='<div class="lbt">Endless leaderboard</div>'+lbHTML(rows,false,wfmt,'e');b.insertBefore(box,b.querySelector('.bb'))}
 }
 function endRun(done){
   state='over';timer=1e9;
@@ -1298,8 +1324,15 @@ async function ghPutAll(){
 }
 const replayLink=(u,ref)=>(backend==='http'&&/^https?:/.test(location.protocol)?location.origin+location.pathname:'https://boxrun.fun/')+'?replay='+encodeURIComponent(u+'~'+ref);
 function startRef(ref,name,arr,watch){spec=false;pendingGhost={name,arr};specInfo={ref,name,arr};if(ref[0]==='m')startLevel(+ref.slice(1),false);else startComm(ref.slice(1));spec=!!watch}
-function specEnd(){state='win';const end=ghost[ghost.length-1][0];banner.innerHTML='<b>Replay finished</b><small class="lvn">'+esc(specInfo?specInfo.name:'')+' \u00b7 '+fmt(end)+'</small><div class="bb"><button data-b="rewatch">Watch again</button><button data-b="menu">Menu</button><button class="pri" data-b="playit">Race it</button></div>';banner.style.opacity=1}
+function specEnd(){state='win';const end=ghost[ghost.length-1][0],en=mode==='endless';banner.innerHTML='<b>Replay finished</b><small class="lvn">'+esc(specInfo?specInfo.name:'')+' \u00b7 '+(en?Math.floor(score)+' m':fmt(end))+'</small><div class="bb"><button data-b="rewatch">Watch again</button><button data-b="menu">Menu</button>'+(en?'':'<button class="pri" data-b="playit">Race it</button>')+'</div>';banner.style.opacity=1}
+function watchEndless(seed,name,arr){menuEl.hidden=true;pendingGhost=null;startEndless(seed,false);spec=true;specInfo={ref:'e',name,arr,seed};ghost=arr;gi=0;gt=0;score=0}
 async function openReplay(u,ref,name,watch){
+  if(ref==='e'){
+    toast('Loading replay\u2026');let seed=null,arr=null;
+    try{const sn=await db.doc('gh/'+u).get(),e=sn.exists&&sn.data().f&&sn.data().f[EBF];if(e&&typeof e.g==='string'){const i=e.g.indexOf('|');if(i>0&&/^[0-9A-Z ]{1,6}$/.test(e.g.slice(0,i))){seed=e.g.slice(0,i);arr=ghDec(e.g.slice(i+1))}}}catch(er){}
+    if(!arr||!seed){toast('No replay is available for that run.');return}
+    if(!name){name='Player';try{if(usersNS){const pr=await usersNS.profiles([u]);name=(pr[u]&&pr[u].name)||name}}catch(er){}}
+    if(watch!==false){bump('replays');checkAch();savePB()}watchEndless(seed,name,arr);return}
   const isM=ref[0]==='m',field=isM?fld(+ref.slice(1)):cfk(ref.slice(1));
   if(isM&&!(+ref.slice(1)>=0&&+ref.slice(1)<LEVELS.length)){toast('That replay link is not valid.');return}
   if(!isM&&!commList.some(l=>l.key===ref.slice(1))&&!await fetchComm(ref.slice(1))){toast('That replay\'s level no longer exists.');return}
@@ -1337,7 +1370,7 @@ const seedCopy=sd=>'<button class="gbtn" data-cs="'+esc(sd)+'" title="Copy seed"
 function lbHTML(rows,link,f,ref){f=f||fmt;
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
-  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+(r.sd?' <small class="sd">'+esc(r.sd)+'</small> '+seedCopy(r.sd):'')+'</b></div>').join('');
+  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&ref!=='e'&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+(r.sd?' <small class="sd">'+esc(r.sd)+'</small> '+seedCopy(r.sd):'')+'</b></div>').join('');
 }
 // the board can lag behind a write you just made, so make sure your own time is shown
 function lbMerge(rows,t){
