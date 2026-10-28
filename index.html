@@ -43,6 +43,7 @@ canvas{display:block;width:100%;height:100%}
 .bars{display:flex;flex-direction:column;gap:12px}#p-pmenu,#p-emenu,#p-prmenu{width:min(400px,100%)}.bars .bar.big{padding:24px 12px;font-size:22px}.bars .bar{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:16px}
 #psignout{border-color:#ff5a3c;color:#ff8a70}#psignout[hidden]{display:none}
 .gaten{background:#ff9a3c22;border:1px solid #ff9a3c;border-radius:8px;padding:8px 10px;font-weight:700}
+.lbgate{padding:14px 10px;font-weight:700;opacity:.9;text-align:center;border:1px dashed #ff9a3c;border-radius:8px;color:#ffb070}
 #tagline{font-size:calc(1em + 3px);transition:opacity .4s}#tagline.fade{opacity:0}
 .panel button,.pop button{font:inherit;font-size:18px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer}
 .panel button:hover,.pop button:hover{background:#383c5c}
@@ -1381,9 +1382,10 @@ async function showProfile(id){
 async function acctDo(kind){
   const n=document.getElementById('au').value.trim(),p=document.getElementById('ap').value,e=document.getElementById('aerr');
   e.textContent='One moment\u2026';
-  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);showProfile();resumeAct()}catch(er){e.textContent=er.message||'Could not sign in.'}
+  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);clrLB();showProfile();resumeAct()}catch(er){e.textContent=er.message||'Could not sign in.'}
 }
-async function acctOut(){await httpB.logout();uid=null;showProfile()}
+async function acctOut(){await httpB.logout();uid=null;clrLB();showProfile()}
+function clrLB(){try{for(const k in sideCache)delete sideCache[k];for(const k in cCache)delete cCache[k]}catch(e){}}
 document.getElementById('profbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ap')acctDo('login')});
 
 const cfld=key=>{let a=2166136261,b=5381;for(let i=0;i<key.length;i++){const c=key.charCodeAt(i);a=Math.imul(a^c,16777619);b=(Math.imul(b,33)^c)>>>0}return 'x'+(a>>>0).toString(36)+b.toString(36)};
@@ -1460,7 +1462,7 @@ async function lbTop(field,n){
     return rows.map(r=>({id:r.id,t:r.t,sd:r.sd,name:names[r.id]||'Player',me:r.id===uid}))}catch(e){return null}
 }
 const seedCopy=sd=>'<button class="gbtn" data-cs="'+esc(sd)+'" title="Copy seed" aria-label="Copy seed"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>';
-function lbHTML(rows,link,f,ref){f=f||fmt;
+function lbHTML(rows,link,f,ref){f=f||fmt;if(backend==='http'&&!uid)return '<div class="lbgate">Create an account to view leaderboards</div>';
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
   return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&ref!=='e'&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+(r.sd?' <small class="sd">'+esc(r.sd)+'</small> '+seedCopy(r.sd):'')+'</b></div>').join('');
