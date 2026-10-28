@@ -402,13 +402,14 @@ function finish(){
   if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
-let crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
+const CDN=.8;   // seconds per count (a little quicker than a real second)
+let cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
 function load(n,keep){
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
   layers=(mode==='main'?null:cur.ov)||{};
   texts=mode==='main'?[]:txLabels(cur.tx);
-  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;
+  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?3*CDN:0;goT=0;
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
@@ -502,6 +503,9 @@ function drawOv(c,poly,x,y){
 function update(dt){
   t+=dt;
   if(state==='menu')return;
+  if(spec)cd=0;
+  if(goT>0)goT-=dt;
+  if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.45}document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
   if(state==='play'){lt+=dt;gt+=dt;total+=dt;lastA=p.a}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
   document.getElementById('esub').textContent=mode==='endless'?(curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
@@ -606,6 +610,10 @@ function draw(){
   ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8); // front marker
   ctx.restore();
   if(state==='dead'){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='rgba(255,40,0,.25)';ctx.fillRect(0,0,W,Hh)}
+  if((cd>0||goT>0)&&state==='play'){   // countdown overlay
+    ctx.setTransform(dpr,0,0,dpr,0,0);const go=cd<=0,n=go?0:Math.ceil(cd/CDN-1e-9),fr=go?1-goT/.45:1-(cd-(n-1)*CDN)/CDN,sz=Math.min(W,Hh)*.34*(go?1:1.35-.35*Math.min(1,fr*2.2));
+    ctx.save();ctx.globalAlpha=go?Math.max(0,1-fr):Math.min(1,1.6-fr*1.3);ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 '+sz+'px system-ui,sans-serif';ctx.lineWidth=sz*.08;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.fillStyle=go?'#2fd37a':'#fff';
+    const tx=go?'GO!':String(n);ctx.strokeText(tx,W/2,Hh*.3);ctx.fillText(tx,W/2,Hh*.3);ctx.restore()}
 }
 let last=performance.now();
 function loop(now){
