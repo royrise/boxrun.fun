@@ -338,6 +338,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.u)showProfile(d.u);
   else if(d.wg)watchGhost(d);
   else if(d.rw)openReplay(d.rw,d.wr,d.wn,true);
+  else if(d.cs)copyText(d.cs).then(ok=>toast(ok?'Seed copied':'Could not copy the seed'));
   else if(d.rl)copyText(replayLink(d.rl,d.wr)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));
   else if(d.lbs!=null){sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);popSide('lvside')}
   else if(d.sk)pickSkin(d.sk,+d.ci);
@@ -1070,7 +1071,7 @@ function endRun(done){
   state='over';timer=1e9;
   const d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
-  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="menu">Menu</button></div>';
+  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
   if(curWeekly)weeklyDone(d);else if(!curSet&&d>0)endBoardDone(d);
 }
@@ -1294,10 +1295,11 @@ async function lbTop(field,n){
     if(usersNS&&rows.length){try{const ps=await usersNS.profiles(rows.map(r=>r.id));rows.forEach(r=>names[r.id]=ps[r.id]&&ps[r.id].name)}catch(e){}}
     return rows.map(r=>({id:r.id,t:r.t,sd:r.sd,name:names[r.id]||'Player',me:r.id===uid}))}catch(e){return null}
 }
+const seedCopy=sd=>'<button class="gbtn" data-cs="'+esc(sd)+'" title="Copy seed" aria-label="Copy seed"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>';
 function lbHTML(rows,link,f,ref){f=f||fmt;
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
-  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+(r.sd?' <small class="sd">'+esc(r.sd)+'</small>':'')+'</b></div>').join('');
+  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+(r.sd?' <small class="sd">'+esc(r.sd)+'</small> '+seedCopy(r.sd):'')+'</b></div>').join('');
 }
 // the board can lag behind a write you just made, so make sure your own time is shown
 function lbMerge(rows,t){
