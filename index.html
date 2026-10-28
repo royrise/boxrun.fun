@@ -1878,7 +1878,7 @@ btn.addEventListener('click',e=>{e.stopPropagation();init();muted=!muted;try{loc
 
 // rotating tagline under the logo
 (()=>{const el=document.getElementById('tagline');if(!el)return;
-const L=['Steer. Survive. Don\u2019t touch the lava.','Always forward. Never stop.','Reach the checkered flag.','How far can you get in Endless?','A new weekly challenge every week.','Build a level and share it.','Lava is not your friend.','Beat your ghost.'];let i=0;
+const L=['Steer. Survive. Don\u2019t touch the lava.','Always forward. Never stop.','Reach the checkered flag.','How far can you get in Endless?','A new weekly challenge every week.','Build a level and share it.','Lava is not your friend.','Beat your best time.'];let i=0;
 setInterval(()=>{if(document.hidden)return;el.classList.add('fade');setTimeout(()=>{let j;do j=Math.floor(Math.random()*L.length);while(j===i);i=j;el.textContent=L[i];el.classList.remove('fade')},400)},4200)})();
 </script>
 </body>
