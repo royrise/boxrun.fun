@@ -437,13 +437,13 @@ function finish(){
 }
 const keys={left:false,right:false};
 const CDN=.5;   // seconds per count (way quicker than a real second)
-let eSh={x:0,y:0},cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
+let inHold={l:0,r:0},eSh={x:0,y:0},cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
 function load(n,keep){
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
   layers=(mode==='main'?null:cur.ov)||{};
   texts=mode==='main'?[]:txLabels(cur.tx);
-  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?3*CDN:0;goT=0;eSh.x=eSh.y=0;
+  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?3*CDN:0;goT=0;eSh.x=eSh.y=0;inHold.l=inHold.r=0;
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
@@ -544,13 +544,13 @@ function update(dt){
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
   document.getElementById('esub').textContent=mode==='endless'?(spec?'Replay':curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
   if(spec){
-    const idp=document.getElementById('inpd');let L=false,R=false;
+    const idp=document.getElementById('inpd');inHold.l-=dt;inHold.r-=dt;
     if(state==='play'){const g=ghostAt();if(g){
       if(mode==='endless'&&cur&&cur.gen){const v=cur.dist[Math.floor(g[1]+eSh.y)*cur.N+Math.floor(g[0]+eSh.x)];if(v>score)score=v;for(const q of cur.gen.ensure(score)){eSh.x+=q.ox;eSh.y+=q.oy}cur.dist=cur.gen.dist;p.x=g[0]+eSh.x;p.y=g[1]+eSh.y}else{p.x=g[0];p.y=g[1]}
       p.a=g[2];
-      const A=ghost[gi],B=ghost[gi+1];if(A&&B&&!B[4]&&B[0]>A[0]){const rate=(B[3]-A[3])/(B[0]-A[0]);if(Math.abs(rate)<TURN*1.4){if(rate>TURN*.45)R=true;else if(rate<-TURN*.45)L=true}}   // the replay has no key log, so the keys are worked out from how fast the cube is turning
+      const A=ghost[gi],B=ghost[gi+1];if(A&&B&&!B[4]&&B[0]>A[0]){const rate=(B[3]-A[3])/(B[0]-A[0]);if(Math.abs(rate)<TURN*1.4){if(rate>TURN*.2)inHold.r=.13;else if(rate<-TURN*.2)inHold.l=.13}}   // the replay has no key log, so the keys are worked out from how fast the cube is turning
     }const end=ghost&&ghost.length?ghost[ghost.length-1][0]:0;if(gt>end+.6)specEnd()}
-    idp.hidden=state!=='play';idp.querySelector('[data-k=l]').classList.toggle('on',L);idp.querySelector('[data-k=r]').classList.toggle('on',R);
+    idp.hidden=state!=='play';idp.querySelector('[data-k=l]').classList.toggle('on',inHold.l>0);idp.querySelector('[data-k=r]').classList.toggle('on',inHold.r>0);
     return}
   document.getElementById('inpd').hidden=true;
   if(state==='play'){
