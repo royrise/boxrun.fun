@@ -768,6 +768,8 @@ if(!pb.skin)pb.skin={p:'sky',s:'navy'};
 const FULLS=[{id:'graphite',n:'Graphite',src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAc0lEQVR4AeyTUQqAMAxD4w6nH97Fw3hhzUgpY6Ns008NpSvrHh2BpvWFEoDjkQhmmMdInIX0fgImoC+yUMzBYjz/sFsxVnzVsD1Q1zUzbGnUJfnA4KsRe90wuBocYVpK7xpcDfZ2WWgflXWf4S2Q5kQZwA0AAP//vA6R5QAAAAZJREFUAwC+m3mRw3xkuwAAAABJRU5ErkJggg=='},{id:'copper',n:'Copper',src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAjElEQVR4AeyUOwqAMAxAo9DJxcnJs3gMPYEnEj2V3sLJycWpg6Y0hNJW+lm1PNrQ5BEItOU699mUAHCJJgMUlYxHDJU8GF2fIKMgzx3BQJMma4f3X+ZRxAVfHVg3Tl6CU6OBFc4KmlhA8u0szAUh2Wr8pom6RThLstWY02Zgfhj6XsnbMnjhp+8NAOABAAD//zppiIkAAAAGSURBVAMApeGTdR70ZKQAAAAASUVORK5CYII='},{id:'ivory',n:'Ivory',src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAbklEQVR4AeyTUQrAIAxDM6+3627n2yopQSpIu/0apAbbp1Jou36oATg/ycAO25ZZ9yDWF2AD+EUzXDWYjOKG1Yqc2Q3L9UlV3rBjkioWxuFn0oJRyuHwsNLBcCh16HB4WOnRcB4Zed5h3leNAF4AAAD//yV+2l8AAAAGSURBVAMACCuTWQ8V2gkAAAAASUVORK5CYII='}];
 const fullImg={};for(const f of FULLS){const im=new Image();im.src=f.src;fullImg[f.id]=im}
 const fullOf=id=>FULLS.find(f=>f.id===id);
+const FULLT={graphite:['centurion','Complete 100 levels'],copper:['flagship','Touch 100 checkpoints'],ivory:['allclear','Clear all 25 levels']};
+const fullOk=id=>!!(pb.ach&&pb.ach[FULLT[id][0]]);
 const COLORS=[
  {id:'sky',n:'Sky',h:'#5ec8ff',t:'Free',u:()=>1},
  {id:'white',n:'White',h:'#f2f2f5',t:'Free',u:()=>1},
@@ -806,12 +808,12 @@ function buildSkins(note){
   const S=skinStats();
   for(const k of ['p','s'])document.getElementById('sw'+k).innerHTML=COLORS.map((c,i)=>{const ok=c.u(S);
     return '<button class="swb'+(pb.skin[k]===c.id?' on':'')+(ok?'':' lock')+'" data-sk="'+k+'" data-ci="'+i+'" title="'+esc(c.n+(ok?'':' - '+c.t))+'" style="background:'+(c.h==='rainbow'?'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)':c.h)+'">'+(ok?'':'\u{1F512}')+'</button>'}).join('');
-  document.getElementById('swf').innerHTML=FULLS.map(f=>'<button class="swb fsk'+(pb.skin.f===f.id?' on':'')+'" data-fs="'+f.id+'" title="'+esc(f.n)+'" style="background:url('+f.src+') center/cover;image-rendering:pixelated"></button>').join('');
+  document.getElementById('swf').innerHTML=FULLS.map(f=>'<button class="swb fsk'+(pb.skin.f===f.id?' on':'')+(fullOk(f.id)?'':' lock')+'" data-fs="'+f.id+'" title="'+esc(f.n+(fullOk(f.id)?'':' - '+FULLT[f.id][1]))+'" style="background:url('+f.src+') center/cover;image-rendering:pixelated"></button>').join('');
     document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
   document.getElementById('skinprev').innerHTML=pb.skin.f&&fullOf(pb.skin.f)?'<img src="'+fullOf(pb.skin.f).src+'" width="72" height="72" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
 }
 function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins(c.n+': '+c.t);return}pb.skin[k]=c.id;pb.skin.f=null;savePB();buildSkins(c.n+' selected')}
-function pickFull(id){const f=fullOf(id);if(!f)return;pb.skin.f=pb.skin.f===id?null:id;savePB();buildSkins(pb.skin.f?f.n+' selected. Pick a colour to go back to colours.':'Back to colours')}
+function pickFull(id){const f=fullOf(id);if(!f)return;if(!fullOk(id)){buildSkins(f.n+': '+FULLT[id][1]);return}pb.skin.f=pb.skin.f===id?null:id;savePB();buildSkins(pb.skin.f?f.n+' selected. Pick a colour to go back to colours.':'Back to colours')}
 
 // ---- achievements: each one unlocks a cube colour. Counters live in pb.st, unlocked ids in pb.ach
 const bump=(k,n)=>{pb.st[k]=(pb.st[k]||0)+(n==null?1:n)};
@@ -828,12 +830,15 @@ const ACH=[
  {id:'explorer',n:'Explorer',d:'Clear 5 community levels',v:commClears,max:5,c:'orchid'},
  {id:'creator',n:'Creator',d:'Share a level with the community',v:()=>pb.st.shares||0,max:1,c:'amber'},
  {id:'fan',n:'Fan',d:'Watch 3 replays',v:()=>pb.st.replays||0,max:3,c:'silver'},
- {id:'weekly',n:'Weekly Warrior',d:'Finish the weekly challenge',v:()=>pb.st.weekly||0,max:1,c:'crimson'}
+ {id:'weekly',n:'Weekly Warrior',d:'Finish the weekly challenge',v:()=>pb.st.weekly||0,max:1,c:'crimson'},
+  {id:'centurion',n:'Centurion',d:'Complete 100 levels',v:()=>pb.completions||0,max:100,f:'graphite'},
+  {id:'flagship',n:'Flag Bearer',d:'Touch 100 checkpoints',v:()=>pb.st.cps||0,max:100,f:'copper'},
+  {id:'allclear',n:'Completionist',d:'Clear all 25 levels',v:()=>skinStats().clear,max:25,f:'ivory'}
 ];
 function checkAch(){
   let fresh=null;
   for(const a of ACH)if(!pb.ach[a.id]&&a.v()>=a.max){pb.ach[a.id]=Date.now();fresh=a}
-  if(fresh){savePB();toast('New colour unlocked: '+colOf(fresh.c).n+' \u00b7 '+fresh.d)}
+  if(fresh){savePB();toast(fresh.f?'New full skin unlocked: '+fullOf(fresh.f).n+' \u00b7 '+fresh.d:'New colour unlocked: '+colOf(fresh.c).n+' \u00b7 '+fresh.d)}
   return fresh;
 }
 let achT=0;
@@ -1802,7 +1807,7 @@ function tick(){
   if(document.hidden){for(const k in T)if(T[k].a&&!T[k].a.paused)T[k].a.pause();if(ctx.state==='running')ctx.suspend();return}
   if(ctx.state==='suspended')ctx.resume();
   const w=muted?null:want(),now=ctx.currentTime;
-  const nm=w&&T[w].name&&!T[w].bad&&!T[w].a.paused;np.textContent=nm?'Now Playing: '+T[w].name:'';np.style.opacity=nm?1:0;
+  const nm=w&&T[w].name&&!T[w].bad&&!T[w].a.paused;np.textContent=nm?T[w].name:'';np.style.opacity=nm?1:0;
   for(const k in T){const t=T[k],on=k===w&&!t.bad;
     if(on&&t.a.paused)t.a.play().catch(()=>{});
     t.g.gain.setTargetAtTime(on?t.vol:0,now,on?.6:.35);
