@@ -170,6 +170,8 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 .panel .nameb:hover,.pop .nameb:hover{color:#5ec8ff}
 #ec{flex:1;min-height:0;width:100%;touch-action:none}
 #mute{position:fixed;top:8px;right:8px;z-index:60;width:34px;height:34px;border-radius:50%;border:1px solid #fff4;background:#0008;color:#fff;font-size:16px;line-height:1;padding:0;cursor:pointer}
+#np{position:fixed;left:10px;bottom:8px;z-index:60;color:#fffc;font:600 12px system-ui,sans-serif;text-shadow:0 1px 3px #000;pointer-events:none;transition:opacity .4s;opacity:0}
+@media(pointer:fine){#np{font-size:14px}}
 </style>
 </head>
 <body>
@@ -1772,8 +1774,9 @@ load(0);showMenu();requestAnimationFrame(loop);bootDone=true;
 (()=>{
 const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
 let ctx=null,muted=false;try{muted=localStorage.getItem('br_mute')==='1'}catch(e){}
-const T={menu:{src:'music/menu.mp3',vol:.7},levels:{src:'music/levels.mp3',vol:.5,comp:true},endless:{src:'music/endless.mp3',vol:.6}};
+const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},levels:{src:'music/levels.mp3',vol:.5,comp:true},endless:{src:'music/endless.mp3',vol:.6}};
 const btn=document.createElement('button');btn.id='mute';btn.setAttribute('aria-label','Toggle music');document.body.appendChild(btn);
+const np=document.createElement('div');np.id='np';document.body.appendChild(np);
 const paint=()=>btn.textContent=muted?'\u{1F507}':'\u{1F50A}';paint();
 function init(){
   if(ctx)return;ctx=new AC();
@@ -1788,6 +1791,7 @@ let last=null;
 function tick(){
   if(!ctx)return;if(ctx.state==='suspended')ctx.resume();
   const w=muted?null:want(),now=ctx.currentTime;
+  const nm=w&&T[w].name&&!T[w].bad&&!T[w].a.paused;np.textContent=nm?'Now Playing: '+T[w].name:'';np.style.opacity=nm?1:0;
   for(const k in T){const t=T[k],on=k===w&&!t.bad;
     if(on&&t.a.paused)t.a.play().catch(()=>{});
     t.g.gain.setTargetAtTime(on?t.vol:0,now,on?.6:.35);
