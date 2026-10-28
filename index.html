@@ -1789,7 +1789,9 @@ function init(){
 function want(){const m=document.getElementById('menu');if(!m||!m.hidden)return 'menu';return typeof mode!=='undefined'&&mode==='endless'?'endless':null}
 let last=null;
 function tick(){
-  if(!ctx)return;if(ctx.state==='suspended')ctx.resume();
+  if(!ctx)return;
+  if(document.hidden){for(const k in T)if(T[k].a&&!T[k].a.paused)T[k].a.pause();if(ctx.state==='running')ctx.suspend();return}
+  if(ctx.state==='suspended')ctx.resume();
   const w=muted?null:want(),now=ctx.currentTime;
   const nm=w&&T[w].name&&!T[w].bad&&!T[w].a.paused;np.textContent=nm?'Now Playing: '+T[w].name:'';np.style.opacity=nm?1:0;
   for(const k in T){const t=T[k],on=k===w&&!t.bad;
@@ -1798,6 +1800,7 @@ function tick(){
     if(!on&&!t.a.paused&&t.g.gain.value<.01){t.a.pause()}}
 }
 setInterval(tick,250);
+document.addEventListener('visibilitychange',tick);
 const unlock=()=>{init();tick()};
 addEventListener('pointerdown',unlock);addEventListener('keydown',unlock);
 btn.addEventListener('pointerdown',e=>e.stopPropagation());
