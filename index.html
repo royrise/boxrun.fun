@@ -103,6 +103,9 @@ canvas{display:block;width:100%;height:100%}
 .cr .ci{flex:1;min-width:0}.cr .ci small{display:block;opacity:.7}
 #csort{font:inherit;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:6px}
 .panel.wide{width:min(720px,100%)}
+/* Endless and Weekly screens are small on big desktop monitors, so scale them up */
+@media(pointer:fine) and (min-width:900px) and (min-height:760px){#p-endless,#p-weekly{zoom:1.4}}
+@media(pointer:fine) and (min-width:1300px) and (min-height:900px){#p-endless,#p-weekly{zoom:1.7}}
 #lvwrap{display:flex;gap:18px;text-align:left}#lvleft,#lvside{flex:1;min-width:0}#lvleft{display:flex;flex-direction:column;gap:10px}
 #lvside .lbt{font-weight:600;margin-bottom:6px;opacity:.85}
 #p-levels{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)}
