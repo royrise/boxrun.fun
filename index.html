@@ -242,7 +242,7 @@ const LEVELS=[[
 "######################"]];
 const TUT=makeTutorial();LEVELS.unshift(TUT.rows);
 // stable ids for the main levels: records are stored by id (not position), so levels can be reordered safely
-const LID=["tutorial", "lava-field", "pillar-pass", "ice-rink", "mud-bog", "crumble-bridge", "wind-tunnel", "portal-hall", "mover-gauntlet", "pad-run", "slope-slalom", "lava-stripes", "checkpoint-climb", "tempo", "pad-maze", "lava-islands", "mine-field", "mover-halls", "wind-spiral", "bumper-hall", "ice-bridges", "zipper", "bounce-lane", "mega-maze", "grand-tour"];
+const LID=["tutorial", "lava-field", "pillar-pass", "ice-rink-v2", "mud-bog-v2", "crumble-bridge-v2", "wind-tunnel-v2", "portal-hall-v2", "mover-gauntlet-v2", "pad-run-v2", "slope-slalom-v2", "lava-stripes-v2", "checkpoint-climb-v2", "tempo-v2", "pad-maze", "lava-islands-v2", "mine-field-v2", "mover-halls-v2", "wind-spiral-v2", "bumper-hall-v2", "ice-bridges-v2", "zipper-v2", "bounce-lane-v2", "mega-maze", "grand-tour-v2"];
 const LEGACY={tutorial:'lv2_0','lava-field':'lv2_1','pillar-pass':'lv2_2'}; // leaderboard fields that already exist
 const fld=n=>LEGACY[LID[n]]||'t_'+(typeof backend!=='undefined'&&backend==='http'?LID[n].replace(/-/g,'_'):LID[n]);   // the own-server API only allows letters, digits and _ in field names, so hyphenated level ids (lava-field...) were rejected there
 // ---- main levels 4-25 (built from small recipes; the outer wall ring is added automatically)
@@ -468,7 +468,7 @@ document.getElementById('gh').addEventListener('pointerdown',e=>{e.stopPropagati
 const banner=document.getElementById('banner');
 function fmt1(s){const m=Math.floor(s/60);return m+':'+(Math.floor((s-m*60)*10)/10).toFixed(1).padStart(4,'0')}
 function fmt(s){const ms=Math.round(s*1000),m=Math.floor(ms/60000);return m+':'+((ms-m*60000)/1000).toFixed(3).padStart(6,'0')}
-const lvName=n=>LID[n].split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+const lvName=n=>LID[n].replace(/-v\d+$/,'').split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
 function finish(){
   state='win';timer=1e9;
   const last=mode!=='main'||lvl+1>=LEVELS.length;
