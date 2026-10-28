@@ -72,6 +72,7 @@ canvas{display:block;width:100%;height:100%}
 #p-main .ib:hover::after{opacity:1;transition:opacity .15s .5s}
 #p-main .ib:focus-visible::after{opacity:1}
 .panel .lbt{font-weight:600;opacity:.85;margin-top:4px}
+.row .sd{opacity:.6;font-weight:400;font-size:.8em;margin-left:4px}
 .panel input{font:inherit;font-size:20px;text-align:center;letter-spacing:.12em;text-transform:uppercase;color:#eef;background:#1c1c28;border:1px solid #4a4d63;border-radius:10px;padding:10px}
 .panel button.pri{background:#1f9d5c;border-color:#2fd37a}
 .seg{display:flex}.panel .seg button{flex:1;padding:8px;font-size:15px;border-radius:0}.panel .seg button:first-child{border-radius:10px 0 0 10px}.panel .seg button:last-child{border-radius:0 10px 10px 0}
@@ -1049,16 +1050,20 @@ function openEndless(){
   eBoardLoad();
 }
 // Endless leaderboard: best distance on random-seed runs (set seeds can be practised and the weekly has its own board). Stored inverted like the weekly so lower is better.
-const EBF='endb';
+const EBF='endb',SDC='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ ';
+// a seed (up to 6 letters/digits) is stored as two small numbers, because leaderboard fields only hold numbers
+const encSeed=sd=>{const p=(String(sd).toUpperCase()+'      ').slice(0,6).split('').map(c=>Math.max(0,SDC.indexOf(c)<0?36:SDC.indexOf(c)));return [1+p[0]*1369+p[1]*37+p[2],1+p[3]*1369+p[4]*37+p[5]]};
+const decSeed=d=>{if(!d||d.endsa==null||d.endsb==null)return null;const h=v=>{v=Math.round(v)-1;return SDC[Math.floor(v/1369)%37]+SDC[Math.floor(v/37)%37]+SDC[v%37]};return (h(d.endsa)+h(d.endsb)).trim()||null};
+const withSeed=rows=>{if(rows)rows.forEach(r=>{if(r.me&&!r.sd&&pb.endRS)r.sd=pb.endRS});return rows};
 async function eBoardLoad(){
   const bd=document.getElementById('eboard');bd.textContent='Loading\u2026';
-  if(pb.endRB!=null)lbPut({[EBF]:pb.endRB});
-  bd.innerHTML=lbHTML(await weeklyBoard(pb.endRB,10,EBF),true,wfmt);
+  if(pb.endRB!=null)lbPut(Object.assign({[EBF]:pb.endRB},pb.endRS?{endsa:encSeed(pb.endRS)[0],endsb:encSeed(pb.endRS)[1]}:{}));
+  bd.innerHTML=lbHTML(withSeed(await weeklyBoard(pb.endRB,10,EBF)),true,wfmt);
 }
 async function endBoardDone(d){
-  const v=wval(d,lt);if(pb.endRB==null||v<pb.endRB){pb.endRB=v;savePB()}
-  if(pb.endRB!=null)await lbPut({[EBF]:pb.endRB});
-  const rows=await weeklyBoard(pb.endRB,8,EBF),b=document.getElementById('banner');
+  const v=wval(d,lt);if(pb.endRB==null||v<pb.endRB){pb.endRB=v;pb.endRS=String(curSeed).toUpperCase().slice(0,6);savePB()}
+  if(pb.endRB!=null)await lbPut(Object.assign({[EBF]:pb.endRB},pb.endRS?{endsa:encSeed(pb.endRS)[0],endsb:encSeed(pb.endRS)[1]}:{}));
+  const rows=withSeed(await weeklyBoard(pb.endRB,8,EBF)),b=document.getElementById('banner');
   if(state==='over'&&mode==='endless'&&!curSet&&!curWeekly&&b){const box=document.createElement('div');box.innerHTML='<div class="lbt">Endless leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
 }
 function endRun(done){
@@ -1285,14 +1290,14 @@ function syncPBs(){const p={};LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];i
 async function lbTop(field,n){
   if(!db)return null;
   try{const sn=await db.collection('lb').orderBy(field,'asc').limit(n).get();
-    const rows=sn.docs.map(d=>({id:d.id,t:d.data()[field]})).filter(r=>r.t!=null),names={};
+    const rows=sn.docs.map(d=>({id:d.id,t:d.data()[field],sd:field===EBF?decSeed(d.data()):null})).filter(r=>r.t!=null),names={};
     if(usersNS&&rows.length){try{const ps=await usersNS.profiles(rows.map(r=>r.id));rows.forEach(r=>names[r.id]=ps[r.id]&&ps[r.id].name)}catch(e){}}
-    return rows.map(r=>({id:r.id,t:r.t,name:names[r.id]||'Player',me:r.id===uid}))}catch(e){return null}
+    return rows.map(r=>({id:r.id,t:r.t,sd:r.sd,name:names[r.id]||'Player',me:r.id===uid}))}catch(e){return null}
 }
 function lbHTML(rows,link,f,ref){f=f||fmt;
   if(rows===null)return '<small>'+offMsg()+'</small>';
   if(!rows.length)return '<small>No times yet. Be the first!</small>';
-  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+'</b></div>').join('');
+  return rows.map((r,i)=>'<div class="row'+(r.me?' me':'')+(r.rank?' sep':'')+'"><span>'+(r.rank||i+1)+'. '+(link&&r.id?'<button class="nameb" data-u="'+esc(r.id)+'">'+esc(r.name)+'</button>':esc(r.name))+'</span><b>'+(ref&&r.id&&!r.me?'<button class="gbtn" data-wg="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Race '+esc(r.name)+'\'s ghost">Ghost</button> ':'')+(ref&&r.id?'<button class="gbtn" data-rw="'+esc(r.id)+'" data-wr="'+esc(ref)+'" data-wn="'+esc(r.name)+'" title="Watch the replay" aria-label="Watch replay"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button><button class="gbtn" data-rl="'+esc(r.id)+'" data-wr="'+esc(ref)+'" title="Copy a link to this replay" aria-label="Copy replay link"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button> ':'')+f(r.t)+(r.sd?' <small class="sd">'+esc(r.sd)+'</small>':'')+'</b></div>').join('');
 }
 // the board can lag behind a write you just made, so make sure your own time is shown
 function lbMerge(rows,t){
