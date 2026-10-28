@@ -42,6 +42,7 @@ canvas{display:block;width:100%;height:100%}
 #acctban{display:block;margin:14px auto 0;max-width:330px;width:100%;padding:10px 14px;border-radius:12px;border:2px solid #ff9a3c;background:linear-gradient(135deg,#ff9a3c,#ff5a1f);color:#fff;cursor:pointer;text-align:center;font:inherit;animation:abpulse 2s ease-in-out infinite}#acctban[hidden]{display:none}#acctban b{display:block;font-size:1.1em}#acctban span{display:block;font-size:.82em;opacity:.95;margin-top:2px}#acctban:hover{filter:brightness(1.1)}@keyframes abpulse{0%,100%{box-shadow:0 0 0 0 #ff9a3c88}50%{box-shadow:0 0 0 8px #ff9a3c00}}
 .bars{display:flex;flex-direction:column;gap:12px}#p-pmenu,#p-emenu,#p-prmenu{width:min(400px,100%)}.bars .bar.big{padding:24px 12px;font-size:22px}.bars .bar{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:16px}
 #psignout{border-color:#ff5a3c;color:#ff8a70}#psignout[hidden]{display:none}
+.gaten{background:#ff9a3c22;border:1px solid #ff9a3c;border-radius:8px;padding:8px 10px;font-weight:700}
 #tagline{font-size:calc(1em + 3px);transition:opacity .4s}#tagline.fade{opacity:0}
 .panel button,.pop button{font:inherit;font-size:18px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer}
 .panel button:hover,.pop button:hover{background:#383c5c}
@@ -411,6 +412,7 @@ const narrow=()=>matchMedia('(max-width:640px)').matches,popSide=id=>{if(!narrow
 // page history: Back goes to the page you were on before (not always the main menu), and leaving a level returns to the page you launched it from
 let navStack=[],lastPanel='main',navBack=false,resume={stack:[],panel:'main'};
 function show(id){
+  try{if(id!=='profile')gateNote=''}catch(e){}
   if(id==='main')navStack=[];else if(!navBack&&lastPanel!==id){navStack.push(lastPanel);if(navStack.length>30)navStack.shift()}
   lastPanel=id;resume={stack:navStack.slice(),panel:id};
   closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','prmenu'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
@@ -458,7 +460,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.cl)copyLink(d.cl);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
-  else{const a=d.a;if(a==='go-play')show('pmenu');else if(a==='go-edit')show('emenu');else if(a==='go-prof')show('prmenu');else if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='contrib'){show('contrib')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
+  else{const a=d.a;if(gate(a)){}else if(a==='go-play')show('pmenu');else if(a==='go-edit')show('emenu');else if(a==='go-prof')show('prmenu');else if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='contrib'){show('contrib')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
   if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch'){if(specInfo.ref==='e')watchEndless(specInfo.seed,specInfo.name,specInfo.arr);else startRef(specInfo.ref,specInfo.name,specInfo.arr,true)}else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else menuBack();return}
@@ -1338,12 +1340,17 @@ async function rankOf(field,t,id){
 }
 const offMsg=()=>backend==='none'?(window.claude?'Online features are not available in this view.':'No server address is set, so the online features are off. Add boxrun-config.js next to index.html (see boxrun-server/README.md).'):backendErr?'Cannot reach your server ('+backendErr+'). Check the address in boxrun-config.js, and that ALLOW_ORIGIN matches this site.':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
 const srvLine=()=>backend==='http'?(backendErr?'Server problem: '+backendErr:'Server: '+new URL(BOXRUN_API).host+' (connected)'):backend==='claude'?'Using your claude.ai account':'No server set up';
-const loginForm=()=>'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr">Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
+const loginForm=()=>(gateNote?'<div class="gaten">'+gateNote+'</div>':'')+'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr">Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
 const cubeSvg=(p,s,f)=>fullOf(f)?'<img src="'+fullOf(f).src+'" width="64" height="64" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
 async function adminRename(id,old){
   const n=await askText('New name for '+old+' (3 to 20 letters, numbers, _ . or -)',old,'Rename');if(!n||n===old)return;
   try{await httpB.rename(id,n);toast(old+' is now '+n);showProfile(id)}catch(e){toast((e&&e.message)||'Could not rename')}
 }
+// signed-out players must create an account before using these features
+const GATED={'go-edit':'the editor','edit':'the editor','go-prof':'your profile','prof':'your profile','skins':'your profile','comm':'community levels','weekly':'the weekly challenge'};
+let gateNote='',pendingAct=null;
+function gate(a){if(!GATED[a]||backend!=='http'||uid)return false;gateNote='Create a free account to use '+GATED[a]+'.';pendingAct=(a==='go-prof'||a==='prof'||a==='skins')?null:a;showProfile();return true}
+function resumeAct(){const a=pendingAct;pendingAct=null;gateNote='';if(!a||!uid)return;const b=document.createElement('button');b.dataset.a=a;menuEl.appendChild(b);b.click();b.remove()}
 async function showProfile(id){
   show('profile');document.getElementById('psignout').hidden=true;const el=document.getElementById('profbody');
   if(backend==='none'){el.innerHTML='<small>'+offMsg()+'</small>';return}
@@ -1374,7 +1381,7 @@ async function showProfile(id){
 async function acctDo(kind){
   const n=document.getElementById('au').value.trim(),p=document.getElementById('ap').value,e=document.getElementById('aerr');
   e.textContent='One moment\u2026';
-  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);showProfile()}catch(er){e.textContent=er.message||'Could not sign in.'}
+  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);showProfile();resumeAct()}catch(er){e.textContent=er.message||'Could not sign in.'}
 }
 async function acctOut(){await httpB.logout();uid=null;showProfile()}
 document.getElementById('profbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ap')acctDo('login')});
