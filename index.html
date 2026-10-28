@@ -1774,7 +1774,7 @@ load(0);showMenu();requestAnimationFrame(loop);bootDone=true;
 (()=>{
 const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
 let ctx=null,muted=false;try{muted=localStorage.getItem('br_mute')==='1'}catch(e){}
-const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},levels:{src:'music/levels.mp3',vol:.8,comp:true,name:'Ice Flow'},endless:{src:'music/endless.mp3',vol:.6}};
+const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},levels:{src:'music/levels.mp3',vol:.8,comp:true,name:'Ice Flow'},endless:{src:'music/endless.mp3',vol:.6,name:'Concentration'}};
 const btn=document.createElement('button');btn.id='mute';btn.setAttribute('aria-label','Toggle music');document.body.appendChild(btn);
 const np=document.createElement('div');np.id='np';document.body.appendChild(np);
 const paint=()=>btn.textContent=muted?'\u{1F507}':'\u{1F50A}';paint();
