@@ -49,6 +49,8 @@ canvas{display:block;width:100%;height:100%}
 #banner small{display:block;margin-top:6px;font-size:clamp(14px,3.5vw,20px);font-variant-numeric:tabular-nums}
 #banner small.lvn{opacity:.85;margin-top:2px}
 #banner{z-index:4}
+/* behind the menu only the level stays visible: no timer, buttons, ghost icon or hint text */
+body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #inpd{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);display:flex;gap:10px;z-index:3;pointer-events:none}
 #inpd span{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:12px;border:2px solid #4a4d63;background:rgba(20,20,30,.72);color:#8a8fb0;transition:background .05s}
 #inpd span.on{background:#5ec8ff;border-color:#fff;color:#0b1020}
@@ -346,6 +348,7 @@ function ghostAt(){
 function nextLevel(){if(state!=='win')return;extGhost=null;if(mode==='main'&&lvl+1<LEVELS.length)load(lvl+1);else menuBack()}
 function again(){if(state!=='win')return;fullRun=false;total=0;load(lvl)}
 const menuEl=document.getElementById('menu');
+{const sync=()=>document.body.classList.toggle('menuopen',!menuEl.hidden);new MutationObserver(sync).observe(menuEl,{attributes:true,attributeFilter:['hidden']});sync()}
 const narrow=()=>matchMedia('(max-width:640px)').matches,popSide=id=>{if(!narrow())return;const e=document.getElementById(id);if(!e._ph){e._ph=document.createComment(id);e.before(e._ph)}menuEl.appendChild(e);e.classList.add('pop')},closeSide=()=>document.querySelectorAll('#lvside,#cside').forEach(e=>{e.classList.remove('pop');if(e._ph&&e._ph.parentNode){e._ph.replaceWith(e);e._ph=null}});
 // page history: Back goes to the page you were on before (not always the main menu), and leaving a level returns to the page you launched it from
 let navStack=[],lastPanel='main',navBack=false,resume={stack:[],panel:'main'};
@@ -628,7 +631,7 @@ function draw(){
   for(const m of movers){ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(m.x*U+.5,m.y*U+.5,(m.v?1:m.d+1)*U-1,(m.v?m.d+1:1)*U-1);ctx.setLineDash([])}
   for(const poly of moverPolys()){const x=poly[0][0]*U,y=poly[0][1]*U;ctx.fillStyle='#6a6f94';ctx.fillRect(x,y,U,U);ctx.strokeStyle='#ffd24a';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,U-4,U-4);ctx.beginPath();ctx.moveTo(x+6,y+U-6);ctx.lineTo(x+U-6,y+6);ctx.stroke()}
   const labs=mode==='main'&&lvl===0?TUT.labels:mode==='main'&&lvl===1?TUT2.labels:(cur&&cur.labels)||texts;
-  if(labs){
+  if(labs&&state!=='menu'){   // no level text behind the menu
     ctx.font='14px system-ui,sans-serif';ctx.textBaseline='top';
     for(const L of labs){
       const w=Math.max(...L.t.map(s=>ctx.measureText(s).width))+(L.c?22:0)+14,h=L.t.length*18+10;
