@@ -49,6 +49,14 @@ canvas{display:block;width:100%;height:100%}
 #banner small{display:block;margin-top:6px;font-size:clamp(14px,3.5vw,20px);font-variant-numeric:tabular-nums}
 #banner small.lvn{opacity:.85;margin-top:2px}
 #banner{z-index:4}
+#banner .lbw{max-width:360px;margin:12px auto 0;font-size:clamp(17px,4.2vw,22px)}
+#banner .lbw .lbt{font-size:.8em;opacity:.8;margin-bottom:2px;text-align:center}
+#banner .lbw .row{align-items:center;padding:7px 4px}
+#banner .lbw .row span{font-size:1.25em}
+#banner .lbw .row b{display:inline;font-size:1em;color:inherit}
+#banner .lbw .row small{display:inline;margin:0;font-size:.7em}
+#banner .lbw button.nameb,#banner .lbw button.gbtn{background:none;border:0;padding:0 2px;font:inherit;color:inherit;border-radius:6px}
+#banner .lbw button.gbtn{background:#2a2d44;border:1px solid #4a4d63;padding:2px 6px;font-size:.7em;margin-left:4px;vertical-align:middle}
 #banner .bb{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 #banner button{pointer-events:auto;font:inherit;font-size:18px;color:#fff;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:10px 20px;cursor:pointer}
 #banner button.pri{background:#1f9d5c;border-color:#2fd37a}
@@ -1065,7 +1073,7 @@ async function endBoardDone(d){
   const v=wval(d,lt);if(pb.endRB==null||v<pb.endRB){pb.endRB=v;pb.endRS=String(curSeed).toUpperCase().slice(0,6);savePB()}
   if(pb.endRB!=null)await lbPut(Object.assign({[EBF]:pb.endRB},pb.endRS?{endsa:encSeed(pb.endRS)[0],endsb:encSeed(pb.endRS)[1]}:{}));
   const rows=withSeed(await weeklyBoard(pb.endRB,8,EBF)),b=document.getElementById('banner');
-  if(state==='over'&&mode==='endless'&&!curSet&&!curWeekly&&b){const box=document.createElement('div');box.innerHTML='<div class="lbt">Endless leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
+  if(state==='over'&&mode==='endless'&&!curSet&&!curWeekly&&b){const box=document.createElement('div');box.className='lbw';box.innerHTML='<div class="lbt">Endless leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
 }
 function endRun(done){
   state='over';timer=1e9;
@@ -1093,7 +1101,7 @@ async function weeklyDone(d){
   const mine=pb.wk[k];
   if(mine!=null)await lbPut({[wfld()]:mine});
   const rows=await weeklyBoard(mine,8),b=document.getElementById('banner');
-  if(state==='over'&&curWeekly&&b){const box=document.createElement('div');box.innerHTML='<div class="lbt">Weekly leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
+  if(state==='over'&&curWeekly&&b){const box=document.createElement('div');box.className='lbw';box.innerHTML='<div class="lbt">Weekly leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
 }
 async function openWeekly(){
   show('weekly');if(!pb.wk)pb.wk={};
