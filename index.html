@@ -1802,6 +1802,8 @@ function tick(){
 setInterval(tick,250);
 document.addEventListener('visibilitychange',tick);
 const unlock=()=>{init();tick()};
+try{init();tick()}catch(e){}
+addEventListener('load',()=>{try{init();tick()}catch(e){}});
 for(const ev of ['pointerup','click','touchend','keydown','mouseup'])addEventListener(ev,unlock,true);
 btn.addEventListener('pointerdown',e=>e.stopPropagation());
 btn.addEventListener('click',e=>{e.stopPropagation();init();muted=!muted;try{localStorage.setItem('br_mute',muted?'1':'0')}catch(x){}paint();tick();btn.blur()});
