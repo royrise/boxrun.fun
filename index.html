@@ -611,9 +611,9 @@ function draw(){
   ctx.restore();
   if(state==='dead'){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='rgba(255,40,0,.25)';ctx.fillRect(0,0,W,Hh)}
   if((cd>0||goT>0)&&state==='play'){   // countdown overlay
-    ctx.setTransform(dpr,0,0,dpr,0,0);const go=cd<=0,n=go?0:Math.ceil(cd/CDN-1e-9),sz=Math.min(W,Hh)*.34;   // plain numbers, no animation; GO fades out over 0.5 s
+    ctx.setTransform(dpr,0,0,dpr,0,0);const go=cd<=0,n=go?0:Math.ceil(cd/CDN-1e-9),sz=Math.max(34,Math.min(60,Math.min(W,Hh)*.1));   // plain numbers, no animation; GO fades out over 0.5 s
     ctx.save();ctx.globalAlpha=go?Math.max(0,goT/.5):1;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 '+sz+'px system-ui,sans-serif';ctx.lineWidth=sz*.08;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.fillStyle=go?'#2fd37a':'#fff';
-    const tx=go?'GO!':String(n);ctx.strokeText(tx,W/2,Hh*.3);ctx.fillText(tx,W/2,Hh*.3);ctx.restore()}
+    const tx=go?'GO!':String(n);ctx.strokeText(tx,W/2,118);ctx.fillText(tx,W/2,118);ctx.restore()}
 }
 let last=performance.now();
 function loop(now){
