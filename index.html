@@ -299,7 +299,7 @@ const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='t
     const xy=(a,b)=>v?[ox+a,b]:[b,a];
     const rect=(a1,b1,a2,b2,c)=>{const [x1,y1]=xy(Math.min(a1,a2),Math.min(b1,b2)),[x2,y2]=xy(Math.max(a1,a2),Math.max(b1,b2));o.r(Math.min(x1,x2),Math.min(y1,y2),Math.max(x1,x2),Math.max(y1,y2),c)};
     const get=(a,b)=>{const [x,y]=xy(a,b);return o.get(x,y)};
-    for(let att=0;att<60;att++){
+    for(let att=0;att<90;att++){
       let q=(sp.seed*7919+att*104729)>>>0;const rnd=()=>(q=(q*1664525+1013904223)>>>0)/4294967296;
       {const [x1,y1]=xy(0,0),[x2,y2]=xy(A-1,B-1);o.clr(Math.min(x1,x2),Math.min(y1,y2),Math.max(x1,x2),Math.max(y1,y2))}
       const xs=[...Array(n)].map((_,i)=>Math.round(A*(i+1)/(n+1)+(rnd()-.5)*(A/(n+1))*.45)),lo=1+hg,hi=B-2-hg;
@@ -327,12 +327,17 @@ const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='t
           let ok=a2-a1>=sa+2?1:0;for(let u=0;u<sa&&ok;u++)for(let t=0;t<sbz;t++)if(get(aa+u,bb+t)!=='.'){ok=0;break}if(ok)rect(aa,bb,aa+sa-1,bb+sbz-1,sp.hc||'L')}
       }
       // can a 2x2 block get from the start to the goal?
-      const ok=(a,b)=>{if(a<0||b<0||a>=A-1||b>=B-1)return 0;for(const [da,db] of [[0,0],[1,0],[0,1],[1,1]]){const c=get(a+da,b+db);if(c==='#'||c==='L'||c==='B')return 0}return 1};
-      const seen=new Set(),st=[[first?2:3,sb-1]];let found=false;
-      while(st.length&&!found){const [a,b]=st.pop(),k=a+','+b;if(seen.has(k)||!ok(a,b))continue;seen.add(k);
-        for(const [da,db] of [[0,0],[1,0],[0,1],[1,1]])if(get(a+da,b+db)===gch)found=true;
-        st.push([a+1,b],[a-1,b],[a,b+1],[a,b-1])}
-      if(found||att===59){if(first){const [x,y]=xy(2,sb);o.st(x,y,v?0:1)}return}
+      const T3=[0,1,2].flatMap(da=>[0,1,2].map(db=>[da,db])),ok=(a,b)=>{if(a<0||b<0||a>=A-2||b>=B-2)return 0;for(const [da,db] of T3){const c=get(a+da,b+db);if(c==='#'||c==='L'||c==='B')return 0}return 1};
+      const prev=new Map(),qq=[[first?2:3,sb-1]];prev.set(qq[0].join(','),null);let endk=null;
+      for(let qi=0;qi<qq.length&&endk===null;qi++){const [a,b]=qq[qi];if(!ok(a,b))continue;
+        for(const [da,db] of T3)if(get(a+da,b+db)===gch){endk=a+','+b;break}
+        if(endk!==null)break;
+        for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const na=a+da,nb=b+db,nk=na+','+nb;if(!prev.has(nk)&&ok(na,nb)){prev.set(nk,a+','+b);qq.push([na,nb])}}}
+      const found=endk!==null;
+      if(found){   // seal everything more than 3 tiles from the route, so the way through is obvious
+        const keep=new Set();let k=endk;while(k!==null){const [a,b]=k.split(',').map(Number);for(let da=-3;da<=5;da++)for(let db=-3;db<=5;db++)keep.add((a+da)+','+(b+db));k=prev.get(k)}
+        for(let a=0;a<A;a++)for(let b=0;b<B;b++){if(keep.has(a+','+b))continue;const c=get(a,b);if('.LIMKPBC'.includes(c))rect(a,b,a,b,'#')}}
+      if(found||att===89){if(first){const [x,y]=xy(2,sb);o.st(x,y,v?0:1)}return}
     }};
   const arena=sp=>add(sp.w,sp.h,o=>build(o,0,sp,true,false));
   arena({w:66,h:30,v:1,n:5,gw:5,pat:'alt',mech:'ice',haz:3,seed:11});                                                    // 4 ice rink
