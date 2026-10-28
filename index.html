@@ -302,9 +302,9 @@ const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='t
     for(let att=0;att<60;att++){
       let q=(sp.seed*7919+att*104729)>>>0;const rnd=()=>(q=(q*1664525+1013904223)>>>0)/4294967296;
       {const [x1,y1]=xy(0,0),[x2,y2]=xy(A-1,B-1);o.clr(Math.min(x1,x2),Math.min(y1,y2),Math.max(x1,x2),Math.max(y1,y2))}
-      const xs=[...Array(n)].map((_,i)=>Math.round(A*(i+1)/(n+1))),lo=1+hg,hi=B-2-hg;
+      const xs=[...Array(n)].map((_,i)=>Math.round(A*(i+1)/(n+1)+(rnd()-.5)*(A/(n+1))*.45)),lo=1+hg,hi=B-2-hg;
       const gc=xs.map((_,i)=>Math.round(lo+(hi-lo)*(pat==='stair'?.12+.76*i/Math.max(1,n-1):pat==='mid'?.5+(rnd()-.5)*.14:pat==='ends'?(i%2?.96:.04):(i%2?.86+.12*rnd():.02+.12*rnd()))));
-      xs.forEach((x,i)=>{rect(x,0,x,B-1,'#');rect(x,gc[i]-hg,x,gc[i]-hg+gw-1,'.')});
+      xs.forEach((x,i)=>{rect(x,0,x,B-1,'#');rect(x,gc[i]-hg,x,gc[i]-hg+gw-1,'.');const mm=Array.isArray(mech)?mech[i]:mech;if(rnd()<.3&&mm!=='gate'&&mm!=='check'){const g2=Math.round(gc[i]<B/2?gc[i]+hg+3+rnd()*(B-gc[i]-hg-9):2+rnd()*(gc[i]-hg-7));if(g2>=1&&g2+2<=B-2&&Math.abs(g2-gc[i])>hg+3)rect(x,g2,x,g2+2,'.')}});
       const gb=Math.round(gc[n-1]<B/2?B*.74:B*.26),sb=Math.round(B/2);
       const gch=toP?'1':'G';
       if(toP){rect(A-2,gb-1,A-2,gb-1,'1');rect(A-2,gb,A-2,gb,'2');rect(A-2,gb+1,A-2,gb+1,'3')}else rect(A-4,gb-1,A-2,gb+1,'G');
@@ -314,13 +314,15 @@ const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='t
         const a1=ra+(i===0?(first?9:6):3),a2=rb-(i===n?6:2),bl=Math.min(cin,cout)+hg+2,bh=Math.max(cin,cout)-hg-2,m=Array.isArray(mech)?mech[i]:mech,band=bh-bl>=3&&a2-a1>=4;
         if(band){
           if(m==='ice')rect(a1,bl,a2,bh,'I');else if(m==='mud')rect(a1,bl,a2,bh,'M');else if(m==='K')rect(a1,bl,a2,bh,'K');else if(m==='pad')rect(a1,bl,a2,bh,'P');
-          else if(m==='wind'){rect(a1,bl,a1+1,bh,'L');rect(a2-1,bl,a2,bh,'L');rect(a1+2,bl,a2-2,bh,v?(i%2?'>':'<'):(i%2?'v':'^'))}
+          else if(m==='wind'&&a2-a1>=6){rect(a1,bl,a1,bh,'L');rect(a2,bl,a2,bh,'L');rect(a1+1,bl,a2-1,bh,v?(i%2?'>':'<'):(i%2?'v':'^'))}
           else if(m==='slope'){for(let aa=a1+1;aa<a2-1;aa+=5)for(let bb=bl+((aa-a1)%10?2:0);bb<bh-1;bb+=5)if(get(aa,bb)==='.'&&get(aa+1,bb+1)==='.'){const [x,y]=xy(aa,bb);o.dia(x,y)}}
           else if(m==='bounce'){for(let k=0;k<4;k++){const aa=a1+Math.floor(rnd()*(a2-a1-1)),bb=bl+Math.floor(rnd()*(bh-bl-1));rect(aa,bb,aa+1,bb+1,'B')}}
           else if(m==='sweep'){const d=Math.min(7,rb-ra),bm=Math.round((bl+bh)/2);const [x,y]=xy(ra,bm),[x2,y2]=xy(ra,bm+1);const ch=String.fromCharCode((v?96:104)+d);o.r(x,y,x,y,ch);o.r(x2,y2,x2,y2,ch)}
         }
         if(m==='gate'&&i<n){const g1=gc[i]-hg,ch=v?'j':'b';for(let k=0;k<3;k++){const [x,y]=xy(xs[i],g1+k);o.r(x,y,x,y,ch)}}
         if(m==='check'&&i<n)rect(xs[i]+1,gc[i]-hg,xs[i]+1,gc[i]-hg+gw-1,'C');
+        for(let k=0,done=0;k<24&&done<Math.max(1,5-(att>>3));k++){const len=2+Math.floor(rnd()*4),bb=2+Math.floor(rnd()*(B-5)),left=rnd()<.5,aa=left?ra:rb-len+1;if(aa<a1-(left?3:0)||aa+len-1>a2+(left?0:2))continue;let ok=get(left?ra-1:rb+1,bb)==='#'?1:0;for(let u=0;u<len&&ok;u++)for(let t=-1;t<=1;t++)if(get(aa+u,bb+t)!=='.')ok=0;if(ok){rect(aa,bb,aa+len-1,bb,'#');done++}}
+        for(let k=0,done=0;k<24&&done<Math.max(0,4-(att>>3));k++){const aa=a1+1+Math.floor(rnd()*Math.max(1,a2-a1-3)),bb=2+Math.floor(rnd()*(B-6)),ph=1+Math.floor(rnd()*2);if(a2-a1<5)continue;let ok=1;for(let u=-1;u<=2&&ok;u++)for(let t=-1;t<=ph+1;t++)if(get(aa+u,bb+t)!=='.')ok=0;if(ok){rect(aa,bb,aa+1,bb+ph,'#');done++}}
         for(let k=0;k<(sp.haz||0)/(n+1);k++){const sa=sp.bl?sp.bl[0]:2+(rnd()<.5?1:0),sbz=sp.bl?sp.bl[1]:2+(rnd()<.5?1:0),aa=a1+1+Math.floor(rnd()*Math.max(1,a2-a1-sa-1)),bb=1+Math.floor(rnd()*Math.max(1,B-sbz-2));
           let ok=a2-a1>=sa+2?1:0;for(let u=0;u<sa&&ok;u++)for(let t=0;t<sbz;t++)if(get(aa+u,bb+t)!=='.'){ok=0;break}if(ok)rect(aa,bb,aa+sa-1,bb+sbz-1,sp.hc||'L')}
       }
@@ -333,26 +335,26 @@ const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='t
       if(found||att===59){if(first){const [x,y]=xy(2,sb);o.st(x,y,v?0:1)}return}
     }};
   const arena=sp=>add(sp.w,sp.h,o=>build(o,0,sp,true,false));
-  arena({w:56,h:30,v:1,n:4,gw:5,pat:'alt',mech:'ice',haz:3,seed:11});                                                    // 4 ice rink
-  arena({w:32,h:46,v:0,n:4,gw:6,pat:'alt',mech:'mud',haz:8,seed:5});                                                    // 5 mud bog
+  arena({w:66,h:30,v:1,n:5,gw:5,pat:'alt',mech:'ice',haz:3,seed:11});                                                    // 4 ice rink
+  arena({w:32,h:56,v:0,n:5,gw:6,pat:'alt',mech:'mud',haz:8,seed:5});                                                    // 5 mud bog
   arena({w:60,h:26,v:1,n:5,gw:5,pat:'ends',mech:'K',haz:4,seed:3});                                                       // 6 crumble run
-  arena({w:30,h:52,v:0,n:4,gw:6,pat:'alt',mech:'wind',haz:0,seed:2});                                                     // 7 wind tunnel
+  arena({w:32,h:62,v:0,n:5,gw:6,pat:'alt',mech:'wind',haz:0,seed:2});                                                     // 7 wind tunnel
   add(74,18,o=>{build(o,0,{w:34,h:18,v:1,n:3,gw:5,pat:'alt',mech:'none',haz:3,seed:8},true,true);o.r(34,0,35,17,'#');build(o,36,{w:38,h:18,v:1,n:3,gw:5,pat:'ends',mech:'none',haz:3,seed:9},false,false)}); // 8 portal hall
   arena({w:56,h:18,v:1,n:4,gw:5,pat:'alt',mech:'gate',haz:2,seed:6});                                                     // 9 mover gauntlet
-  arena({w:62,h:30,v:1,n:4,gw:6,pat:'alt',mech:'pad',haz:4,seed:4});                                                      // 10 pad run
+  arena({w:72,h:30,v:1,n:5,gw:6,pat:'alt',mech:'pad',haz:4,seed:4});                                                      // 10 pad run
   arena({w:36,h:44,v:0,n:3,gw:7,pat:'alt',mech:'slope',haz:0,seed:12});                                                   // 11 slope slalom
   arena({w:76,h:18,v:1,n:7,gw:4,pat:'alt',mech:'none',haz:12,bl:[1,5],seed:7});                                           // 12 lava stripes
   arena({w:26,h:60,v:0,n:6,gw:4,pat:'ends',mech:'check',haz:3,seed:13});                                                  // 13 checkpoint climb
-  arena({w:60,h:28,v:1,n:4,gw:5,pat:'alt',mech:['pad','mud','pad','mud','pad'],haz:3,seed:14});                           // 14 tempo
+  arena({w:72,h:28,v:1,n:5,gw:5,pat:'alt',mech:['pad','mud','pad','mud','pad','mud'],haz:3,seed:14});                           // 14 tempo
   maze(8,4,99,false,true);                                                                                                                    // 15 pad maze
-  arena({w:68,h:26,v:1,n:4,gw:8,pat:'mid',mech:'none',haz:18,seed:15});                                                   // 16 lava field
-  arena({w:36,h:40,v:0,n:3,gw:7,pat:'alt',mech:'none',haz:30,bl:[1,1],seed:16});                                          // 17 mine field
-  arena({w:50,h:30,v:1,n:4,gw:6,pat:'alt',mech:'sweep',haz:2,seed:17});                                                 // 18 mover halls
-  arena({w:58,h:30,v:1,n:4,gw:6,pat:'ends',mech:'wind',haz:0,seed:18});                                                   // 19 wind spiral
-  arena({w:34,h:48,v:0,n:4,gw:6,pat:'alt',mech:'bounce',haz:2,seed:19});                                                  // 20 bumper hall
+  arena({w:72,h:22,v:1,n:5,gw:6,pat:'mid',mech:'none',haz:18,seed:15});                                                   // 16 lava field
+  arena({w:32,h:56,v:0,n:5,gw:6,pat:'alt',mech:'none',haz:36,bl:[1,1],seed:16});                                          // 17 mine field
+  arena({w:62,h:30,v:1,n:5,gw:6,pat:'alt',mech:'sweep',haz:2,seed:17});                                                 // 18 mover halls
+  arena({w:68,h:30,v:1,n:5,gw:6,pat:'ends',mech:'wind',haz:0,seed:18});                                                   // 19 wind spiral
+  arena({w:34,h:60,v:0,n:5,gw:6,pat:'alt',mech:'bounce',haz:2,seed:19});                                                  // 20 bumper hall
   arena({w:32,h:54,v:0,n:4,gw:5,pat:'alt',mech:'ice',haz:6,seed:20});                                                     // 21 ice bridges
-  arena({w:64,h:16,v:1,n:8,gw:5,pat:'alt',mech:'pad',haz:0,seed:21});                                                     // 22 zipper
-  arena({w:54,h:32,v:1,n:3,gw:7,pat:'alt',mech:'bounce',haz:4,seed:22});                                                // 23 bounce lane
+  arena({w:76,h:16,v:1,n:9,gw:5,pat:'alt',mech:'pad',haz:0,seed:21});                                                     // 22 zipper
+  arena({w:64,h:32,v:1,n:4,gw:7,pat:'alt',mech:'bounce',haz:4,seed:22});                                                // 23 bounce lane
   maze(9,6,5,true,true);                                                                                                                      // 24 mega maze
   arena({w:100,h:30,v:1,n:7,gw:5,pat:'alt',mech:['ice','mud','wind','K','sweep','gate','pad','none'],haz:2,seed:25});       // 25 grand tour
 })();
