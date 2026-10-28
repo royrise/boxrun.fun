@@ -159,7 +159,7 @@ canvas{display:block;width:100%;height:100%}
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
- <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track that never ends. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><button data-a="back">Back</button></div>
+ <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track that never ends. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><div class="lbt">Top distances (random seeds)</div><div id="eboard"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-stats" hidden><h2>Statistics</h2><div id="statlist"></div><button data-a="back">Back</button></div>
 </div>
@@ -1046,6 +1046,20 @@ function endNew(){if(curWeekly){showMenu();openWeekly()}else if(curSet){showMenu
 function openEndless(){
   show('endless');endUI();document.getElementById('eseed').value=pb.endSeed||'';
   document.getElementById('ebest').textContent=pb.endBest?'Best distance: '+pb.endBest+' m':'No runs yet';
+  eBoardLoad();
+}
+// Endless leaderboard: best distance on random-seed runs (set seeds can be practised and the weekly has its own board). Stored inverted like the weekly so lower is better.
+const EBF='endb';
+async function eBoardLoad(){
+  const bd=document.getElementById('eboard');bd.textContent='Loading\u2026';
+  if(pb.endRB!=null)lbPut({[EBF]:pb.endRB});
+  bd.innerHTML=lbHTML(await weeklyBoard(pb.endRB,10,EBF),true,wfmt);
+}
+async function endBoardDone(d){
+  const v=wval(d,lt);if(pb.endRB==null||v<pb.endRB){pb.endRB=v;savePB()}
+  if(pb.endRB!=null)await lbPut({[EBF]:pb.endRB});
+  const rows=await weeklyBoard(pb.endRB,8,EBF),b=document.getElementById('banner');
+  if(state==='over'&&mode==='endless'&&!curSet&&!curWeekly&&b){const box=document.createElement('div');box.innerHTML='<div class="lbt">Endless leaderboard</div>'+lbHTML(rows,false,wfmt);b.insertBefore(box,b.querySelector('.bb'))}
 }
 function endRun(done){
   state='over';timer=1e9;
@@ -1053,18 +1067,18 @@ function endRun(done){
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
   banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
-  if(curWeekly)weeklyDone(d);
+  if(curWeekly)weeklyDone(d);else if(!curSet&&d>0)endBoardDone(d);
 }
 // ---- weekly challenge: one fixed track per week (Monday 00:00 UTC), same for everyone. Board score: further is better (stored inverted so lower is better).
 const weekIdx=()=>Math.floor((Date.now()-Date.UTC(1970,0,5))/(7*864e5));
 const weekSeed=()=>'WN'+weekIdx(),wfld=()=>'wn'+weekIdx(),wkKey=()=>'n'+weekIdx();   // 'WN'/'wn'/'n' = the new-style endless track and its own fresh leaderboard (the old 'WK'/'w' weeks are retired)
 const wval=(d,time)=>Math.round((99000-d+Math.min(time||0,999)/10000)*1e5)/1e5,wdist=v=>Math.round(99000-Math.floor(v+1e-6)),wfmt=v=>wdist(v)+' m';
 function wLeft(){const ms=(weekIdx()+1)*7*864e5+Date.UTC(1970,0,5)-Date.now(),h=Math.floor(ms/36e5);return (h>=24?Math.floor(h/24)+' d ':'')+(h%24)+' h left'}
-async function weeklyBoard(mine,limit){
-  const raw=await lbTop(wfld(),50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,mine);
+async function weeklyBoard(mine,limit,F){
+  F=F||wfld();const raw=await lbTop(F,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,mine);
   if(all===null)return null;
   let rows=all.slice(0,limit);const mi=all.findIndex(r=>r.me);
-  if(mi>=limit){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(wfld(),mine,uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}
+  if(mi>=limit){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(F,mine,uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}
   return rows;
 }
 async function weeklyDone(d){
