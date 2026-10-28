@@ -39,6 +39,7 @@ canvas{display:block;width:100%;height:100%}
 #p-main h1{font-family:Audex,Bungee,Orbitron,sans-serif;font-weight:400;margin:0;font-size:clamp(40px,16.5vw,172px);line-height:1;letter-spacing:.02em;color:#5ec8ff;white-space:nowrap}
 .panel h2{margin:0 0 4px;font-size:26px}
 .panel .sub{margin:0 0 12px;opacity:.7}
+#tagline{font-size:calc(1em + 3px);transition:opacity .4s}#tagline.fade{opacity:0}
 .panel button,.pop button{font:inherit;font-size:18px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer}
 .panel button:hover,.pop button:hover{background:#383c5c}
 .panel button small{display:block;font-size:13px;opacity:.7;margin-top:2px}
@@ -182,7 +183,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 <div id="banner"></div>
 <div id="menu">
 <button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
- <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub">Steer. Survive. Don’t touch the lava.</p><div class="icons">
+ <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub" id="tagline">Steer. Survive. Don’t touch the lava.</p><div class="icons">
 <button class="ib playbig" data-a="play" aria-label="Play" data-tip="Play: start a full run from Level 1"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span>PLAY</span></button>
 <button class="ib playbig" data-a="endless" aria-label="Endless" data-tip="Endless: a random track from a seed. Go as far as you can"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-3-3.5-4-5.5-4a4 4 0 000 8c2 0 3.5-1 5.5-4zm0 0c2 3 3.5 4 5.5 4a4 4 0 000-8c-2 0-3.5 1-5.5 4z"/></svg><span>ENDLESS</span></button>
 <button class="ib" data-a="levels" aria-label="Level Select" data-tip="Level Select: pick a level and see its leaderboard"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span>Levels</span></button>
@@ -1874,6 +1875,11 @@ for(const ev of ['pointerup','click','touchend','keydown','mouseup'])addEventLis
 btn.addEventListener('pointerdown',e=>e.stopPropagation());
 btn.addEventListener('click',e=>{e.stopPropagation();init();muted=!muted;try{localStorage.setItem('br_mute',muted?'1':'0')}catch(x){}paint();tick();btn.blur()});
 })();
+
+// rotating tagline under the logo
+(()=>{const el=document.getElementById('tagline');if(!el)return;
+const L=['Steer. Survive. Don\u2019t touch the lava.','Always forward. Never stop.','Reach the checkered flag.','How far can you get in Endless?','A new weekly challenge every week.','Build a level and share it.','Lava is not your friend.','Beat your ghost.'];let i=0;
+setInterval(()=>{if(document.hidden)return;el.classList.add('fade');setTimeout(()=>{i=(i+1)%L.length;el.textContent=L[i];el.classList.remove('fade')},400)},4200)})();
 </script>
 </body>
 </html>
