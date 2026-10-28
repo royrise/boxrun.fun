@@ -169,6 +169,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 .panel .nameb,.pop .nameb{background:none!important;border:0;padding:0;font-size:inherit;color:inherit;cursor:pointer;text-decoration:underline dotted}
 .panel .nameb:hover,.pop .nameb:hover{color:#5ec8ff}
 #ec{flex:1;min-height:0;width:100%;touch-action:none}
+#mute{position:fixed;top:8px;right:8px;z-index:60;width:34px;height:34px;border-radius:50%;border:1px solid #fff4;background:#0008;color:#fff;font-size:16px;line-height:1;padding:0;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1766,6 +1767,38 @@ editorEl.addEventListener('click',e=>{
     else eStat('Could not save: this browser is blocking storage. Use Export to keep the level.')}
 });
 load(0);showMenu();requestAnimationFrame(loop);bootDone=true;
+
+// ---- music: menu / main levels / endless. Files live in music/ (menu.mp3, levels.mp3, endless.mp3); a missing file just stays silent
+(()=>{
+const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+let ctx=null,muted=false;try{muted=localStorage.getItem('br_mute')==='1'}catch(e){}
+const T={menu:{src:'music/menu.mp3',vol:.7},levels:{src:'music/levels.mp3',vol:.5,comp:true},endless:{src:'music/endless.mp3',vol:.6}};
+const btn=document.createElement('button');btn.id='mute';btn.setAttribute('aria-label','Toggle music');document.body.appendChild(btn);
+const paint=()=>btn.textContent=muted?'\u{1F507}':'\u{1F50A}';paint();
+function init(){
+  if(ctx)return;ctx=new AC();
+  for(const k in T){const t=T[k];const a=new Audio();a.loop=true;a.preload='auto';a.crossOrigin='anonymous';a.src=t.src;a.addEventListener('error',()=>{t.bad=true});
+    t.a=a;t.g=ctx.createGain();t.g.gain.value=0;
+    const n=ctx.createMediaElementSource(a);
+    if(t.comp){const c=ctx.createDynamicsCompressor();c.threshold.value=-24;c.knee.value=12;c.ratio.value=8;c.attack.value=.003;c.release.value=.2;n.connect(c);c.connect(t.g)}else n.connect(t.g);
+    t.g.connect(ctx.destination)}
+}
+function want(){const m=document.getElementById('menu');if(!m||!m.hidden)return 'menu';return typeof mode!=='undefined'&&mode==='endless'?'endless':'levels'}
+let last=null;
+function tick(){
+  if(!ctx)return;if(ctx.state==='suspended')ctx.resume();
+  const w=muted?null:want(),now=ctx.currentTime;
+  for(const k in T){const t=T[k],on=k===w&&!t.bad;
+    if(on&&t.a.paused)t.a.play().catch(()=>{});
+    t.g.gain.setTargetAtTime(on?t.vol:0,now,on?.6:.35);
+    if(!on&&!t.a.paused&&t.g.gain.value<.01){t.a.pause()}}
+}
+setInterval(tick,250);
+const unlock=()=>{init();tick()};
+addEventListener('pointerdown',unlock);addEventListener('keydown',unlock);
+btn.addEventListener('pointerdown',e=>e.stopPropagation());
+btn.addEventListener('click',e=>{e.stopPropagation();init();muted=!muted;try{localStorage.setItem('br_mute',muted?'1':'0')}catch(x){}paint();tick();btn.blur()});
+})();
 </script>
 </body>
 </html>
