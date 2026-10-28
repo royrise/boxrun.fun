@@ -41,6 +41,7 @@ canvas{display:block;width:100%;height:100%}
 .panel .sub{margin:0 0 12px;opacity:.7}
 #acctban{display:block;margin:14px auto 0;max-width:330px;width:100%;padding:10px 14px;border-radius:12px;border:2px solid #ff9a3c;background:linear-gradient(135deg,#ff9a3c,#ff5a1f);color:#fff;cursor:pointer;text-align:center;font:inherit;animation:abpulse 2s ease-in-out infinite}#acctban[hidden]{display:none}#acctban b{display:block;font-size:1.1em}#acctban span{display:block;font-size:.82em;opacity:.95;margin-top:2px}#acctban:hover{filter:brightness(1.1)}@keyframes abpulse{0%,100%{box-shadow:0 0 0 0 #ff9a3c88}50%{box-shadow:0 0 0 8px #ff9a3c00}}
 .bars{display:flex;flex-direction:column;gap:12px}#p-pmenu,#p-emenu,#p-prmenu{width:min(400px,100%)}.bars .bar.big{padding:24px 12px;font-size:22px}.bars .bar{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:16px}
+#psignout{border-color:#ff5a3c;color:#ff8a70}#psignout[hidden]{display:none}
 #tagline{font-size:calc(1em + 3px);transition:opacity .4s}#tagline.fade{opacity:0}
 .panel button,.pop button{font:inherit;font-size:18px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer}
 .panel button:hover,.pop button:hover{background:#383c5c}
@@ -199,7 +200,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
  <div class="panel" id="p-prmenu" hidden><h2>Profile</h2><div class="bars"><button data-a="prof" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>View your profile</span></button><button data-a="skins" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg><span>Customise your character</span></button></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><button class="lbo" data-lbo="1">Overall leaderboard</button><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
- <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button><button data-a="alogout" id="psignout" hidden>Sign out</button></div>
  <div class="panel" id="p-contrib" hidden><h2>Contributors</h2><p class="sub">Thanks to everyone who helped make Box Run.</p><div class="row" style="justify-content:center;text-align:center"><span>royrise</span></div><div class="row" style="justify-content:center;text-align:center"><span>the_union_of_soviet_onions</span></div><div class="row" style="justify-content:center;text-align:center"><span>zvelq</span></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><div class="lbt" style="margin-top:14px">Full skins</div><div class="sw" id="swf"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
@@ -1344,7 +1345,7 @@ async function adminRename(id,old){
   try{await httpB.rename(id,n);toast(old+' is now '+n);showProfile(id)}catch(e){toast((e&&e.message)||'Could not rename')}
 }
 async function showProfile(id){
-  show('profile');const el=document.getElementById('profbody');
+  show('profile');document.getElementById('psignout').hidden=true;const el=document.getElementById('profbody');
   if(backend==='none'){el.innerHTML='<small>'+offMsg()+'</small>';return}
   if(!id){
     if(!uid){el.innerHTML=backend==='http'&&!backendErr?loginForm():backendErr?'<small>'+offMsg()+'</small>':'<small>Sign in to claude.ai to have a profile.</small>';return}
@@ -1365,7 +1366,8 @@ async function showProfile(id){
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
    +(!mine&&backend==='http'&&httpB&&httpB.admin()?'<button data-ar="'+esc(id)+'" data-an="'+esc(name)+'">Rename player (admin)</button>':'')
-   +(mine&&backend==='http'?'<button data-a="alogout">Sign out</button><small class="srv">'+srvLine()+'</small>':'');
+   +(mine&&backend==='http'?'<small class="srv">'+srvLine()+'</small>':'');
+  document.getElementById('psignout').hidden=!(mine&&backend==='http'&&uid);
   let ranked=false;const pl=el.querySelector('.plc');   // ranks are only looked up when the dropdown is opened
   if(pl)pl.addEventListener('toggle',()=>{if(!pl.open||ranked)return;ranked=true;defs.forEach(([n,f],i)=>{if(times[f]==null)return;rankOf(f,times[f],id).then(r=>{const c=document.getElementById('rk'+i);if(c&&r)c.textContent=r.rank?'#'+r.rank:'100+'})})});
 }
