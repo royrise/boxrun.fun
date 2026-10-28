@@ -1774,7 +1774,7 @@ load(0);showMenu();requestAnimationFrame(loop);bootDone=true;
 (()=>{
 const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
 let ctx=null,muted=false;try{muted=localStorage.getItem('br_mute')==='1'}catch(e){}
-const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},levels:{src:'music/levels.mp3',vol:.8,comp:true,name:'Ice Flow'},endless:{src:'music/endless.mp3',vol:.6,name:'Concentration'}};
+const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},endless:{src:'music/endless.mp3',vol:.6,name:'Concentration'}};
 const btn=document.createElement('button');btn.id='mute';btn.setAttribute('aria-label','Toggle music');document.body.appendChild(btn);
 const np=document.createElement('div');np.id='np';document.body.appendChild(np);
 const paint=()=>btn.textContent=muted?'\u{1F507}':'\u{1F50A}';paint();
@@ -1786,7 +1786,7 @@ function init(){
     if(t.comp){const c=ctx.createDynamicsCompressor();c.threshold.value=-24;c.knee.value=12;c.ratio.value=8;c.attack.value=.003;c.release.value=.2;n.connect(c);c.connect(t.g)}else n.connect(t.g);
     t.g.connect(ctx.destination)}
 }
-function want(){const m=document.getElementById('menu');if(!m||!m.hidden)return 'menu';return typeof mode!=='undefined'&&mode==='endless'?'endless':'levels'}
+function want(){const m=document.getElementById('menu');if(!m||!m.hidden)return 'menu';return typeof mode!=='undefined'&&mode==='endless'?'endless':null}
 let last=null;
 function tick(){
   if(!ctx)return;if(ctx.state==='suspended')ctx.resume();
