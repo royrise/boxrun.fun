@@ -52,6 +52,7 @@ canvas{display:block;width:100%;height:100%}
 /* behind the menu only the level stays visible: no timer, buttons, ghost icon or hint text */
 body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #inpd{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);display:flex;gap:10px;z-index:3;pointer-events:none}
+#inpd[hidden]{display:none}
 #inpd span{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:12px;border:2px solid #4a4d63;background:rgba(20,20,30,.72);color:#8a8fb0;transition:background .05s}
 #inpd span.on{background:#5ec8ff;border-color:#fff;color:#0b1020}
 @media (pointer:coarse){#inpd{bottom:110px}}
@@ -361,7 +362,7 @@ function openPanel(id){   // show a panel again, refreshing the ones whose conte
   try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
   show(id)}
 function menuBack(){const r=resume;showMenu();if(r&&r.panel!=='main'){navStack=r.stack.slice();navBack=true;openPanel(r.panel);navBack=false;navStack=r.stack.slice();resume={stack:r.stack.slice(),panel:r.panel}}}
-function showMenu(f){spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
+function showMenu(f){document.getElementById('inpd').hidden=true;spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
   let h=LEVELS.map((_,i)=>'<div class="crow"><button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button><button class="lbbtn" data-lbs="'+i+'" title="Show the leaderboard for level '+(i+1)+'" aria-label="Leaderboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button></div>').join('');
