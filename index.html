@@ -113,6 +113,8 @@ canvas{display:block;width:100%;height:100%}
 #p-levels{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)}
 #p-levels #lvwrap{flex:1;min-height:0}
 #lvleft{overflow-y:auto;min-height:0;padding-right:6px}
+/* big screens: level buttons are tall enough that exactly 5 levels fit in view at a time */
+@media(pointer:fine) and (min-width:900px){#lvlist .crow{height:max(72px,calc((100dvh - 178px)/5))}#lvlist .crow button{height:100%}#lvlist .crow button[data-l]{font-size:clamp(20px,3.2vh,30px)}#lvlist .crow button[data-l] small{font-size:clamp(13px,2vh,18px)}}
 #lvside{align-self:flex-start}
 .panel .lbbtn{padding:6px 10px;display:flex;align-items:center}
 @media(min-width:641px){.lbo{display:none}}
