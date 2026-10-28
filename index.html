@@ -197,7 +197,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><button class="lbo" data-lbo="1">Overall leaderboard</button><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button></div>
- <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><small id="skinnote"></small><button data-a="back">Back</button></div>
+ <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><div class="lbt" style="margin-top:14px">Full skins</div><div class="sw" id="swf"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track that never ends. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><div class="lbt">Top distances (random seeds)</div><div id="eboard"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
@@ -392,6 +392,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.rl)copyText(replayLink(d.rl,d.wr)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));
   else if(d.lbs!=null){sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);popSide('lvside')}
   else if(d.sk)pickSkin(d.sk,+d.ci);
+  else if(d.fs)pickFull(d.fs);
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
   else if(d.cp)startComm(d.cp);
@@ -652,8 +653,10 @@ function draw(){
   if(tpK>0){ctx.lineWidth=4;ctx.strokeStyle='rgba(200,150,255,'+tpK*.8+')';for(const q of [tpFrom,p]){ctx.beginPath();ctx.arc(q.x*U,q.y*U,U*(.3+(1-tpK)*1.1),0,7);ctx.stroke()}}
   ctx.save();ctx.translate(p.x*U,p.y*U);ctx.rotate(p.a);ctx.scale(1-.6*tpK,1-.6*tpK);ctx.globalAlpha=1-.5*tpK;
   const s=SIZE*U;
+  const fi=pb.skin.f&&state!=='dead'&&fullImg[pb.skin.f];
+  if(fi&&fi.complete&&fi.naturalWidth){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(fi,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm}else{
   ctx.fillStyle=state==='dead'?'#ff4d4d':skinCol(pb.skin.p);ctx.fillRect(-s/2,-s/2,s,s);
-  ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8); // front marker
+  ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8)} // front marker
   ctx.restore();
   if(state==='dead'){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='rgba(255,40,0,.25)';ctx.fillRect(0,0,W,Hh)}
   if((cd>0||goT>0)&&state==='play'){   // countdown overlay
@@ -761,6 +764,10 @@ function startCustom(id){menuEl.hidden=true;mode='custom';cur=customs.find(c=>c.
 // ---- shared leaderboards (one db doc per player: lb/<id> = {l0,l1,...,run})
 // ---- skins: pick a primary and a secondary colour; colours unlock by doing things
 if(!pb.skin)pb.skin={p:'sky',s:'navy'};
+// full skins: pixel-art cube images that replace the colour pair
+const FULLS=[{id:'graphite',n:'Graphite',src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAc0lEQVR4AeyTUQqAMAxD4w6nH97Fw3hhzUgpY6Ns008NpSvrHh2BpvWFEoDjkQhmmMdInIX0fgImoC+yUMzBYjz/sFsxVnzVsD1Q1zUzbGnUJfnA4KsRe90wuBocYVpK7xpcDfZ2WWgflXWf4S2Q5kQZwA0AAP//vA6R5QAAAAZJREFUAwC+m3mRw3xkuwAAAABJRU5ErkJggg=='},{id:'copper',n:'Copper',src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAjElEQVR4AeyUOwqAMAxAo9DJxcnJs3gMPYEnEj2V3sLJycWpg6Y0hNJW+lm1PNrQ5BEItOU699mUAHCJJgMUlYxHDJU8GF2fIKMgzx3BQJMma4f3X+ZRxAVfHVg3Tl6CU6OBFc4KmlhA8u0szAUh2Wr8pom6RThLstWY02Zgfhj6XsnbMnjhp+8NAOABAAD//zppiIkAAAAGSURBVAMApeGTdR70ZKQAAAAASUVORK5CYII='},{id:'ivory',n:'Ivory',src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAbklEQVR4AeyTUQrAIAxDM6+3627n2yopQSpIu/0apAbbp1Jou36oATg/ycAO25ZZ9yDWF2AD+EUzXDWYjOKG1Yqc2Q3L9UlV3rBjkioWxuFn0oJRyuHwsNLBcCh16HB4WOnRcB4Zed5h3leNAF4AAAD//yV+2l8AAAAGSURBVAMACCuTWQ8V2gkAAAAASUVORK5CYII='}];
+const fullImg={};for(const f of FULLS){const im=new Image();im.src=f.src;fullImg[f.id]=im}
+const fullOf=id=>FULLS.find(f=>f.id===id);
 const COLORS=[
  {id:'sky',n:'Sky',h:'#5ec8ff',t:'Free',u:()=>1},
  {id:'white',n:'White',h:'#f2f2f5',t:'Free',u:()=>1},
@@ -799,10 +806,12 @@ function buildSkins(note){
   const S=skinStats();
   for(const k of ['p','s'])document.getElementById('sw'+k).innerHTML=COLORS.map((c,i)=>{const ok=c.u(S);
     return '<button class="swb'+(pb.skin[k]===c.id?' on':'')+(ok?'':' lock')+'" data-sk="'+k+'" data-ci="'+i+'" title="'+esc(c.n+(ok?'':' - '+c.t))+'" style="background:'+(c.h==='rainbow'?'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)':c.h)+'">'+(ok?'':'\u{1F512}')+'</button>'}).join('');
+  document.getElementById('swf').innerHTML=FULLS.map(f=>'<button class="swb fsk'+(pb.skin.f===f.id?' on':'')+'" data-fs="'+f.id+'" title="'+esc(f.n)+'" style="background:url('+f.src+') center/cover;image-rendering:pixelated"></button>').join('');
     document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
-  document.getElementById('skinprev').innerHTML='<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
+  document.getElementById('skinprev').innerHTML=pb.skin.f&&fullOf(pb.skin.f)?'<img src="'+fullOf(pb.skin.f).src+'" width="72" height="72" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
 }
-function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins(c.n+': '+c.t);return}pb.skin[k]=c.id;savePB();buildSkins(c.n+' selected')}
+function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins(c.n+': '+c.t);return}pb.skin[k]=c.id;pb.skin.f=null;savePB();buildSkins(c.n+' selected')}
+function pickFull(id){const f=fullOf(id);if(!f)return;pb.skin.f=pb.skin.f===id?null:id;savePB();buildSkins(pb.skin.f?f.n+' selected. Pick a colour to go back to colours.':'Back to colours')}
 
 // ---- achievements: each one unlocks a cube colour. Counters live in pb.st, unlocked ids in pb.ach
 const bump=(k,n)=>{pb.st[k]=(pb.st[k]||0)+(n==null?1:n)};
@@ -1260,7 +1269,7 @@ function levelInfo(xp){let l=1;while(xp>=xpNeed(l+1))l++;return {l,cur:xp-xpNeed
 let pfT=0;
 function pushProfile(now){
   if(!db||!uid)return;clearTimeout(pfT);
-  const go=async()=>{try{const S=skinStats();await db.doc('pf/'+uid).set({skin:{p:pb.skin.p,s:pb.skin.s},stats:{comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0},xp:xpOf(),ach:Object.keys(pb.ach),at:Date.now()})}catch(e){}};
+  const go=async()=>{try{const S=skinStats();await db.doc('pf/'+uid).set({skin:{p:pb.skin.p,s:pb.skin.s,f:pb.skin.f||''},stats:{comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0},xp:xpOf(),ach:Object.keys(pb.ach),at:Date.now()})}catch(e){}};
   if(now)go();else pfT=setTimeout(go,1500);
 }
 async function rankOf(field,t,id){
@@ -1271,7 +1280,7 @@ async function rankOf(field,t,id){
 const offMsg=()=>backend==='none'?(window.claude?'Online features are not available in this view.':'No server address is set, so the online features are off. Add boxrun-config.js next to index.html (see boxrun-server/README.md).'):backendErr?'Cannot reach your server ('+backendErr+'). Check the address in boxrun-config.js, and that ALLOW_ORIGIN matches this site.':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
 const srvLine=()=>backend==='http'?(backendErr?'Server problem: '+backendErr:'Server: '+new URL(BOXRUN_API).host+' (connected)'):backend==='claude'?'Using your claude.ai account':'No server set up';
 const loginForm=()=>'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr">Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
-const cubeSvg=(p,s)=>'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
+const cubeSvg=(p,s,f)=>fullOf(f)?'<img src="'+fullOf(f).src+'" width="64" height="64" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
 async function adminRename(id,old){
   const n=await askText('New name for '+old+' (3 to 20 letters, numbers, _ . or -)',old,'Rename');if(!n||n===old)return;
   try{await httpB.rename(id,n);toast(old+' is now '+n);showProfile(id)}catch(e){toast((e&&e.message)||'Could not rename')}
@@ -1293,7 +1302,7 @@ async function showProfile(id){
   if(mine){LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)times[fld(i)]=t});if(pb.run!=null)times.run3=pb.run}else if(lbd)Object.assign(times,lbd);
   const defs=LEVELS.map((_,i)=>['Level '+(i+1)+' \u00b7 '+lvName(i),fld(i)]);
   const allT=LEVELS.map((_,i)=>times[fld(i)]),combined=allT.every(t=>t!=null)?allT.reduce((a,b)=>a+b,0):null;
-  el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s)+'<div><div class="pname">'+esc(name)+'</div><div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
+  el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s,skin.f)+'<div><div class="pname">'+esc(name)+'</div><div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
    +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',times.run3!=null?fmt(times.run3):st.run?'Done':'Not yet'],['Combined best times',combined!=null?fmt(combined):'Clear every level']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
@@ -1774,7 +1783,7 @@ load(0);showMenu();requestAnimationFrame(loop);bootDone=true;
 (()=>{
 const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
 let ctx=null,muted=false;try{muted=localStorage.getItem('br_mute')==='1'}catch(e){}
-const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},endless:{src:'music/endless.mp3',vol:.6,name:'Concentration'}};
+const T={menu:{src:'music/menu.mp3',vol:.7,name:'zvelq - Neon Dock Vector 1'},endless:{src:'music/endless.mp3',vol:.6,name:'Kevin MacLeod - Concentration'}};
 const btn=document.createElement('button');btn.id='mute';btn.setAttribute('aria-label','Toggle music');document.body.appendChild(btn);
 const np=document.createElement('div');np.id='np';document.body.appendChild(np);
 const paint=()=>btn.textContent=muted?'\u{1F507}':'\u{1F50A}';paint();
