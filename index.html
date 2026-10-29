@@ -380,7 +380,7 @@ let W,Hh,dpr;
 function resize(){dpr=window.devicePixelRatio||1;W=innerWidth;Hh=innerHeight;cv.width=W*dpr;cv.height=Hh*dpr}
 addEventListener('resize',resize);resize();
 
-let lvl=0,grid,p,cp,state='play',timer=0,deaths=0,t=0,lt=0,total=0,attempts=1,wasIce=false,slideA=0,lastA=0;
+let segT=0,lvl=0,grid,p,cp,state='play',timer=0,deaths=0,t=0,lt=0,total=0,attempts=1,wasIce=false,slideA=0,lastA=0;
 // storage: every write is read back, so a blocked or full browser store is reported instead of silently losing levels
 let bootDone=false;
 const store={ok:true,
@@ -390,7 +390,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};attempts++;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
+function respawn(){if(state==='win'||state==='menu')return;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
@@ -478,7 +478,7 @@ function fmt1(s){const m=Math.floor(s/60);return m+':'+(Math.floor((s-m*60)*10)/
 function fmt(s){const ms=Math.round(s*1000),m=Math.floor(ms/60000);return m+':'+((ms-m*60000)/1000).toFixed(3).padStart(6,'0')}
 const lvName=n=>LID[n].replace(/-v\d+$/,'').split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
 function finish(){
-  state='win';timer=1e9;
+  playTick(lt);state='win';timer=1e9;
   const last=mode!=='main'||lvl+1>=LEVELS.length;
   const prev=bestOf(),isPB=mode!=='test'&&(prev==null||rnd(lt,3)<rnd(prev,3));
   if(isPB){rec.push([gt,p.x,p.y,p.a]);const gh=rec.map(s=>[rnd(s[0],3),rnd(s[1],2),rnd(s[2],2),rnd(s[3],2)].concat(s[4]?[1]:[]));
@@ -508,7 +508,7 @@ function load(n,keep){
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
-  if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=(extGhost&&(mode==='main'||mode==='custom')?extGhost.arr:ghostOf())||null;gi=0;
+  if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;segT=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=(extGhost&&(mode==='main'||mode==='custom')?extGhost.arr:ghostOf())||null;gi=0;
 }
 const tile=(x,y)=>(grid[y]&&grid[y][x])||'#';
 
@@ -601,7 +601,7 @@ function update(dt){
   if(spec)cd=0;
   if(goT>0)goT-=dt;
   if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.5}document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
-  if(state==='play'){lt+=dt;gt+=dt;total+=dt;lastA=p.a}
+  if(state==='play'){lt+=dt;segT+=dt;gt+=dt;total+=dt;lastA=p.a}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
   document.getElementById('esub').textContent=mode==='endless'?(spec?'Replay':curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
   if(spec){
@@ -615,7 +615,7 @@ function update(dt){
     return}
   document.getElementById('inpd').hidden=true;
   if(state==='play'){
-    if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}
+    if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}
     if(bturn>0){const r=Math.min(bturn,dt*Math.PI/.4),o={x:p.x,y:p.y,a:p.a};p.a+=r;if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y;p.a=o.a+bturn;if(touching(p.x,p.y,p.a,['#'])){p.a=o.a}else{slideA+=bturn;bturn=0}}else{bturn-=r;slideA+=r}}
     const turn=(keys.right?1:0)-(keys.left?1:0);
     // turning: if rotating would put a corner into a wall, push out; if that fails, cancel the turn
@@ -647,8 +647,8 @@ function update(dt){
     if(gt-lastRec>=1/30){rec.push(mode==='endless'?[gt,p.x-eSh.x,p.y-eSh.y,p.a]:[gt,p.x,p.y,p.a]);lastRec=gt}
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),ck=fx+','+fy;
       for(const q in crumb){crumb[q]-=dt;if(crumb[q]<=0){fell[q]=true;delete crumb[q]}}
-      if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
-    if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}}
+      if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
+    if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}}
     else if(touching(p.x,p.y,p.a,['G'])){if(mode==='endless')endRun(true);else finish()}
   }else{
     timer-=dt;
@@ -743,7 +743,7 @@ addEventListener('keydown',e=>{
   if(e.key==='Escape'){menuBack();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&spec&&specInfo&&specInfo.ref==='e'){banner.style.opacity=0;banner.innerHTML='';watchEndless(specInfo.seed,specInfo.name,specInfo.arr);return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(state==='play'||state==='dead')endRetry();return}
-  if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play'&&lt>3&&mode!=='test'&&!spec){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
+  if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play')playTick(segT);if(state==='play'&&lt>3&&mode!=='test'&&!spec){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
   if(map[e.key]){keys[map[e.key]]=true;e.preventDefault()}
 });
 addEventListener('keyup',e=>{if(map[e.key])keys[map[e.key]]=false});
@@ -1035,14 +1035,22 @@ async function commVote(key,val){
 function startComm(key){
   const l=commList.find(x=>x.key===key);if(!l)return;rvSync(l);extGhost=pendingGhost;pendingGhost=null;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
-  countPlay(l);delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfk(key)]:rnd(pb.cl['cm_'+key],3)});
+  delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfk(key)]:rnd(pb.cl['cm_'+key],3)});
 }
 // play count: each player keeps their own tally per level inside their vt document (field p); the totals are summed when the list loads
-async function countPlay(l){
+const pendPlays={};let playTimer=0;
+function playTick(secs){   // a play counts when a community level is completed after 5 s or more, or when an attempt lasts more than 5 s before a death or retry
+  if(mode!=='custom'||!cur||!/^cm_/.test(cur.id||'')||spec||secs<5)return;
+  const l=commList.find(x=>x.key===cur.id.slice(3));if(l)countPlay(l)}
+function countPlay(l){
   if(!db||!uid||l.by===uid)return;
+  l.plays=(l.plays|0)+1;pendPlays[l.key]=(pendPlays[l.key]|0)+1;
+  if(!playTimer)playTimer=setTimeout(flushPlays,3000)}
+async function flushPlays(){
+  playTimer=0;const add=Object.assign({},pendPlays);for(const k in pendPlays)delete pendPlays[k];
   try{const ref=db.doc('vt/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};d.p=d.p||{};d.v=d.v||{};
-    if(!(l.key in d.p)&&Object.keys(d.p).length>=400)return;
-    d.p[l.key]=Math.min(999,(d.p[l.key]|0)+1);l.plays=(l.plays|0)+1;await ref.set(d)}catch(e){}
+    for(const k in add){if(!(k in d.p)&&Object.keys(d.p).length>=400)continue;d.p[k]=Math.min(999,(d.p[k]|0)+add[k])}
+    await ref.set(d)}catch(e){}
 }
 function commCopy(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
