@@ -201,7 +201,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
  <div class="panel" id="p-emenu" hidden><h2>Editor</h2><div class="bars"><button data-a="edit" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></svg><span>Make your own level</span></button><button data-a="comm" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><span>Community levels</span></button></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-prmenu" hidden><h2>Profile</h2><div class="bars"><button data-a="prof" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>View your profile</span></button><button data-a="skins" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg><span>Customise your character</span></button></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><button class="lbo" data-lbo="1">Overall leaderboard</button><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
- <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="plays">Most played</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button><button data-a="alogout" id="psignout" hidden>Sign out</button></div>
  <div class="panel" id="p-contrib" hidden><h2>Contributors</h2><p class="sub">Thanks to everyone who helped make Box Run.</p><div class="row" style="justify-content:center;text-align:center"><span>royrise</span></div><div class="row" style="justify-content:center;text-align:center"><span>the_union_of_soviet_onions</span></div><div class="row" style="justify-content:center;text-align:center"><span>zvelq</span></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><div class="lbt" style="margin-top:14px">Full skins</div><div class="sw" id="swf"></div><small id="skinnote"></small><button data-a="back">Back</button></div>
@@ -911,7 +911,7 @@ async function fetchComm(key){
   const us=[];for(let i=key.indexOf('_');i>0;i=key.indexOf('_',i+1))us.push(i);
   for(const i of us){const by=key.slice(0,i),id=key.slice(i+1);
     try{const sn=await db.doc('lv/'+by).get();const raw=sn.exists&&(sn.data().levels||{})[id];if(!raw)continue;const c=cleanLvl(raw);if(!c)continue;
-      const l=Object.assign(c,{key,by,id,up:0,down:0,byName:'Player'});if(!commList.some(x=>x.key===key))commList.push(l);rvSync(l);return l}catch(e){}}
+      const l=Object.assign(c,{key,by,id,up:0,down:0,plays:0,byName:'Player'});if(!commList.some(x=>x.key===key))commList.push(l);rvSync(l);return l}catch(e){}}
   return null
 }
 async function openLinked(){
@@ -966,8 +966,8 @@ async function commLoad(){
   try{
     const [ls,vs]=await Promise.all([db.collection('lv').get(),db.collection('vt').get()]);
     const list=[],byKey={};myVotes={};
-    ls.docs.forEach(d=>{const lv=d.data().levels||{};for(const id in lv){const c=cleanLvl(lv[id]);if(c){const l=Object.assign(c,{key:d.id+'_'+id,by:d.id,id,up:0,down:0});list.push(l);byKey[l.key]=l}}});
-    vs.docs.forEach(d=>{const v=d.data().v||{};for(const k in v){const l=byKey[k];if(!l)continue;if(v[k]>0)l.up++;else if(v[k]<0)l.down++;if(d.id===uid)myVotes[k]=v[k]}});
+    ls.docs.forEach(d=>{const lv=d.data().levels||{};for(const id in lv){const c=cleanLvl(lv[id]);if(c){const l=Object.assign(c,{key:d.id+'_'+id,by:d.id,id,up:0,down:0,plays:0});list.push(l);byKey[l.key]=l}}});
+    vs.docs.forEach(d=>{const pp=d.data().p||{};for(const k in pp){const l=byKey[k];if(l)l.plays+=Math.max(0,Math.min(999,pp[k]|0))}const v=d.data().v||{};for(const k in v){const l=byKey[k];if(!l)continue;if(v[k]>0)l.up++;else if(v[k]<0)l.down++;if(d.id===uid)myVotes[k]=v[k]}});
     if(usersNS&&list.length){try{const ids=[...new Set(list.map(l=>l.by))],ps=await usersNS.profiles(ids);list.forEach(l=>l.byName=(ps[l.by]&&ps[l.by].name)||'Player')}catch(e){}}
     return list;
   }catch(e){return null}
@@ -976,7 +976,7 @@ let cQ='';const cTags=new Set();
 function commSorted(){
   const now=Date.now(),net=l=>l.up-l.down,q=cQ.trim().toLowerCase(),L=commList.filter(l=>(!q||l.name.toLowerCase().includes(q)||(l.byName||'').toLowerCase().includes(q))&&[...cTags].every(t=>l.tags.includes(t)));
   if(commSort==='az')return L.sort((a,b)=>a.name.localeCompare(b.name));
-  const f={rel:l=>(net(l)+1)/Math.pow(1+(now-l.at)/864e5,1.2),up:l=>l.up,net,new:l=>l.at,old:l=>-l.at}[commSort];
+  const f={rel:l=>(net(l)+1)/Math.pow(1+(now-l.at)/864e5,1.2),up:l=>l.up,plays:l=>l.plays|0,net,new:l=>l.at,old:l=>-l.at}[commSort];
   return L.sort((a,b)=>f(b)-f(a)||b.at-a.at);
 }
 const ago=ms=>{const m=(Date.now()-ms)/6e4;return m<60?Math.max(1,m|0)+' min ago':m<1440?(m/60|0)+' h ago':(m/1440|0)+' d ago'};
@@ -990,7 +990,7 @@ function renderComm(){
   el.innerHTML=list.map(l=>{
     const mine=l.by===uid,v=myVotes[l.key]||0;
     return '<div class="cw"><div class="cr"><div class="vt"><button data-vk="'+l.key+'" data-vv="1" class="'+(v>0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25b2</button><b>'+(l.up-l.down)+'</b><button data-vk="'+l.key+'" data-vv="-1" class="'+(v<0?'on':'')+'"'+(mine||!uid?' disabled':'')+'>\u25bc</button></div>'+
-    '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+'</small>'+(l.tags.length?'<span class="tgs">'+l.tags.map(t=>'<span class="tgp">'+t+'</span>').join('')+'</span>':'')+'</div>'+
+    '<div class="ci"><b>'+esc(l.name)+'</b><small>by '+(mine?'you':'<button class="nameb" data-u="'+esc(l.by)+'">'+esc(l.byName||'Player')+'</button>')+' \u00b7 '+ago(l.at)+' \u00b7 \u25b2'+l.up+' \u25bc'+l.down+' \u00b7 \u25b6 '+(l.plays|0)+(l.plays===1?' play':' plays')+'</small>'+(l.tags.length?'<span class="tgs">'+l.tags.map(t=>'<span class="tgp">'+t+'</span>').join('')+'</span>':'')+'</div>'+
     '<div class="cbt"><button data-cp="'+l.key+'" title="Play" aria-label="Play"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button><button data-cs="'+l.key+'" title="Save a copy to My levels" aria-label="Copy"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button>'+'<button data-cl="'+l.key+'" title="Copy a link to this level" aria-label="Link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3M8 12h8"/></svg></button>'+(mine?'<button class="rm" data-cr="'+l.key+'" title="Remove from the community" aria-label="Remove"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>':'')+'<button data-ct="'+l.key+'" title="Fastest times on this level" aria-label="Times"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></button></div></div></div>';
   }).join('');
 }
@@ -1030,12 +1030,19 @@ async function commVote(key,val){
   if(cur>0)l.up--;if(cur<0)l.down--;if(nv>0)l.up++;if(nv<0)l.down++;
   if(nv)myVotes[key]=nv;else delete myVotes[key];
   renderComm();
-  try{await db.doc('vt/'+uid).set({v:myVotes})}catch(e){cNote('Could not save your vote.')}
+  try{const ref=db.doc('vt/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};d.v=myVotes;await ref.set(d)}catch(e){cNote('Could not save your vote.')}
 }
 function startComm(key){
   const l=commList.find(x=>x.key===key);if(!l)return;rvSync(l);extGhost=pendingGhost;pendingGhost=null;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
-  delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfk(key)]:rnd(pb.cl['cm_'+key],3)});
+  countPlay(l);delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfk(key)]:rnd(pb.cl['cm_'+key],3)});
+}
+// play count: each player keeps their own tally per level inside their vt document (field p); the totals are summed when the list loads
+async function countPlay(l){
+  if(!db||!uid||l.by===uid)return;
+  try{const ref=db.doc('vt/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};d.p=d.p||{};d.v=d.v||{};
+    if(!(l.key in d.p)&&Object.keys(d.p).length>=400)return;
+    d.p[l.key]=Math.min(999,(d.p[l.key]|0)+1);l.plays=(l.plays|0)+1;await ref.set(d)}catch(e){}
 }
 function commCopy(key){
   const l=commList.find(x=>x.key===key);if(!l)return;
