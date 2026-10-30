@@ -2014,15 +2014,17 @@ function frame(t){requestAnimationFrame(frame);const m=document.getElementById('
     c.save();c.translate(b.x,b.y);c.rotate(b.r);c.globalAlpha=b.al;c.fillStyle='hsl('+b.hu+',75%,58%)';c.fillRect(-b.s/2,-b.s/2,b.s,b.s);c.fillStyle='hsl('+b.hu+',65%,30%)';c.fillRect(b.s*.2,-b.s*.4,b.s*.16,b.s*.8);c.restore()}}
 requestAnimationFrame(frame)})();
 // ---- crates: one per minute of play, opened for numbered base skins
-let crBal=0,crItems=[],crBusy=false,crFlushing=false,crTurn=-1e9,crSave=0,crView=[];
+let crBal=0,crItems=[],crBusy=false,crFlushing=false,crTurn=-1e9,crPress=[],crDn=false,crSave=0,crView=[];
 const crName=k=>(crSkin(k)||[0,k])[1],crRarOf=k=>(crSkin(k)||[0,0,'common'])[2],crRC=r=>{const x=crRar(r);return x&&x[3]!=='rainbow'?x[3]:'#fff'},crRank=k=>CR_RAR.findIndex(x=>x[0]===crRarOf(k));
 const crOn=()=>backend==='http'&&!!uid&&!!httpB;
 function crBadge(){const e=document.getElementById('crlbl');if(e)e.textContent='Skins'+(crBal>0?' ('+crBal+')':'')}
 // playtime only counts inside a level (not replays or editor tests) while the player keeps turning: at least once every 10 seconds
 function crPlay(dt){
   if(spec||mode==='test'||!crOn())return;
-  if(keys.left||keys.right)crTurn=t;
-  if(t-crTurn>10)return;
+  const dn=!!(keys.left||keys.right);
+  if(dn&&!crDn){crPress.push(t);if(crPress.length>8)crPress.shift()}crDn=dn;
+  // anti-AFK: need 4+ separate key presses in the last 10 s, and one attempt can earn at most 150 s of playtime
+  if(crPress.filter(x=>t-x<=10).length<4||lt>150)return;
   pb.cpl=(pb.cpl||0)+dt;crSave+=dt;
   if(pb.cpl>=60){pb.cpl-=60;pb.cmin=(pb.cmin||0)+1;crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb));toast('Crate earned! Open it under Profile > Crates');crFlush()}
   else if(crSave>10){crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb))}
