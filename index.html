@@ -897,7 +897,7 @@ const skinCol=id=>{const h=colOf(id).h;return h==='rainbow'?'hsl('+((t*90)%360)+
 const CR_RAR=[['common','Common',50,'#b7c0cc'],['uncommon','Uncommon',35,'#4ade80'],['epic','Epic',10,'#b36bff'],['legendary','Legendary',4,'#ffb81f'],['mythic','Mythic',1,'#ff3d78'],['ultra','Ultra',.2,'#22d3ee'],['super','Super',.01,'rainbow']];
 // colour slots: 0 primary, 1 secondary, 2 dark primary, 3 light primary, 4 dark secondary, 5 white, 6 black
 const CR_SKINS=[
- ['racing','Racing','common','stripe',[0,1]],['brick','Brick','common','bricks',[0,2]],['pinstripe','Pinstripe','common','diag',[0,2]],
+ ['plain','Plain','common','plain',[0,1]],['racing','Racing','common','stripe',[0,1]],['brick','Brick','common','bricks',[0,2]],['pinstripe','Pinstripe','common','diag',[0,2]],
  ['dots','Polka','common','dots',[0,1]],['checker','Checker','common','checker',[0,2]],['frame','Frame','common','frame',[0,1]],
  ['gradient','Gradient','uncommon','grad',[0,1,3]],['tide','Tide','uncommon','waves',[0,1,2]],['camo','Camo','uncommon','camo',[0,2,3]],
  ['hazard','Hazard','uncommon','diag',[0,6]],['candy','Candy','uncommon','diag',[0,5]],
@@ -917,6 +917,7 @@ const crMix=(a,b,t)=>{const A=crRGB(a),B=crRGB(b);return crHex(A.map((v,i)=>v*(1
 function crPal(pc,sc){const P=crRGB(pc),S=crRGB(sc);return [crHex(P),crHex(S),crShade(P,-.45),crShade(P,.4),crShade(S,-.45),'#ffffff','#000000']}
 function crPix(sp,x,y,pal){const c=sp[4].map(i=>pal[i]),p=sp[3];
   switch(p){
+  case 'plain':return x>=14&&x<=15&&y>=4&&y<=15?c[1]:c[0];
   case 'stripe':return x>=13&&x<=15&&y>=3&&y<=16?c[1]:c[0];
   case 'checker':return((x>>2)+(y>>2))&1?c[1]:c[0];
   case 'diag':return((x+y)/3|0)&1?c[1]:c[0];
@@ -940,7 +941,7 @@ function crCanvas(id,shiny,pc,sc){const sp=crSkin(id);if(!sp)return null;const k
   const pal=crPal(pc,sc),cv=document.createElement('canvas');cv.width=cv.height=20;const g=cv.getContext('2d');
   for(let y=0;y<20;y++)for(let x=0;x<20;x++){let col=crPix(sp,x,y,pal);
     const e=Math.min(x,y,19-x,19-y);
-    if(e===0)col=shiny?'#ffe9a0':crShade(crRGB(pal[sp[4][0]]),-.5);else if(e===1&&shiny)col='#ffd24a';
+    if(e===0)col=shiny?'#ffe9a0':sp[3]==='plain'?crPix(sp,x,y,pal):crShade(crRGB(pal[sp[4][0]]),-.5);else if(e===1&&shiny)col='#ffd24a';
     g.fillStyle=col;g.fillRect(x,y,1,1)}
   if(shiny){
     const im=g.getImageData(0,0,20,20),d=im.data;
@@ -2059,7 +2060,7 @@ function crRender(){
   CR_SKINS.forEach(s=>{if(own[s[0]])have++});
   document.getElementById('crcount').textContent='\u00b7 '+have+' / '+CR_SKINS.length+' unlocked';
   document.getElementById('crshow').checked=!hide;
-  let html='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" title="Plain cube"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span class="nm">Plain</span></button></div>';
+  let html='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" title="Default cube"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span class="nm">Default</span></button></div>';
   for(const r of CR_RAR){
     const list=CR_SKINS.filter(s=>s[2]===r[0]).filter(s=>!hide||own[s[0]]);if(!list.length)continue;
     html+='<div class="crrh '+(r[0]==='super'?'rb':'')+'" style="color:'+(r[3]==='rainbow'?'#fff':r[3])+'">'+r[1]+' <small>'+r[2]+'%</small></div><div class="crgrid">'
