@@ -45,6 +45,17 @@ canvas{display:block;width:100%;height:100%}
 .gaten{background:#ff9a3c22;border:1px solid #ff9a3c;border-radius:8px;padding:8px 10px;font-weight:700}
 .lbgate{padding:14px 10px;font-weight:700;opacity:.9;text-align:center;border:1px dashed #ff9a3c;border-radius:8px;color:#ffb070}
 #menubg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}#menu>*:not(#menubg){position:relative;z-index:1}#menu>.panel{margin:auto}
+.crbal{font-size:22px}.crbal b{font-size:34px;color:#ffb81f}
+.crbar{height:10px;border-radius:6px;background:#12121a;border:1px solid #4a4d63;overflow:hidden}.crbar i{display:block;height:100%;background:linear-gradient(90deg,#ff9a3c,#ffd24a)}
+.crc{margin:8px auto;padding:14px 22px;border-radius:14px;border:2px solid var(--rc,#4a4d63);background:#12121acc;box-shadow:0 0 22px -4px var(--rc,#000);text-align:center;min-width:180px;animation:crpop .45s ease-out}
+.crc.sh{box-shadow:0 0 30px 2px #ffd24a99}.crc img{display:block;margin:0 auto 6px;filter:drop-shadow(0 0 8px var(--rc,#fff))}
+.crn{font-weight:800;font-size:20px}.crr{font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:13px}.crs{opacity:.8;font-size:14px}
+.rb{background:linear-gradient(90deg,#ff4d4d,#ffd24a,#3dff8a,#2fd3ff,#8f5bff,#ff4d4d);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:rbs 3s linear infinite}
+@keyframes rbs{to{background-position:200% 0}}@keyframes crpop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.crc.opening{animation:crshake .25s infinite}.crbox{font-size:54px;font-weight:800}@keyframes crshake{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.crgrid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:260px;overflow:auto;padding:4px}
+.panel button.crt{width:62px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;border:2px solid var(--rc,#4a4d63)}.crt.on{background:#3d4166;outline:2px solid #fff}.crt.sh{box-shadow:0 0 8px #ffd24a99}
+.crtag{font-size:13px;opacity:.85}
 #tagline{font-size:calc(1em + 3px);transition:opacity .4s}#tagline.fade{opacity:0}
 .panel button,.pop button{font:inherit;font-size:18px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer}
 .panel button:hover,.pop button:hover{background:#383c5c}
@@ -200,7 +211,8 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 </div><button id="acctban" hidden><b>Create a free account</b><span>No email required. Save your times, climb the leaderboards and unlock skins</span></button></div>
  <div class="panel" id="p-pmenu" hidden><h2>Play</h2><div class="bars"><button data-a="play" class="bar big"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span>Start run</span></button><button data-a="endless" class="bar big"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-3-3.5-4-5.5-4a4 4 0 000 8c2 0 3.5-1 5.5-4zm0 0c2 3 3.5 4 5.5 4a4 4 0 000-8c-2 0-3.5 1-5.5 4z"/></svg><span>Endless mode</span></button><button data-a="levels" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span>Level select</span></button><button data-a="comm" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><span>Community levels</span></button><button data-a="weekly" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z" fill="currentColor" stroke="none"/></svg><span>Weekly challenge</span></button></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-emenu" hidden><h2>Editor</h2><div class="bars"><button data-a="edit" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></svg><span>Make your own level</span></button><button data-a="comm" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><span>Community levels</span></button></div><button data-a="back">Back</button></div>
- <div class="panel" id="p-prmenu" hidden><h2>Profile</h2><div class="bars"><button data-a="prof" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>View your profile</span></button><button data-a="skins" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg><span>Customise your character</span></button></div><button data-a="back">Back</button></div>
+ <div class="panel" id="p-prmenu" hidden><h2>Profile</h2><div class="bars"><button data-a="prof" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>View your profile</span></button><button data-a="skins" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg><span>Customise your character</span></button><button data-a="crates" class="bar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span id="crlbl">Crates</span></button></div><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-crates" hidden><h2>Crates</h2><div id="crtop"></div><div id="crres"></div><div class="lbt" style="margin-top:6px">Your base skins</div><div id="crcol"></div><small id="crnote"></small><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-levels" hidden><h2>Level Select</h2><div id="lvwrap"><div id="lvleft"><button class="lbo" data-lbo="1">Overall leaderboard</button><div id="lvlist"></div><small id="lvnote"></small><div class="crow"><button data-a="bkup" title="Download one file with all your levels and records">Back up all</button><button data-a="rstr" title="Load a backup file">Restore</button></div><input type="file" id="bfile" accept=".json,application/json" hidden></div><div id="lvside"><div class="lbt" id="lvsidet">Overall</div><div id="lvsideb"></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="plays">Most played</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button><button data-a="alogout" id="psignout" hidden>Sign out</button></div>
@@ -417,10 +429,10 @@ function show(id){
   try{if(id!=='profile')gateNote=''}catch(e){}
   if(id==='main')navStack=[];else if(!navBack&&lastPanel!==id){navStack.push(lastPanel);if(navStack.length>30)navStack.shift()}
   lastPanel=id;resume={stack:navStack.slice(),panel:id};
-  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','prmenu'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','prmenu','crates'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
 function navPrev(){if(navStack.length){const prev=navStack.pop(),keep=navStack.slice();navBack=true;openPanel(prev);navBack=false;navStack=keep;resume={stack:keep.slice(),panel:prev}}else show('main')}
 function openPanel(id){   // show a panel again, refreshing the ones whose content can change
-  try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
+  try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='crates')openCrates();else if(id==='lb')showLB('run3')}catch(e){}
   show(id)}
 function menuBack(){const r=resume;showMenu();if(r&&r.panel!=='main'){navStack=r.stack.slice();navBack=true;openPanel(r.panel);navBack=false;navStack=r.stack.slice();resume={stack:r.stack.slice(),panel:r.panel}}}
 function showMenu(f){document.getElementById('inpd').hidden=true;spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
@@ -451,6 +463,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.lbs!=null){sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);popSide('lvside')}
   else if(d.sk)pickSkin(d.sk,+d.ci);
   else if(d.fs)pickFull(d.fs);
+  else if(d.ce!=null)crEquip(+d.ce);
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
   else if(d.cp)startComm(d.cp);
@@ -462,7 +475,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.cl)copyLink(d.cl);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
-  else{const a=d.a;if(gate(a)){}else if(a==='go-play')show('pmenu');else if(a==='go-edit')show('emenu');else if(a==='go-prof')show('prmenu');else if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='contrib'){show('contrib')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
+  else{const a=d.a;if(gate(a)){}else if(a==='go-play')show('pmenu');else if(a==='go-edit')show('emenu');else if(a==='go-prof')show('prmenu');else if(a==='crates')openCrates();else if(a==='copen')crOpen(1);else if(a==='copenall')crOpen(99);else if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins'){buildSkins();show('skins')}else if(a==='contrib'){show('contrib')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
 document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
   if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch'){if(specInfo.ref==='e')watchEndless(specInfo.seed,specInfo.name,specInfo.arr);else startRef(specInfo.ref,specInfo.name,specInfo.arr,true)}else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else menuBack();return}
@@ -617,7 +630,7 @@ function update(dt){
   if(spec)cd=0;
   if(goT>0)goT-=dt;
   if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.5}document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
-  if(state==='play'){lt+=dt;segT+=dt;gt+=dt;total+=dt;lastA=p.a}
+  if(state==='play'){lt+=dt;segT+=dt;gt+=dt;total+=dt;lastA=p.a;crPlay(dt)}
   document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
   document.getElementById('esub').textContent=mode==='endless'?(spec?'Replay':curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
   if(spec){
@@ -728,8 +741,10 @@ function draw(){
   const s=SIZE*U;
   const fi=pb.skin.f&&state!=='dead'&&fullImg[pb.skin.f];
   if(fi&&fi.complete&&fi.naturalWidth){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(fi,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm}else{
+  const bc=pb.skin.b&&state!=='dead'?crCan(pb.skin.b,pb.skin.p,pb.skin.s):null;
+  if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm}else{
   ctx.fillStyle=state==='dead'?'#ff4d4d':skinCol(pb.skin.p);ctx.fillRect(-s/2,-s/2,s,s);
-  ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8)} // front marker
+  ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8)}} // front marker
   ctx.restore();
   if(state==='dead'){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='rgba(255,40,0,.25)';ctx.fillRect(0,0,W,Hh)}
   if((cd>0||goT>0)&&state==='play'){   // countdown overlay
@@ -879,13 +894,73 @@ const COLORS=[
 const skinStats=()=>({comp:pb.completions||0,dead:pb.deaths||0,clear:LEVELS.filter((_,i)=>pb.levels[LID[i]]!=null).length,tut:pb.levels.tutorial!=null,run:pb.run!=null,ach:pb.ach||{}});
 const colOf=id=>COLORS.find(c=>c.id===id)||COLORS[0];
 const skinCol=id=>{const h=colOf(id).h;return h==='rainbow'?'hsl('+((t*90)%360)+',90%,60%)':h};
+// ---- crate base skins: catalogue and pixel-art generator. Each is a 20 x 20 pattern drawn in the player's primary and secondary colours
+const CR_RAR=[['common','Common',50,'#b7c0cc'],['uncommon','Uncommon',35,'#4ade80'],['epic','Epic',10,'#b36bff'],['legendary','Legendary',4,'#ffb81f'],['mythic','Mythic',1,'#ff3d78'],['ultra','Ultra',.2,'#22d3ee'],['super','Super',.01,'rainbow']];
+// colour slots: 0 primary, 1 secondary, 2 dark primary, 3 light primary, 4 dark secondary, 5 white, 6 black
+const CR_SKINS=[
+ ['racing','Racing','common','stripe',[0,1]],['brick','Brick','common','bricks',[0,2]],['pinstripe','Pinstripe','common','diag',[0,2]],
+ ['dots','Polka','common','dots',[0,1]],['checker','Checker','common','checker',[0,2]],['frame','Frame','common','frame',[0,1]],
+ ['gradient','Gradient','uncommon','grad',[0,1,3]],['tide','Tide','uncommon','waves',[0,1,2]],['camo','Camo','uncommon','camo',[0,2,3]],
+ ['hazard','Hazard','uncommon','diag',[0,6]],['candy','Candy','uncommon','diag',[0,5]],
+ ['circuit','Circuit','epic','circuit',[6,1]],['cracked','Cracked','epic','cracks',[2,1]],['facet','Facet','epic','facets',[0,3,1,2]],['starfield','Starfield','epic','stars',[2,0,1]],
+ ['target','Target','legendary','rings',[1,0,2]],['aurora','Aurora','legendary','waves',[3,1,0]],['emblem','Emblem','legendary','emblem',[0,1,5]],
+ ['rift','Rift','mythic','rings',[6,1,0]],['flare','Flare','mythic','rings',[5,1,0]],['grid','Neon Grid','mythic','grid',[6,0,1]],
+ ['crystal','Crystal','ultra','facets',[0,1,3,4,5,2]],['hole','Black Hole','ultra','swirl',[6,0,1]],
+ ['origin','Origin','super','rings',[5,0,1,4]]
+];
+const crSkin=id=>CR_SKINS.find(s=>s[0]===id);
+const crRar=r=>CR_RAR.find(x=>x[0]===r);
+const crHash=(x,y,s)=>{let h=(x*374761393+y*668265263+s*2147483647)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296};
+const crRGB=(()=>{const cv=document.createElement('canvas');cv.width=cv.height=1;const g=cv.getContext('2d',{willReadFrequently:true}),m={};return css=>{if(m[css])return m[css];g.clearRect(0,0,1,1);g.fillStyle='#000';g.fillStyle=css;g.fillRect(0,0,1,1);const d=g.getImageData(0,0,1,1).data;return m[css]=[d[0],d[1],d[2]]}})();
+const crHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const crShade=(rgb,k)=>crHex(rgb.map(v=>k<0?v*(1+k):v+(255-v)*k));
+const crMix=(a,b,t)=>{const A=crRGB(a),B=crRGB(b);return crHex(A.map((v,i)=>v*(1-t)+B[i]*t))};
+function crPal(pc,sc){const P=crRGB(pc),S=crRGB(sc);return [crHex(P),crHex(S),crShade(P,-.45),crShade(P,.4),crShade(S,-.45),'#ffffff','#000000']}
+function crPix(sp,x,y,pal){const c=sp[4].map(i=>pal[i]),p=sp[3];
+  switch(p){
+  case 'stripe':return x>=13&&x<=15&&y>=3&&y<=16?c[1]:c[0];
+  case 'checker':return((x>>2)+(y>>2))&1?c[1]:c[0];
+  case 'diag':return((x+y)/3|0)&1?c[1]:c[0];
+  case 'dots':return x%5===2&&y%5===2?c[1]:c[0];
+  case 'frame':return Math.min(x,y,19-x,19-y)>=3&&Math.min(x,y,19-x,19-y)<=5?c[1]:c[0];
+  case 'waves':{const k=(y+Math.round(Math.sin(x*.7)*1.6)+60)%6;return k<2?c[1]:k<4?c[0]:c[2]}
+  case 'grad':return y<2?c[2]:crMix(c[0],c[1],y/19);
+  case 'camo':{const h=crHash(x>>1,y>>1,7);return h<.38?c[0]:h<.7?c[1]:c[2]}
+  case 'grid':return x%5===0||y%5===0?c[1]:((x+y)%10===0?c[2]:c[0]);
+  case 'rings':{const d=Math.max(Math.abs(x-9.5),Math.abs(y-9.5));return c[Math.floor(d/2.2)%c.length]}
+  case 'stars':return crHash(x,y,3)>.965?c[2]:crMix(c[0],c[1],y/19*.7);
+  case 'bricks':{const o=Math.floor(y/5)&1?3:0;return y%5===4||(x+o)%8===7?c[1]:c[0]}
+  case 'facets':{const tri=((x&3)+(y&3))<4?0:1;return c[Math.floor(crHash(x>>2,y>>2,tri+1)*c.length)]}
+  case 'circuit':{const h=crHash(x>>1,y>>1,5),v=(x%4===1&&h>.35)||(y%4===2&&h>.55)||(x%7===3&&y%7===3);return v?c[1]:c[0]}
+  case 'cracks':{const a=Math.sin(x*.55+y*.25)*3+9.5,b=Math.sin(y*.5-x*.2)*3+9.5;return Math.abs(y-a)<1.1||Math.abs(x-b)<.9?c[1]:c[0]}
+  case 'swirl':{const dx=x-9.5,dy=y-9.5,r=Math.hypot(dx,dy),v=Math.atan2(dy,dx)*1.6+r*.7,m=((v%(Math.PI*2))+Math.PI*2)%(Math.PI*2);return r<2.2?c[0]:m<2.2?c[1]:m<2.8?c[2]:c[0]}
+  case 'emblem':{const d=Math.abs(x-9.5)+Math.abs(y-9.5);return d<4?c[1]:d<5.6?c[2]:c[0]}
+  }return c[0]}
+const crCache={};
+function crCanvas(id,shiny,pc,sc){const sp=crSkin(id);if(!sp)return null;const k=id+(shiny?'*':'')+'|'+pc+'|'+sc;if(crCache[k])return crCache[k];
+  const pal=crPal(pc,sc),cv=document.createElement('canvas');cv.width=cv.height=20;const g=cv.getContext('2d');
+  for(let y=0;y<20;y++)for(let x=0;x<20;x++){let col=crPix(sp,x,y,pal);
+    const e=Math.min(x,y,19-x,19-y);
+    if(e===0)col=shiny?'#ffe9a0':crShade(crRGB(pal[sp[4][0]]),-.5);else if(e===1&&shiny)col='#ffd24a';
+    g.fillStyle=col;g.fillRect(x,y,1,1)}
+  if(shiny){
+    const im=g.getImageData(0,0,20,20),d=im.data;
+    for(let y=2;y<18;y++)for(let x=2;x<18;x++){const s=x+y;if(s===16||s===17||s===22){const i=(y*20+x)*4,a=s===22?.25:.45;d[i]+=(255-d[i])*a;d[i+1]+=(255-d[i+1])*a;d[i+2]+=(255-d[i+2])*a}}
+    g.putImageData(im,0,0);g.fillStyle='#fff';for(const [x,y] of [[5,4],[14,6],[8,14],[15,15]]){g.fillRect(x,y,1,1);g.fillRect(x-1,y,3,1);g.fillRect(x,y-1,1,3)}}
+  if(Object.keys(crCache).length>400)for(const q in crCache)delete crCache[q];
+  crCache[k]=cv;return cv}
+// the current look of a base skin item [k,shiny,serial] in the given colour ids (rainbow is frozen to the hue at that moment)
+const crQ=css=>/^hsl\((\d+)/.test(css)?'hsl('+(Math.round(+RegExp.$1/30)*30)+',90%,60%)':css;
+const crCan=(b,p,s)=>b?crCanvas(b.k,b.s,crQ(skinCol(p)),crQ(skinCol(s))):null;
+const crImg=(b,p,s,px)=>{const c=crCan(b,p,s);return c?'<img src="'+c.toDataURL()+'" width="'+px+'" height="'+px+'" style="image-rendering:pixelated" alt="">':''};
+
 function buildSkins(note){
   const S=skinStats();
   for(const k of ['p','s'])document.getElementById('sw'+k).innerHTML=COLORS.map((c,i)=>{const ok=c.u(S);
     return '<button class="swb'+(pb.skin[k]===c.id?' on':'')+(ok?'':' lock')+'" data-sk="'+k+'" data-ci="'+i+'" title="'+esc(c.n+(ok?'':' - '+c.t))+'" style="background:'+(c.h==='rainbow'?'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)':c.h)+'">'+(ok?'':'\u{1F512}')+'</button>'}).join('');
   document.getElementById('swf').innerHTML=FULLS.map(f=>'<button class="swb fsk'+(pb.skin.f===f.id?' on':'')+(fullOk(f.id)?'':' lock')+'" data-fs="'+f.id+'" title="'+esc(f.n+(fullOk(f.id)?'':' - '+FULLT[f.id][1]))+'" style="background:url('+f.src+') center/cover;image-rendering:pixelated"></button>').join('');
-    document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it.';
-  document.getElementById('skinprev').innerHTML=pb.skin.f&&fullOf(pb.skin.f)?'<img src="'+fullOf(pb.skin.f).src+'" width="72" height="72" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
+    document.getElementById('skinnote').textContent=note||'Pick a primary and a secondary colour. Hover a locked colour to see how to unlock it. Base skins from crates are chosen under Crates.';
+  document.getElementById('skinprev').innerHTML=!(pb.skin.f&&fullOf(pb.skin.f))&&crCan(pb.skin.b,pb.skin.p,pb.skin.s)?crImg(pb.skin.b,pb.skin.p,pb.skin.s,72):pb.skin.f&&fullOf(pb.skin.f)?'<img src="'+fullOf(pb.skin.f).src+'" width="72" height="72" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
 }
 function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins(c.n+': '+c.t);return}pb.skin[k]=c.id;pb.skin.f=null;savePB();buildSkins(c.n+' selected')}
 function pickFull(id){const f=fullOf(id);if(!f)return;if(!fullOk(id)){buildSkins(f.n+': '+FULLT[id][1]);return}pb.skin.f=pb.skin.f===id?null:id;savePB();buildSkins(pb.skin.f?f.n+' selected. Pick a colour to go back to colours.':'Back to colours')}
@@ -1328,6 +1403,7 @@ function httpBackend(base){
     rename:(id,name)=>call('/admin/rename',{method:'POST',body:JSON.stringify({id,name})}),
     async restore(){if(!token)return;try{me=await call('/auth/me')}catch(e){if(e.status===401){token=null;me=null;store.set('boxrunToken','')}else throw e}},
     ping:()=>call('/db/lb?limit=1'),
+    crate:(p,b)=>call('/crate/'+p,b?{method:'POST',body:JSON.stringify(b)}:p==='open'?{method:'POST'}:undefined),
     async register(n,p){return enter(await call('/auth/register',{method:'POST',body:JSON.stringify({name:n,password:p})}))},
     async login(n,p){return enter(await call('/auth/login',{method:'POST',body:JSON.stringify({name:n,password:p})}))},
     async logout(){try{await call('/auth/logout',{method:'POST'})}catch(e){}token=null;me=null;store.set('boxrunToken','')},
@@ -1344,7 +1420,7 @@ async function initBackend(){
       uid=httpB.uid();
     }
   }catch(e){db=null;uid=null}
-  if(db&&uid&&!backendErr){await pullMine();syncPBs();ghPutAll();pushProfile(true)}
+  if(db&&uid&&!backendErr){await pullMine();syncPBs();ghPutAll();pushProfile(true);crSync()}
 }
 initBackend().then(openLinked);
 // bring your server-side times and stats onto this device (a new browser, or after clearing site data); the faster time always wins
@@ -1369,7 +1445,7 @@ function levelInfo(xp){let l=1;while(xp>=xpNeed(l+1))l++;return {l,cur:xp-xpNeed
 let pfT=0;
 function pushProfile(now){
   if(!db||!uid)return;clearTimeout(pfT);
-  const go=async()=>{try{const S=skinStats();await db.doc('pf/'+uid).set({skin:{p:pb.skin.p,s:pb.skin.s,f:pb.skin.f||''},stats:{comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0},xp:xpOf(),ach:Object.keys(pb.ach),at:Date.now()})}catch(e){}};
+  const go=async()=>{try{const S=skinStats();await db.doc('pf/'+uid).set({skin:{p:pb.skin.p,s:pb.skin.s,f:pb.skin.f||'',b:pb.skin.b?{k:pb.skin.b.k,s:pb.skin.b.s?1:0,n:pb.skin.b.n|0}:null},stats:{comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0},xp:xpOf(),ach:Object.keys(pb.ach),at:Date.now()})}catch(e){}};
   if(now)go();else pfT=setTimeout(go,1500);
 }
 async function rankOf(field,t,id){
@@ -1380,13 +1456,13 @@ async function rankOf(field,t,id){
 const offMsg=()=>backend==='none'?(window.claude?'Online features are not available in this view.':'No server address is set, so the online features are off. Add boxrun-config.js next to index.html (see boxrun-server/README.md).'):backendErr?'Cannot reach your server ('+backendErr+'). Check the address in boxrun-config.js, and that ALLOW_ORIGIN matches this site.':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
 const srvLine=()=>backend==='http'?(backendErr?'Server problem: '+backendErr:'Server: '+new URL(BOXRUN_API).host+' (connected)'):backend==='claude'?'Using your claude.ai account':'No server set up';
 const loginForm=()=>(gateNote?'<div class="gaten">'+gateNote+'</div>':'')+'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr"><b>No email required.</b> Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
-const cubeSvg=(p,s,f)=>fullOf(f)?'<img src="'+fullOf(f).src+'" width="64" height="64" style="image-rendering:pixelated" alt="">':'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
+const cubeSvg=(p,s,f,b)=>fullOf(f)?'<img src="'+fullOf(f).src+'" width="64" height="64" style="image-rendering:pixelated" alt="">':crCan(b,p,s)?crImg(b,p,s,64):'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
 async function adminRename(id,old){
   const n=await askText('New name for '+old+' (3 to 20 letters, numbers, _ . or -)',old,'Rename');if(!n||n===old)return;
   try{await httpB.rename(id,n);toast(old+' is now '+n);showProfile(id)}catch(e){toast((e&&e.message)||'Could not rename')}
 }
 // signed-out players must create an account before using these features
-const GATED={'go-edit':'the editor','edit':'the editor','go-prof':'your profile','prof':'your profile','skins':'your profile','comm':'community levels','weekly':'the weekly challenge'};
+const GATED={'go-edit':'the editor','edit':'the editor','go-prof':'your profile','prof':'your profile','skins':'your profile','comm':'community levels','weekly':'the weekly challenge','crates':'crates'};
 let gateNote='',pendingAct=null;
 function gate(a){if(!GATED[a]||backend!=='http'||uid)return false;gateNote='Create a free account to use '+GATED[a]+'.';pendingAct=(a==='go-prof'||a==='prof'||a==='skins')?null:a;showProfile();return true}
 function resumeAct(){const a=pendingAct;pendingAct=null;gateNote='';if(!a||!uid)return;const b=document.createElement('button');b.dataset.a=a;menuEl.appendChild(b);b.click();b.remove()}
@@ -1407,7 +1483,7 @@ async function showProfile(id){
   if(mine){LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)times[fld(i)]=t});if(pb.run!=null)times.run3=pb.run}else if(lbd)Object.assign(times,lbd);
   const defs=LEVELS.map((_,i)=>['Level '+(i+1)+' \u00b7 '+lvName(i),fld(i)]);
   const allT=LEVELS.map((_,i)=>times[fld(i)]),combined=allT.every(t=>t!=null)?allT.reduce((a,b)=>a+b,0):null;
-  el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s,skin.f)+'<div><div class="pname">'+esc(name)+'</div><div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
+  el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s,skin.f,skin.b)+'<div><div class="pname">'+esc(name)+'</div>'+(skin.b&&crSkin(skin.b.k)&&!fullOf(skin.f)?'<div class="crtag">'+esc(crName(skin.b.k))+(skin.b.s?' \u2726':'')+' #'+(skin.b.n|0)+'</div>':'')+'<div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
    +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',times.run3!=null?fmt(times.run3):st.run?'Done':'Not yet'],['Combined best times',combined!=null?fmt(combined):'Clear every level']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
@@ -1420,7 +1496,7 @@ async function showProfile(id){
 async function acctDo(kind){
   const n=document.getElementById('au').value.trim(),p=document.getElementById('ap').value,e=document.getElementById('aerr');
   e.textContent='One moment\u2026';
-  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);clrLB();showProfile();resumeAct()}catch(er){e.textContent=er.message||'Could not sign in.'}
+  try{await httpB[kind](n,p);uid=httpB.uid();await pullMine();syncPBs();ghPutAll();pushProfile(true);crSync();clrLB();showProfile();resumeAct()}catch(er){e.textContent=er.message||'Could not sign in.'}
 }
 async function acctOut(){await httpB.logout();uid=null;clrLB();showProfile()}
 function clrLB(){try{for(const k in sideCache)delete sideCache[k];for(const k in cCache)delete cCache[k]}catch(e){}}
@@ -1950,6 +2026,56 @@ function frame(t){requestAnimationFrame(frame);const m=document.getElementById('
     if(b.x<-b.s*2||b.x>W+b.s*2||b.y<-b.s*2||b.y>H+b.s*2){bx[i]=mk(false);continue}
     c.save();c.translate(b.x,b.y);c.rotate(b.r);c.globalAlpha=b.al;c.fillStyle='hsl('+b.hu+',75%,58%)';c.fillRect(-b.s/2,-b.s/2,b.s,b.s);c.fillStyle='hsl('+b.hu+',65%,30%)';c.fillRect(b.s*.2,-b.s*.4,b.s*.16,b.s*.8);c.restore()}}
 requestAnimationFrame(frame)})();
+// ---- crates: one per minute of play, opened for numbered base skins
+let crBal=0,crItems=[],crBusy=false,crFlushing=false,crTurn=-1e9,crSave=0,crView=[];
+const crName=k=>(crSkin(k)||[0,k])[1],crRarOf=k=>(crSkin(k)||[0,0,'common'])[2],crRC=r=>{const x=crRar(r);return x&&x[3]!=='rainbow'?x[3]:'#fff'},crRank=k=>CR_RAR.findIndex(x=>x[0]===crRarOf(k));
+const crOn=()=>backend==='http'&&!!uid&&!!httpB;
+function crBadge(){const e=document.getElementById('crlbl');if(e)e.textContent='Crates'+(crBal>0?' ('+crBal+')':'')}
+// playtime only counts inside a level (not replays or editor tests) while the player keeps turning: at least once every 10 seconds
+function crPlay(dt){
+  if(spec||mode==='test'||!crOn())return;
+  if(keys.left||keys.right)crTurn=t;
+  if(t-crTurn>10)return;
+  pb.cpl=(pb.cpl||0)+dt;crSave+=dt;
+  if(pb.cpl>=60){pb.cpl-=60;pb.cmin=(pb.cmin||0)+1;crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb));toast('Crate earned! Open it under Profile > Crates');crFlush()}
+  else if(crSave>10){crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb))}
+}
+async function crFlush(){
+  if(crFlushing||!crOn()||!(pb.cmin>0))return;crFlushing=true;const m=Math.min(60,pb.cmin);
+  try{const r=await httpB.crate('earn',{m});pb.cmin-=m;crBal=r.bal;store.set('cubeRunnerPB',JSON.stringify(pb))}catch(e){}
+  crFlushing=false;crBadge();if(pb.cmin>0&&!crFlushing)setTimeout(crFlush,20000)}
+async function crSync(){if(!crOn())return;try{const r=await httpB.crate('state');crBal=r.bal|0;crItems=Array.isArray(r.items)?r.items:[]}catch(e){}crBadge();crFlush()}
+const crCard=it=>{const k=it[0],sh=it[1],n=it[2],ra=crRarOf(k),c=crRar(ra);
+  return '<div class="crc'+(sh?' sh':'')+'" style="--rc:'+crRC(ra)+'">'+crImg({k,s:sh},pb.skin.p,pb.skin.s,96)+'<div class="crn">'+esc(crName(k))+'</div><div class="crr'+(ra==='super'?' rb':'')+'" style="color:'+crRC(ra)+'">'+c[1]+(sh?' \u00b7 \u2726 Shiny':'')+'</div><div class="crs">#'+n+(n===1?' \u00b7 the first one ever!':'')+'</div></div>'};
+async function openCrates(){show('crates');crRender();await crSync();crRender()}
+function crRender(){
+  const top=document.getElementById('crtop'),col=document.getElementById('crcol');if(!top)return;
+  if(!crOn()){top.innerHTML='<small>Crates need an account on boxrun.fun. Sign in from the Profile screen to earn them.</small>';col.innerHTML='';return}
+  const left=Math.max(0,60-(pb.cpl||0)),mm=Math.floor(left/60),ss=String(Math.ceil(left)%60).padStart(2,'0');
+  top.innerHTML='<div class="crbal"><b>'+crBal+'</b> unopened crate'+(crBal===1?'':'s')+'</div><div class="crbar"><i style="width:'+Math.min(100,(pb.cpl||0)/60*100)+'%"></i></div>'
+   +'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play. Time only counts while you are in a level and turning at least once every 10 seconds.</small>'
+   +'<div class="crow"><button data-a="copen" class="pri"'+(crBal>0&&!crBusy?'':' disabled')+'>Open a crate</button><button data-a="copenall"'+(crBal>1&&!crBusy?'':' disabled')+'>Open all ('+Math.min(crBal,50)+')</button></div>'
+   +'<small>Odds: '+CR_RAR.map(r=>r[1]+' '+r[2]+'%').join(' \u00b7 ')+'. A shiny is 25x rarer than its normal version. Every skin has a global serial number: #1 is the first one anyone ever got.</small>';
+  crView=crItems.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[0].localeCompare(b[0])||a[2]-b[2]).slice(0,400);
+  const eq=pb.skin.b;
+  col.innerHTML='<div class="crgrid"><button class="crt'+(eq?'':' on')+'" data-ce="-1" title="Plain cube"><svg viewBox="0 0 60 60" width="40" height="40"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span>Plain</span></button>'
+   +crView.map((it,i)=>{const ra=crRarOf(it[0]),on=eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2];
+    return '<button class="crt'+(on?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+crRC(ra)+'" title="'+esc(crName(it[0])+' \u00b7 '+crRar(ra)[1]+(it[1]?' \u00b7 Shiny':'')+' \u00b7 #'+it[2])+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,40)+'<span>#'+it[2]+(it[1]?' \u2726':'')+'</span></button>'}).join('')+'</div>'
+   +(crItems.length?'':'<small>No base skins yet. Open a crate to get your first.</small>')+(crItems.length>400?'<small>Showing your 400 rarest.</small>':'');
+}
+async function crOpen(n){
+  if(crBusy||!crOn()||crBal<1)return;n=Math.min(n,crBal,50);crBusy=true;crRender();
+  const res=document.getElementById('crres');res.innerHTML='<div class="crc opening"><div class="crbox">?</div><div class="crn">Opening\u2026</div></div>';
+  const got=[];let err='';
+  try{for(let i=0;i<n;i++){const r=await httpB.crate('open');crBal=r.bal|0;crItems.push(r.item);got.push(r.item)}}catch(e){err=e.message||'Could not open the crate.'}
+  await new Promise(r=>setTimeout(r,500));
+  if(got.length){const best=got.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[2]-b[2])[0];
+    res.innerHTML=crCard(got.length===1?got[0]:best)+(got.length>1?'<small>Best of '+got.length+' crates. All of them: '+got.map(g=>esc(crName(g[0]))+(g[1]?'\u2726':'')+' #'+g[2]).join(', ')+'</small>':'')}
+  else res.innerHTML='';
+  document.getElementById('crnote').textContent=err;crBusy=false;crBadge();crRender()}
+function crEquip(i){
+  if(i<0){pb.skin.b=null}else{const it=crView[i];if(!it)return;const same=pb.skin.b&&pb.skin.b.k===it[0]&&!!pb.skin.b.s===!!it[1]&&pb.skin.b.n===it[2];pb.skin.b=same?null:{k:it[0],s:it[1]?1:0,n:it[2]};if(!same)pb.skin.f=null}
+  savePB();crRender()}
 // rotating tagline under the logo
 (()=>{const el=document.getElementById('tagline');if(!el)return;
 const L=['Steer. Survive. Don\u2019t touch the lava.','Always forward. Never stop.','Reach the checkered flag.','How far can you get in Endless?','A new weekly challenge every week.','Build a level and share it.','Lava is not your friend.','Improve your best score.'];let i=0;
