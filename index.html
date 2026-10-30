@@ -2056,7 +2056,7 @@ function crRender(){
   idx.innerHTML='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" style="--rc:'+rc(cr)+'" title="Default \u00b7 Common"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span class="nm">Default</span><span class="ct">Common</span></button>'
    +crCopies.map((it,i)=>{const ra=crRarOf(it[0]),r=crRar(ra),w=eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2];
      return '<button class="crt idx'+(w?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+rc(r)+'" title="'+esc(crName(it[0])+' \u00b7 '+r[1]+(it[1]?' \u00b7 Shiny':'')+' \u00b7 #'+it[2])+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(crName(it[0]))+'</span><span class="ct">#'+it[2]+(it[1]?' \u2726':'')+'</span></button>'}).join('')+'</div>'
-   +(crItems.length?'':'<small>Your crate skins will appear here.</small>')+(crItems.length>400?'<small>Showing your 400 rarest.</small>':'');
+   +(crItems.length>400?'<small>Showing your 400 rarest.</small>':'');
 }
 async function crOpen(n){
   if(crBusy||!crOn()||crBal<1)return;n=Math.min(n,crBal,50);crBusy=true;crRender();
