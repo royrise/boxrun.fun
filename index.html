@@ -1937,20 +1937,18 @@ const upd=()=>{const m=document.getElementById('p-main');b.hidden=!(backend!=='n
 (()=>{const cv=document.getElementById('menubg');if(!cv)return;const c=cv.getContext('2d');let W=0,H=0,dpr=1,bx=[],last=0;
 const rs=()=>{dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr};
 const mk=(init)=>{const s=18+Math.random()*46,a=Math.random()*Math.PI*2,v=14+Math.random()*34,side=Math.random();
-  const b={s,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:Math.random()*Math.PI*2,w:(Math.random()-.5)*.8,al:.14+Math.random()*.16,x:0,y:0};
+  const hu=Math.floor(Math.random()*360),b={hu,s,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:Math.random()*Math.PI*2,w:(Math.random()-.5)*.8,al:.14+Math.random()*.16,x:0,y:0};
   if(init){b.x=Math.random()*W;b.y=Math.random()*H}else{ // enter from a random edge, heading inwards
     if(side<.25){b.x=-s;b.y=Math.random()*H;b.vx=Math.abs(b.vx)}else if(side<.5){b.x=W+s;b.y=Math.random()*H;b.vx=-Math.abs(b.vx)}else if(side<.75){b.y=-s;b.x=Math.random()*W;b.vy=Math.abs(b.vy)}else{b.y=H+s;b.x=Math.random()*W;b.vy=-Math.abs(b.vy)}}
   return b};
 rs();addEventListener('resize',rs);
 const N=()=>Math.max(8,Math.min(26,Math.round(W*H/52000)));
 for(let i=0;i<N();i++)bx.push(mk(true));
-const colors=()=>{try{return [skinCol(pb.skin.p),skinCol(pb.skin.s)]}catch(e){return ['#5ec8ff','#1f3a5c']}};
 function frame(t){requestAnimationFrame(frame);const m=document.getElementById('menu');if(!m||m.hidden||document.hidden){last=0;return}
   const dt=last?Math.min(.1,(t-last)/1000):0;last=t;while(bx.length<N())bx.push(mk(false));
-  c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);const [p,s]=colors();
-  for(let i=0;i<bx.length;i++){const b=bx[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.r+=b.w*dt;
+  c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);  for(let i=0;i<bx.length;i++){const b=bx[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.r+=b.w*dt;
     if(b.x<-b.s*2||b.x>W+b.s*2||b.y<-b.s*2||b.y>H+b.s*2){bx[i]=mk(false);continue}
-    c.save();c.translate(b.x,b.y);c.rotate(b.r);c.globalAlpha=b.al;c.fillStyle=p;c.fillRect(-b.s/2,-b.s/2,b.s,b.s);c.fillStyle=s;c.fillRect(b.s*.2,-b.s*.4,b.s*.16,b.s*.8);c.restore()}}
+    c.save();c.translate(b.x,b.y);c.rotate(b.r);c.globalAlpha=b.al;c.fillStyle='hsl('+b.hu+',75%,58%)';c.fillRect(-b.s/2,-b.s/2,b.s,b.s);c.fillStyle='hsl('+b.hu+',65%,30%)';c.fillRect(b.s*.2,-b.s*.4,b.s*.16,b.s*.8);c.restore()}}
 requestAnimationFrame(frame)})();
 // rotating tagline under the logo
 (()=>{const el=document.getElementById('tagline');if(!el)return;
