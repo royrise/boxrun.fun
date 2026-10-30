@@ -2014,7 +2014,7 @@ function frame(t){requestAnimationFrame(frame);const m=document.getElementById('
     c.save();c.translate(b.x,b.y);c.rotate(b.r);c.globalAlpha=b.al;c.fillStyle='hsl('+b.hu+',75%,58%)';c.fillRect(-b.s/2,-b.s/2,b.s,b.s);c.fillStyle='hsl('+b.hu+',65%,30%)';c.fillRect(b.s*.2,-b.s*.4,b.s*.16,b.s*.8);c.restore()}}
 requestAnimationFrame(frame)})();
 // ---- crates: one per minute of play, opened for numbered base skins
-let crBal=0,crItems=[],crBusy=false,crFlushing=false,crTurn=-1e9,crPress=[],crDn=false,crSave=0,crView=[];
+let crBal=0,crItems=[],crBusy=false,crFlushing=false,crTurn=-1e9,crPress=[],crDay=null,crDn=false,crSave=0,crView=[];
 const crName=k=>(crSkin(k)||[0,k])[1],crRarOf=k=>(crSkin(k)||[0,0,'common'])[2],crRC=r=>{const x=crRar(r);return x&&x[3]!=='rainbow'?x[3]:'#fff'},crRank=k=>CR_RAR.findIndex(x=>x[0]===crRarOf(k));
 const crOn=()=>backend==='http'&&!!uid&&!!httpB;
 function crBadge(){const e=document.getElementById('crlbl');if(e)e.textContent='Skins'+(crBal>0?' ('+crBal+')':'')}
@@ -2024,16 +2024,16 @@ function crPlay(dt){
   const dn=!!(keys.left||keys.right);
   if(dn&&!crDn){crPress.push(t);if(crPress.length>8)crPress.shift()}crDn=dn;
   // anti-AFK: need 4+ separate key presses in the last 10 s, and one attempt can earn at most 150 s of playtime
-  if(crPress.filter(x=>t-x<=10).length<4||lt>150)return;
+  if(crPress.filter(x=>t-x<=10).length<4||lt>150||(crDay&&crDay[0]>=crDay[1]))return;
   pb.cpl=(pb.cpl||0)+dt;crSave+=dt;
   if(pb.cpl>=60){pb.cpl-=60;pb.cmin=(pb.cmin||0)+1;crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb));toast('Crate earned! Open it under Profile > Crates');crFlush()}
   else if(crSave>10){crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb))}
 }
 async function crFlush(){
   if(crFlushing||!crOn()||!(pb.cmin>0))return;crFlushing=true;const m=Math.min(60,pb.cmin);
-  try{const r=await httpB.crate('earn',{m});pb.cmin-=m;crBal=r.bal;store.set('cubeRunnerPB',JSON.stringify(pb))}catch(e){}
+  try{const r=await httpB.crate('earn',{m});pb.cmin-=m;crBal=r.bal;if(r.limit)crDay=[r.today|0,r.limit];store.set('cubeRunnerPB',JSON.stringify(pb))}catch(e){}
   crFlushing=false;crBadge();if(pb.cmin>0&&!crFlushing)setTimeout(crFlush,20000)}
-async function crSync(){if(!crOn())return;try{const r=await httpB.crate('state');crBal=r.bal|0;crItems=Array.isArray(r.items)?r.items.filter(it=>crSkin(it[0])):[];if(pb.skin.b&&!crSkin(pb.skin.b.k)){pb.skin.b=null;savePB()}}catch(e){}crBadge();crFlush()}
+async function crSync(){if(!crOn())return;try{const r=await httpB.crate('state');crBal=r.bal|0;if(r.limit)crDay=[r.today|0,r.limit];crItems=Array.isArray(r.items)?r.items.filter(it=>crSkin(it[0])):[];if(pb.skin.b&&!crSkin(pb.skin.b.k)){pb.skin.b=null;savePB()}}catch(e){}crBadge();crFlush()}
 const crCard=it=>{const k=it[0],sh=it[1],n=it[2],ra=crRarOf(k),c=crRar(ra);
   return '<div class="crc'+(sh?' sh':'')+'" style="--rc:'+crRC(ra)+'">'+crImg({k,s:sh},pb.skin.p,pb.skin.s,96)+'<div class="crn">'+esc(crName(k))+'</div><div class="crr'+(ra==='super'?' rb':'')+'" style="color:'+crRC(ra)+'">'+c[1]+(sh?' \u00b7 \u2726 Shiny':'')+'</div><div class="crs">#'+n+(n===1?' \u00b7 the first one ever!':'')+'</div></div>'};
 async function openSkins(){buildSkins();show('skins');await crSync();crRender()}
@@ -2043,7 +2043,7 @@ function crRender(){
   const on=crOn(),left=Math.max(0,60-(pb.cpl||0)),mm=Math.floor(left/60),ss=String(Math.ceil(left)%60).padStart(2,'0');
   const rc=r=>r[3]==='rainbow'?'#fff':r[3];
   top.innerHTML=on?'<div class="crbal"><b>'+crBal+'</b> unopened crate'+(crBal===1?'':'s')+'</div><div class="crbar"><i style="width:'+Math.min(100,(pb.cpl||0)/60*100)+'%"></i></div>'
-   +'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play</small>'
+   +(crDay&&crDay[0]>=crDay[1]?'<small>Daily limit reached ('+crDay[0]+'/'+crDay[1]+'). Crates start again tomorrow (UTC).</small>':'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play'+(crDay?' \u00b7 '+crDay[0]+'/'+crDay[1]+' today':'')+'</small>')
    +'<div class="crow"><button data-a="copen" class="pri"'+(crBal>0&&!crBusy&&CR_SKINS.length?'':' disabled')+'>Open a crate</button><button data-a="copenall"'+(crBal>1&&!crBusy&&CR_SKINS.length?'':' disabled')+'>Open all ('+Math.min(crBal,50)+')</button></div>':'<small>Crates need an account on boxrun.fun. Sign in from the Profile screen to earn them.</small>';
   // every skin that can currently drop, by rarity
   document.getElementById('crpool').innerHTML=!CR_SKINS.length?'<small>No skins are in the crates right now. Your crates are saved for when new ones arrive.</small>':CR_RAR.map(r=>{const l=CR_SKINS.filter(s=>s[2]===r[0]);return l.length?'<div class="crrh '+(r[0]==='super'?'rb':'')+'" style="color:'+rc(r)+'">'+r[1]+' <small>'+r[2]+'%</small></div><div class="crgrid">'+l.map(s=>'<div class="crt idx pool" style="--rc:'+rc(r)+'" title="'+esc(s[1]+' \u00b7 '+r[1])+'">'+crImg({k:s[0],s:0},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(s[1])+'</span></div>').join('')+'</div>':''}).join('');
