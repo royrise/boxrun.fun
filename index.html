@@ -916,7 +916,7 @@ const crMix=(a,b,t)=>{const A=crRGB(a),B=crRGB(b);return crHex(A.map((v,i)=>v*(1
 function crPal(pc,sc){const P=crRGB(pc),S=crRGB(sc);return [crHex(P),crHex(S),crShade(P,-.45),crShade(P,.4),crShade(S,-.45),'#ffffff','#000000']}
 function crPix(sp,x,y,pal){const c=sp[4].map(i=>pal[i]),p=sp[3];
   switch(p){
-  case 'stripe':return x>=13&&x<=15&&y>=3&&y<=16?c[1]:c[0];
+  case 'stripe':return (y>=1&&y<=18&&((x>=5&&x<=7)||(x>=12&&x<=14)))?c[1]:c[0];
   case 'checker':return((x>>2)+(y>>2))&1?c[1]:c[0];
   case 'diag':return((x+y)/3|0)&1?c[1]:c[0];
   case 'dots':return x%5===2&&y%5===2?c[1]:c[0];
