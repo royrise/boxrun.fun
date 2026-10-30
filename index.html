@@ -774,7 +774,7 @@ if(pb.v<3){pb.run=null;pb.v=3}
 // v4: bests/ghosts are stored by level id. Only the first 3 levels kept their layout, so only those carry over.
 if(pb.v<4){if(Array.isArray(pb.levels)){const o={},gh={};[0,1,2].forEach(i=>{if(pb.levels[i]!=null)o[LID[i]]=pb.levels[i];if(pb.ghosts[i])gh[LID[i]]=pb.ghosts[i]});pb.levels=o;pb.ghosts=gh}pb.v=4;savePB()}
 // v5: the finish now uses a circular hitbox, which makes every finish about 0.05 s later, so saved times go up by that much (a full run by 0.05 per level)
-if(pb.v<5){const B=(v,d)=>typeof v==='number'?Math.round((v+d)*1000)/1000:v;for(const k in pb.levels)pb.levels[k]=B(pb.levels[k],.05);pb.clb={};for(const k in pb.cl){pb.cl[k]=B(pb.cl[k],.05);if(k.startsWith('cm_'))pb.clb[k]=1}if(pb.run!=null)pb.run=B(pb.run,.05*LEVELS.length);pb.lbFix=true;pb.v=5;savePB()}
+if(pb.v<5){const B=(v,d)=>typeof v==='number'?Math.round((v+d)*1000)/1000:v;for(const k in pb.levels)pb.levels[k]=B(pb.levels[k],.05);pb.clb={};for(const k in pb.cl){pb.cl[k]=B(pb.cl[k],.05);if(k.startsWith('cm_'))pb.clb[k]=1}if(pb.run!=null)pb.run=B(pb.run,.05*LEVELS.length);pb.lbFix=true;pb.v=6;savePB()}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const bestOf=()=>mode==='main'?pb.levels[LID[lvl]]:mode==='custom'?pb.cl[cur.id]:null;
 const ghostOf=()=>mode==='main'?pb.ghosts[LID[lvl]]:mode==='custom'?pb.cg[cur.id]:null;
@@ -1347,10 +1347,15 @@ async function initBackend(){
 }
 initBackend().then(openLinked);
 // bring your server-side times and stats onto this device (a new browser, or after clearing site data); the faster time always wins
+let srvFx=5;
 async function pullMine(){
   try{
     const l=await db.doc('lb/'+uid).get();
-    if(l.exists){const d=l.data();LEVELS.forEach((_,i)=>{const t=d[fld(i)];if(typeof t==='number'&&(pb.levels[LID[i]]==null||t<pb.levels[LID[i]]))pb.levels[LID[i]]=t});if(typeof d.run3==='number'&&(pb.run==null||d.run3<pb.run))pb.run=d.run3}
+    srvFx=0;
+    if(l.exists){const d=l.data();srvFx=d.fx|0;const add=srvFx<5?.05:0,addR=srvFx<5?.05*LEVELS.length:0;   // server times saved before the circular finish get the same +0.05 s
+      if(srvFx<5&&pb.v===5){const B=(v,x)=>typeof v==='number'?Math.round((v+x)*1000)/1000:v;for(const k in pb.levels)pb.levels[k]=B(pb.levels[k],.05);for(const k in pb.cl)pb.cl[k]=B(pb.cl[k],.05);if(pb.run!=null)pb.run=B(pb.run,.05*LEVELS.length)}   // a copy that was already raised but then overwritten by old server times
+      LEVELS.forEach((_,i)=>{const t=d[fld(i)];if(typeof t==='number'&&(pb.levels[LID[i]]==null||t+add<pb.levels[LID[i]]))pb.levels[LID[i]]=Math.round((t+add)*1000)/1000});if(typeof d.run3==='number'&&(pb.run==null||d.run3+addR<pb.run))pb.run=Math.round((d.run3+addR)*1000)/1000}
+    if(pb.v===5)pb.v=6;
     const f=await db.doc('pf/'+uid).get();
     if(f.exists){const st=f.data().stats||{};pb.completions=Math.max(pb.completions||0,st.comp|0);pb.deaths=Math.max(pb.deaths||0,st.dead|0);pb.endBest=Math.max(pb.endBest||0,st.endBest|0);(f.data().ach||[]).forEach(id=>{if(ACH.some(a=>a.id===id)&&!pb.ach[id])pb.ach[id]=Date.now()})}
     savePB();
@@ -1481,7 +1486,7 @@ async function watchGhost(d){
 }
 async function lbForce(patch){   // one-off overwrite of this player's own times after the hitbox change (the normal write only keeps faster times)
   if(!db||!uid)return;
-  try{const ref=db.doc('lb/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};for(const k in patch)if(patch[k]!=null)d[k]=patch[k];await ref.set(d)}catch(e){}
+  try{const ref=db.doc('lb/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};for(const k in patch)if(patch[k]!=null)d[k]=patch[k];d.fx=5;await ref.set(d)}catch(e){}
 }
 async function lbPut(patch){
   if(!db||!uid)return;
@@ -1489,7 +1494,7 @@ async function lbPut(patch){
     for(const k in patch)if(patch[k]!=null&&(d[k]==null||patch[k]<d[k])){d[k]=patch[k];ch=true}
     if(ch)await ref.set(d)}catch(e){}
 }
-function syncPBs(){const p={};LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)p[fld(i)]=rnd(t,3)});if(pb.run!=null)p.run3=rnd(pb.run,3);if(pb.lbFix){pb.lbFix=false;savePB();lbForce(p)}else lbPut(p)}
+function syncPBs(){const p={};LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)p[fld(i)]=rnd(t,3)});if(pb.run!=null)p.run3=rnd(pb.run,3);if(pb.lbFix||srvFx<5){pb.lbFix=false;srvFx=5;savePB();lbForce(p)}else lbPut(p)}
 async function lbTop(field,n){
   if(!db)return null;
   try{const sn=await db.collection('lb').orderBy(field,'asc').limit(n).get();
