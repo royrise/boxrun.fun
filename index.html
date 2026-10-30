@@ -2051,7 +2051,7 @@ function crRender(){
   const on=crOn(),left=Math.max(0,60-(pb.cpl||0)),mm=Math.floor(left/60),ss=String(Math.ceil(left)%60).padStart(2,'0');
   const rc=r=>r[3]==='rainbow'?'#fff':r[3];
   top.innerHTML=on?'<div class="crbal"><b>'+crBal+'</b> unopened crate'+(crBal===1?'':'s')+'</div><div class="crbar"><i style="width:'+Math.min(100,(pb.cpl||0)/60*100)+'%"></i></div>'
-   +'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play. Time only counts while you are in a level and turning at least once every 10 seconds.</small>'
+   +'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play</small>'
    +'<div class="crow"><button data-a="copen" class="pri"'+(crBal>0&&!crBusy?'':' disabled')+'>Open a crate</button><button data-a="copenall"'+(crBal>1&&!crBusy?'':' disabled')+'>Open all ('+Math.min(crBal,50)+')</button></div>':'<small>Crates need an account on boxrun.fun. Sign in from the Profile screen to earn them.</small>';
   // every skin that can currently drop, by rarity
   document.getElementById('crpool').innerHTML=CR_RAR.map(r=>{const l=CR_SKINS.filter(s=>s[2]===r[0]);return l.length?'<div class="crrh '+(r[0]==='super'?'rb':'')+'" style="color:'+rc(r)+'">'+r[1]+'</div><div class="crgrid">'+l.map(s=>'<div class="crt idx pool" style="--rc:'+rc(r)+'" title="'+esc(s[1]+' \u00b7 '+r[1])+'">'+crImg({k:s[0],s:0},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(s[1])+'</span></div>').join('')+'</div>':''}).join('');
