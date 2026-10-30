@@ -2054,7 +2054,7 @@ function crRender(){
    +'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play</small>'
    +'<div class="crow"><button data-a="copen" class="pri"'+(crBal>0&&!crBusy?'':' disabled')+'>Open a crate</button><button data-a="copenall"'+(crBal>1&&!crBusy?'':' disabled')+'>Open all ('+Math.min(crBal,50)+')</button></div>':'<small>Crates need an account on boxrun.fun. Sign in from the Profile screen to earn them.</small>';
   // every skin that can currently drop, by rarity
-  document.getElementById('crpool').innerHTML=CR_RAR.map(r=>{const l=CR_SKINS.filter(s=>s[2]===r[0]);return l.length?'<div class="crrh '+(r[0]==='super'?'rb':'')+'" style="color:'+rc(r)+'">'+r[1]+'</div><div class="crgrid">'+l.map(s=>'<div class="crt idx pool" style="--rc:'+rc(r)+'" title="'+esc(s[1]+' \u00b7 '+r[1])+'">'+crImg({k:s[0],s:0},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(s[1])+'</span></div>').join('')+'</div>':''}).join('');
+  document.getElementById('crpool').innerHTML=CR_RAR.map(r=>{const l=CR_SKINS.filter(s=>s[2]===r[0]);return l.length?'<div class="crrh '+(r[0]==='super'?'rb':'')+'" style="color:'+rc(r)+'">'+r[1]+' <small>'+r[2]+'%</small></div><div class="crgrid">'+l.map(s=>'<div class="crt idx pool" style="--rc:'+rc(r)+'" title="'+esc(s[1]+' \u00b7 '+r[1])+'">'+crImg({k:s[0],s:0},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(s[1])+'</span></div>').join('')+'</div>':''}).join('');
   // inventory: Default is a common skin everyone has (no serial number, never drops), then every copy you own
   const eq=pb.skin.b,cr=crRar('common');
   crCopies=crItems.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[0].localeCompare(b[0])||a[2]-b[2]).slice(0,400);
