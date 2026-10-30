@@ -56,6 +56,12 @@ canvas{display:block;width:100%;height:100%}
 .crgrid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:260px;overflow:auto;padding:4px}
 .panel button.crt{width:62px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;border:2px solid var(--rc,#4a4d63)}.crt.on{background:#3d4166;outline:2px solid #fff}.crt.sh{box-shadow:0 0 8px #ffd24a99}
 .crtag{font-size:13px;opacity:.85}
+.crodds{display:flex;flex-direction:column;gap:3px;max-width:260px;margin:4px auto;font-size:14px}.crodds div{display:flex;justify-content:space-between;gap:12px;padding:3px 10px;border-radius:6px;background:#12121a99}.crodds b{font-variant-numeric:tabular-nums}
+.crhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}.crhead .sec{margin:0}
+.crsw{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;user-select:none}.crsw input{display:none}.crsw span{width:38px;height:22px;border-radius:12px;background:#3a3d55;position:relative;transition:background .15s}.crsw span::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}.crsw input:checked+span{background:#2fd37a}.crsw input:checked+span::after{left:19px}
+.crrh{text-align:left;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;margin:10px 4px 2px}.crrh small{opacity:.7;font-weight:600;letter-spacing:0}
+.panel button.crt.idx{width:76px;padding:6px 3px;font-size:11px}.crt.lock img{filter:brightness(0);opacity:.5}.crt.lock{opacity:.7}.crt .nm{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crt .ct{opacity:.8}
+#crcopies{margin-top:8px}#crcopies .lbt{margin-bottom:4px}
 #tagline{font-size:calc(1em + 3px);transition:opacity .4s}#tagline.fade{opacity:0}
 .panel button,.pop button{font:inherit;font-size:18px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:10px;padding:12px;cursor:pointer}
 .panel button:hover,.pop button:hover{background:#383c5c}
@@ -118,7 +124,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 .panel .swb.on{border-color:#fff;box-shadow:0 0 0 2px #5ec8ff}
 .panel .swb.lock{opacity:.45}
 #skinprev{display:flex;justify-content:center}
-#p-skins{width:min(520px,100%)}.skcols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.skcols .lbt{margin-bottom:8px}
+#p-skins{width:min(1040px,100%)}.skgrid{display:grid;grid-template-columns:minmax(0,480px) minmax(0,1fr);gap:28px;align-items:start;text-align:center}@media(max-width:860px){.skgrid{grid-template-columns:1fr}}.skl .sec,.skr .sec{margin:0 0 6px}.skcols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.skcols .lbt{margin-bottom:8px}
 @media(pointer:fine) and (min-width:900px) and (min-height:700px){#p-skins{zoom:1.3}}
 @media(pointer:fine) and (min-width:1400px) and (min-height:850px){#p-skins{zoom:1.5}}
 @media(max-width:480px){#p-skins .swb{width:34px;height:34px}}
@@ -216,7 +222,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
  <div class="panel wide" id="p-comm" hidden><h2>Community levels</h2><div><select id="csort" title="Sort levels"><option value="rel">Relevance</option><option value="up">Most upvotes</option><option value="net">Top rated</option><option value="plays">Most played</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option></select> <input id="csearch" maxlength="30" autocomplete="off" placeholder="Search levels or players" aria-label="Search"></div><div id="ctags"></div><div id="cwrap"><div id="cleft"><div id="clist"></div><small id="cnote"></small></div><div id="cside"><div class="lbt" id="cside-t">Fastest times</div><div id="cside-b"><small>Hover a level to see its leaderboard.</small></div><button class="sideclose" data-sc="1">Close</button></div></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-profile" hidden><h2>Profile</h2><div id="profbody"></div><button data-a="back">Back</button><button data-a="alogout" id="psignout" hidden>Sign out</button></div>
  <div class="panel" id="p-contrib" hidden><h2>Contributors</h2><p class="sub">Thanks to everyone who helped make Box Run.</p><div class="row" style="justify-content:center;text-align:center"><span>royrise</span></div><div class="row" style="justify-content:center;text-align:center"><span>the_union_of_soviet_onions</span></div><div class="row" style="justify-content:center;text-align:center"><span>zvelq</span></div><button data-a="back">Back</button></div>
- <div class="panel wide" id="p-skins" hidden><h2>Skins</h2><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><small id="skinnote"></small><h3 class="sec">Crates</h3><div id="crtop"></div><div id="crres"></div><div class="lbt" style="margin-top:6px">Your base skins</div><div id="crcol"></div><small id="crnote"></small><button data-a="back">Back</button></div>
+ <div class="panel wide" id="p-skins" hidden><h2>Skins</h2><div class="skgrid"><div class="skl"><h3 class="sec">Colours</h3><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><small id="skinnote"></small></div><div class="skr"><h3 class="sec">Crates</h3><div id="crtop"></div><div id="crres"></div></div></div><div class="skidx"><div class="crhead"><h3 class="sec">Skin index <small id="crcount"></small></h3><label class="crsw"><input type="checkbox" id="crshow" checked><span></span>Show skins I don't have</label></div><div id="crindex"></div><div id="crcopies"></div></div><small id="crnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
  <div class="panel" id="p-endless" hidden><h2>Endless</h2><p class="sub">A random winding track that never ends. Go as far as you can. The same seed always gives the same track.</p><div class="seg" id="emode"><button data-a="emrand">Random seed</button><button data-a="emset">Set seed</button></div><input id="eseed" maxlength="12" autocomplete="off" aria-label="Seed" placeholder="Type a seed"><small id="enote"></small><div id="ebest"></div><button data-a="estart" class="pri">Start</button><div class="lbt">Top distances (random seeds)</div><div id="eboard"></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-lb" hidden><h2>Leaderboard</h2><div id="lbtabs"></div><div id="lbbody"></div><button data-a="back">Back</button></div>
@@ -462,6 +468,7 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.lbs!=null){sideLB(fld(+d.lbs),'Level '+(+d.lbs+1)+' \u00b7 '+lvName(+d.lbs),'m'+d.lbs);popSide('lvside')}
   else if(d.sk)pickSkin(d.sk,+d.ci);
   else if(d.ce!=null)crEquip(+d.ce);
+  else if(d.ci!=null)crPick(d.ci);
   else if(d.sh)commShare(d.sh);
   else if(d.vk)commVote(d.vk,+d.vv);
   else if(d.cp)startComm(d.cp);
@@ -2039,21 +2046,31 @@ async function crSync(){if(!crOn())return;try{const r=await httpB.crate('state')
 const crCard=it=>{const k=it[0],sh=it[1],n=it[2],ra=crRarOf(k),c=crRar(ra);
   return '<div class="crc'+(sh?' sh':'')+'" style="--rc:'+crRC(ra)+'">'+crImg({k,s:sh},pb.skin.p,pb.skin.s,96)+'<div class="crn">'+esc(crName(k))+'</div><div class="crr'+(ra==='super'?' rb':'')+'" style="color:'+crRC(ra)+'">'+c[1]+(sh?' \u00b7 \u2726 Shiny':'')+'</div><div class="crs">#'+n+(n===1?' \u00b7 the first one ever!':'')+'</div></div>'};
 async function openSkins(){buildSkins();show('skins');await crSync();crRender()}
+let crSel=null,crCopies=[];
 function crRender(){
-  const top=document.getElementById('crtop'),col=document.getElementById('crcol');if(!top)return;
-  if(!crOn()){top.innerHTML='<small>Crates need an account on boxrun.fun. Sign in from the Profile screen to earn them.</small>';col.innerHTML='';return}
-  const left=Math.max(0,60-(pb.cpl||0)),mm=Math.floor(left/60),ss=String(Math.ceil(left)%60).padStart(2,'0');
-  top.innerHTML='<div class="crbal"><b>'+crBal+'</b> unopened crate'+(crBal===1?'':'s')+'</div><div class="crbar"><i style="width:'+Math.min(100,(pb.cpl||0)/60*100)+'%"></i></div>'
+  const top=document.getElementById('crtop'),idx=document.getElementById('crindex');if(!top||!idx)return;
+  const on=crOn(),left=Math.max(0,60-(pb.cpl||0)),mm=Math.floor(left/60),ss=String(Math.ceil(left)%60).padStart(2,'0');
+  top.innerHTML=on?'<div class="crbal"><b>'+crBal+'</b> unopened crate'+(crBal===1?'':'s')+'</div><div class="crbar"><i style="width:'+Math.min(100,(pb.cpl||0)/60*100)+'%"></i></div>'
    +'<small>Next crate after '+(left>=60?'1:00':mm+':'+ss)+' more of play. Time only counts while you are in a level and turning at least once every 10 seconds.</small>'
-   +'<div class="crow"><button data-a="copen" class="pri"'+(crBal>0&&!crBusy?'':' disabled')+'>Open a crate</button><button data-a="copenall"'+(crBal>1&&!crBusy?'':' disabled')+'>Open all ('+Math.min(crBal,50)+')</button></div>'
-   +'<small>Odds: '+CR_RAR.map(r=>r[1]+' '+r[2]+'%').join(' \u00b7 ')+'. A shiny is 25x rarer than its normal version. Every skin has a global serial number: #1 is the first one anyone ever got.</small>';
-  crView=crItems.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[0].localeCompare(b[0])||a[2]-b[2]).slice(0,400);
-  const eq=pb.skin.b;
-  col.innerHTML='<div class="crgrid"><button class="crt'+(eq?'':' on')+'" data-ce="-1" title="Plain cube"><svg viewBox="0 0 60 60" width="40" height="40"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span>Plain</span></button>'
-   +crView.map((it,i)=>{const ra=crRarOf(it[0]),on=eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2];
-    return '<button class="crt'+(on?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+crRC(ra)+'" title="'+esc(crName(it[0])+' \u00b7 '+crRar(ra)[1]+(it[1]?' \u00b7 Shiny':'')+' \u00b7 #'+it[2])+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,40)+'<span>#'+it[2]+(it[1]?' \u2726':'')+'</span></button>'}).join('')+'</div>'
-   +(crItems.length?'':'<small>No base skins yet. Open a crate to get your first.</small>')+(crItems.length>400?'<small>Showing your 400 rarest.</small>':'');
+   +'<div class="crow"><button data-a="copen" class="pri"'+(crBal>0&&!crBusy?'':' disabled')+'>Open a crate</button><button data-a="copenall"'+(crBal>1&&!crBusy?'':' disabled')+'>Open all ('+Math.min(crBal,50)+')</button></div>':'<small>Crates need an account on boxrun.fun. Sign in from the Profile screen to earn them.</small>';
+  top.innerHTML+='<div class="lbt" style="margin-top:8px">Drop chances</div><div class="crodds">'+CR_RAR.map(r=>'<div><span class="'+(r[0]==='super'?'rb':'')+'" style="color:'+(r[3]==='rainbow'?'#fff':r[3])+'">'+r[1]+'</span><b>'+r[2]+'%</b></div>').join('')+'<div><span>\u2726 Shiny</span><b>25x rarer</b></div></div>';
+  const own={};crItems.forEach(it=>{const o=own[it[0]]||(own[it[0]]={n:0,sh:0});o.n++;o.sh+=it[1]?1:0});
+  const hide=!!pb.chide,eq=pb.skin.b;let have=0;
+  CR_SKINS.forEach(s=>{if(own[s[0]])have++});
+  document.getElementById('crcount').textContent='\u00b7 '+have+' / '+CR_SKINS.length+' unlocked';
+  document.getElementById('crshow').checked=!hide;
+  let html='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" title="Plain cube"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span class="nm">Plain</span></button></div>';
+  for(const r of CR_RAR){
+    const list=CR_SKINS.filter(s=>s[2]===r[0]).filter(s=>!hide||own[s[0]]);if(!list.length)continue;
+    html+='<div class="crrh '+(r[0]==='super'?'rb':'')+'" style="color:'+(r[3]==='rainbow'?'#fff':r[3])+'">'+r[1]+' <small>'+r[2]+'%</small></div><div class="crgrid">'
+     +list.map(s=>{const o=own[s[0]],sel=crSel===s[0],worn=eq&&eq.k===s[0];
+       return '<button class="crt idx'+(o?'':' lock')+(sel||worn?' on':'')+'" data-ci="'+s[0]+'" style="--rc:'+(r[3]==='rainbow'?'#ffd24a':r[3])+'" title="'+esc(s[1]+' \u00b7 '+r[1]+(o?'':' \u00b7 not unlocked'))+'">'+crImg({k:s[0],s:0},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(s[1])+'</span><span class="ct">'+(o?'x'+o.n+(o.sh?' \u2726':''):'locked')+'</span></button>'}).join('')+'</div>'}
+  idx.innerHTML=html;
+  // the copies of the selected skin, each with its own serial number
+  const cp=document.getElementById('crcopies');crCopies=crSel&&own[crSel]?crItems.filter(it=>it[0]===crSel).sort((a,b)=>b[1]-a[1]||a[2]-b[2]):[];
+  cp.innerHTML=crCopies.length?'<div class="lbt">'+esc(crName(crSel))+': pick a copy to wear</div><div class="crgrid">'+crCopies.map((it,i)=>{const w=eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2];return '<button class="crt'+(w?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+crRC(crRarOf(it[0]))+'" title="'+esc(crName(it[0])+(it[1]?' \u00b7 Shiny':'')+' \u00b7 #'+it[2])+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,40)+'<span>#'+it[2]+(it[1]?' \u2726':'')+'</span></button>'}).join('')+'</div>':'';
 }
+function crPick(k){const o=crItems.some(it=>it[0]===k);if(!o){const s=crSkin(k),r=crRar(s[2]);document.getElementById('crnote').textContent=s[1]+' is '+r[1]+' ('+r[2]+'% of crates). Open crates to unlock it.';crSel=null}else{document.getElementById('crnote').textContent='';crSel=crSel===k?null:k}crRender()}
 async function crOpen(n){
   if(crBusy||!crOn()||crBal<1)return;n=Math.min(n,crBal,50);crBusy=true;crRender();
   const res=document.getElementById('crres');res.innerHTML='<div class="crc opening"><div class="crbox">?</div><div class="crn">Opening\u2026</div></div>';
@@ -2065,8 +2082,9 @@ async function crOpen(n){
   else res.innerHTML='';
   document.getElementById('crnote').textContent=err;crBusy=false;crBadge();crRender()}
 function crEquip(i){
-  if(i<0){pb.skin.b=null}else{const it=crView[i];if(!it)return;const same=pb.skin.b&&pb.skin.b.k===it[0]&&!!pb.skin.b.s===!!it[1]&&pb.skin.b.n===it[2];pb.skin.b=same?null:{k:it[0],s:it[1]?1:0,n:it[2]}}
-  savePB();crRender()}
+  if(i<0){pb.skin.b=null}else{const it=crCopies[i];if(!it)return;const same=pb.skin.b&&pb.skin.b.k===it[0]&&!!pb.skin.b.s===!!it[1]&&pb.skin.b.n===it[2];pb.skin.b=same?null:{k:it[0],s:it[1]?1:0,n:it[2]}}
+  savePB();buildSkins()}
+document.getElementById('crshow').addEventListener('change',e=>{pb.chide=e.target.checked?0:1;savePB();crRender()});
 // rotating tagline under the logo
 (()=>{const el=document.getElementById('tagline');if(!el)return;
 const L=['Steer. Survive. Don\u2019t touch the lava.','Always forward. Never stop.','Reach the checkered flag.','How far can you get in Endless?','A new weekly challenge every week.','Build a level and share it.','Lava is not your friend.','Improve your best score.'];let i=0;
