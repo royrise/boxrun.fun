@@ -539,6 +539,18 @@ function piecesAt(x,y,types){
 function pointIn(poly,x,y){let s=0;for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],cr=(b[0]-a[0])*(y-a[1])-(b[1]-a[1])*(x-a[0]);if(cr!==0){const sg=Math.sign(cr);if(s&&sg!==s)return false;s=sg}}return true}
 const iceUnder=(x,y)=>piecesAt(Math.floor(x),Math.floor(y),['I']).some(([c,poly])=>pointIn(poly,x,y));
 // SAT: rotated cube vs a convex polygon. Returns true/false, or with mtv=true the minimum push vector (or null)
+// the finish is touched by a circle (radius = half the cube) instead of the cube's corners
+function circleHit(cx,cy,r,poly){
+  let inside=true,best=1e9;
+  for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],ex=b[0]-a[0],ey=b[1]-a[1],l2=ex*ex+ey*ey||1e-9;
+    if(ex*(cy-a[1])-ey*(cx-a[0])<0)inside=false;
+    const t=Math.max(0,Math.min(1,((cx-a[0])*ex+(cy-a[1])*ey)/l2));best=Math.min(best,Math.hypot(cx-(a[0]+t*ex),cy-(a[1]+t*ey)))}
+  if(!inside){let out=true;for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];if((b[0]-a[0])*(cy-a[1])-(b[1]-a[1])*(cx-a[0])>0){out=false;break}}if(out)inside=true}
+  return inside||best<r}
+function touchGoal(){
+  const x0=Math.floor(p.x-1),x1=Math.floor(p.x+1),y0=Math.floor(p.y-1),y1=Math.floor(p.y+1);
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)for(const [c,poly] of piecesAt(x,y,['G']))if(circleHit(p.x,p.y,H,poly))return true;
+  return false}
 function sat(px,py,a,poly,mtv){
   const c=Math.cos(a),s=Math.sin(a);
   const ax=[[c,s],[-s,c]].concat(polyAxes(poly));
@@ -652,7 +664,7 @@ function update(dt){
       for(const q in crumb){crumb[q]-=dt;if(crumb[q]<=0){fell[q]=true;delete crumb[q]}}
       if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
     if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}}
-    else if(touching(p.x,p.y,p.a,['G'])){if(mode==='endless')endRun(true);else finish()}
+    else if(touchGoal()){if(mode==='endless')endRun(true);else finish()}
   }else{
     timer-=dt;
     if(timer<=0){
@@ -761,6 +773,8 @@ if(!pb.v){pb.levels.unshift(null);pb.ghosts.unshift(null);pb.run=null;pb.v=2}
 if(pb.v<3){pb.run=null;pb.v=3}
 // v4: bests/ghosts are stored by level id. Only the first 3 levels kept their layout, so only those carry over.
 if(pb.v<4){if(Array.isArray(pb.levels)){const o={},gh={};[0,1,2].forEach(i=>{if(pb.levels[i]!=null)o[LID[i]]=pb.levels[i];if(pb.ghosts[i])gh[LID[i]]=pb.ghosts[i]});pb.levels=o;pb.ghosts=gh}pb.v=4;savePB()}
+// v5: the finish now uses a circular hitbox, which makes every finish about 0.05 s later, so saved times go up by that much (a full run by 0.05 per level)
+if(pb.v<5){const B=(v,d)=>typeof v==='number'?Math.round((v+d)*1000)/1000:v;for(const k in pb.levels)pb.levels[k]=B(pb.levels[k],.05);pb.clb={};for(const k in pb.cl){pb.cl[k]=B(pb.cl[k],.05);if(k.startsWith('cm_'))pb.clb[k]=1}if(pb.run!=null)pb.run=B(pb.run,.05*LEVELS.length);pb.lbFix=true;pb.v=5;savePB()}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const bestOf=()=>mode==='main'?pb.levels[LID[lvl]]:mode==='custom'?pb.cl[cur.id]:null;
 const ghostOf=()=>mode==='main'?pb.ghosts[LID[lvl]]:mode==='custom'?pb.cg[cur.id]:null;
@@ -1038,7 +1052,7 @@ async function commVote(key,val){
 function startComm(key){
   const l=commList.find(x=>x.key===key);if(!l)return;rvSync(l);extGhost=pendingGhost;pendingGhost=null;
   menuEl.hidden=true;mode='custom';cur={id:'cm_'+key,name:l.name,rows:l.rows,sh:l.sh,ov:l.ov,tx:l.tx,sa:l.sa};fullRun=false;total=0;deaths=0;load(0);
-  delete cCache[key];if(pb.cl['cm_'+key]!=null)lbPut({[cfk(key)]:rnd(pb.cl['cm_'+key],3)});
+  delete cCache[key];if(pb.cl['cm_'+key]!=null){const pt={[cfk(key)]:rnd(pb.cl['cm_'+key],3)};if(pb.clb&&pb.clb['cm_'+key]){delete pb.clb['cm_'+key];savePB();lbForce(pt)}else lbPut(pt)}
 }
 // play count: each player keeps their own tally per level inside their vt document (field p); the totals are summed when the list loads
 const pendPlays={};let playTimer=0;
@@ -1465,13 +1479,17 @@ async function watchGhost(d){
   note('');pendingGhost={name:d.wn,arr};
   if(isM)startLevel(+ref.slice(1),false);else startComm(ref.slice(1));
 }
+async function lbForce(patch){   // one-off overwrite of this player's own times after the hitbox change (the normal write only keeps faster times)
+  if(!db||!uid)return;
+  try{const ref=db.doc('lb/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};for(const k in patch)if(patch[k]!=null)d[k]=patch[k];await ref.set(d)}catch(e){}
+}
 async function lbPut(patch){
   if(!db||!uid)return;
   try{const ref=db.doc('lb/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{};let ch=false;
     for(const k in patch)if(patch[k]!=null&&(d[k]==null||patch[k]<d[k])){d[k]=patch[k];ch=true}
     if(ch)await ref.set(d)}catch(e){}
 }
-function syncPBs(){const p={};LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)p[fld(i)]=rnd(t,3)});if(pb.run!=null)p.run3=rnd(pb.run,3);lbPut(p)}
+function syncPBs(){const p={};LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)p[fld(i)]=rnd(t,3)});if(pb.run!=null)p.run3=rnd(pb.run,3);if(pb.lbFix){pb.lbFix=false;savePB();lbForce(p)}else lbPut(p)}
 async function lbTop(field,n){
   if(!db)return null;
   try{const sn=await db.collection('lb').orderBy(field,'asc').limit(n).get();
