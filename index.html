@@ -390,7 +390,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
+function respawn(){if(state==='win'||state==='menu')return;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
@@ -563,15 +563,18 @@ function touching(px,py,a,types){
   return false;
 }
 // push the cube out of any walls it overlaps; returns true if it ends up clear
-function resolve(){
+function resolve(maxD){   // maxD caps the total push so a squash can never shove the cube out the far side of a wall
+  const sx=p.x,sy=p.y,cap=maxD||.45;
   for(let i=0;i<6;i++){
     let moved=false;
     for(let y=Math.floor(p.y-1);y<=Math.floor(p.y+1);y++)for(let x=Math.floor(p.x-1);x<=Math.floor(p.x+1);x++)
       for(const [c,poly] of piecesAt(x,y,['#'])){const m=sat(p.x,p.y,p.a,poly,true);if(m){p.x+=m[0];p.y+=m[1];moved=true}}
     if(movers.length)for(const poly of moverPolys()){const m=sat(p.x,p.y,p.a,poly,true);if(m){p.x+=m[0];p.y+=m[1];moved=true}}
+    if(Math.hypot(p.x-sx,p.y-sy)>cap){p.x=sx;p.y=sy;return false}
     if(!moved)return true;
   }
-  return !touching(p.x,p.y,p.a,['#']);
+  if(touching(p.x,p.y,p.a,['#'])){p.x=sx;p.y=sy;return false}
+  return true;
 }
 function drawWind(c,px,py,s,dir,tm){
   c.save();c.beginPath();c.rect(px,py,s,s);c.clip();c.fillStyle='rgba(140,210,255,.10)';c.fillRect(px,py,s,s);
