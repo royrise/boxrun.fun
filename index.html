@@ -481,13 +481,13 @@ function ovRender(){
     if(!box)return;const k=hi?'high':'pts';
     if(!ovData){box.innerHTML='<small>'+(backend==='http'?'Loading…':'Leaderboards are only available on boxrun.fun.')+'</small>';return}
     const d=hi?ovData.high:ovData,all=d.top||[],list=ovOpen[k]?all:all.slice(0,10);
-    const row=(r,me)=>'<div class="ovr'+(me?' me':'')+'"><span class="rk">'+r.rank+'</span><span class="nm">'+esc(r.name)+'</span><span class="pt">'+(hi?'Level '+r.lv+'<small> · '+r.n+' cleared</small>':f(r.pts))+'</span></div>';
+    const row=(r,me)=>'<div class="ovr'+(me?' me':'')+'"><span class="rk">'+r.rank+'</span><span class="nm">'+esc(r.name)+'</span><span class="pt">'+(hi?'Level '+r.lv:f(r.pts))+'</span></div>';
     const inList=d.me&&list.some(r=>r.id===d.me.id);
     box.innerHTML='<div class="ovh"><b>'+(hi?'Highest level':'Campaign points')+'</b><small>'+(hi?'Furthest main level cleared':'Points across all '+LEVELS.length+' maps')+'</small></div>'
       +'<div class="ovl">'+(all.length?list.map(r=>row(r,d.me&&r.id===d.me.id)).join(''):'<small>No times yet. Be the first.</small>')+'</div>'
       +(d.me&&!inList?'<div class="ovr gap">…</div>'+row(d.me,true):'')
       +(!uid?'<small class="ovn">Create an account to appear on the leaderboard.</small>':(!d.me?'<small class="ovn">Set a time on a main level to appear here.</small>':''))
-      +'<div class="ovf"><small>'+(hi?'Ties share a place; more levels cleared breaks them.':'1st 40,000 · 2nd 20,000 · 3rd 10,000 · half again each place')+'</small>'+(all.length>10?'<button data-a="ovtoggle" data-t="'+k+'">'+(ovOpen[k]?'Show less':'Show top '+all.length)+'</button>':'')+'</div>'
+      +'<div class="ovf"><small>'+(hi?'Players on the same level share a place.':'1st 40,000 · 2nd 20,000 · 3rd 10,000 · half again each place')+'</small>'+(all.length>10?'<button data-a="ovtoggle" data-t="'+k+'">'+(ovOpen[k]?'Show less':'Show top '+all.length)+'</button>':'')+'</div>'
   };
   one(document.getElementById('ovcard'),false);one(document.getElementById('ovcard2'),true)
 }
