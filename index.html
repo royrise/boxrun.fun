@@ -7,7 +7,8 @@
 <title>boxrun.fun</title>
 <script>window.BOXRUN_API='https://boxrun-api.thefrisk6.workers.dev'</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Bungee&display=swap">
-<style>
+<style>html,body,#hud,#banner,#duelhud,#mphud,canvas,#menu,button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}input,textarea,[contenteditable],.sel{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+
 :root{--bg:#f2f2f5;--fg:#1c1c24;--bar:#ffffffcc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#101015;--fg:#eeeef3;--bar:#1c1c24cc}}
 :root[data-theme="dark"]{--bg:#101015;--fg:#eeeef3;--bar:#1c1c24cc}
@@ -2276,6 +2277,7 @@ function crEquip(i){
 (()=>{const el=document.getElementById('tagline');if(!el)return;
 const L=['Steer. Survive. Don\u2019t touch the lava.','Always forward. Never stop.','Reach the checkered flag.','How far can you get in Endless?','A new weekly challenge every week.','Build a level and share it.','Lava is not your friend.','Improve your best score.'];let i=0;
 setInterval(()=>{if(document.hidden)return;el.classList.add('fade');setTimeout(()=>{let j;do j=Math.floor(Math.random()*L.length);while(j===i);i=j;el.textContent=L[i];el.classList.remove('fade')},400)},4200)})();
+document.addEventListener('selectstart',e=>{const t=e.target&&e.target.closest?e.target:e.target&&e.target.parentElement;if(t&&t.closest('input,textarea,[contenteditable],.sel'))return;e.preventDefault()});document.addEventListener('contextmenu',e=>{const t=e.target;if(t&&t.closest&&t.closest('input,textarea,[contenteditable],.sel'))return;e.preventDefault()});
 </script>
 </body>
 </html>
