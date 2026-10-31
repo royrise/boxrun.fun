@@ -1340,7 +1340,7 @@ const mpNote=m=>{const e=document.getElementById(mp?'mpnote2':'mpnote');if(e)e.t
 function openMp(){if(!mp){mpNote('')}show('mp');mpRender()}
 async function mpCreate(){
   if(!(backend==='http'&&httpB&&uid)){mpNote('Sign in on boxrun.fun to play multiplayer.');return}
-  try{mpEnter(await httpB.mp('create',{secs:120,rounds:3,skin:pb.skin}))}catch(e){mpNote((e&&e.message)||'Could not reach the server.')}
+  try{mpEnter(await httpB.mp('create',{secs:120,rounds:3,skin:pb.skin}))}catch(e){mpNote(e&&/^not found/i.test(e.message||'')?'The game server has not been updated for multiplayer yet.':(e&&e.message)||'Could not reach the server.')}
 }
 async function mpJoin(code){
   code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);pendingMpUse=false;
@@ -1456,7 +1456,7 @@ async function dJoin(code){
   if(!(backend==='http'&&httpB&&uid)){dNote('Sign in on boxrun.fun to play duels.');return}
   if(document.getElementById('dcode').value.trim()&&code.length<3&&code!==''){dNote('Room codes are 3 to 6 letters or numbers.');return}
   dNote('');dWait(true,code?'Waiting for someone to join room '+code+'…':'Looking for an opponent…');
-  let r;try{r=await httpB.duel('join',code?{code}:{})}catch(e){dWait(false);dNote((e&&e.message)||'Could not reach the server.');return}
+  let r;try{r=await httpB.duel('join',code?{code}:{})}catch(e){dWait(false);dNote(e&&/^not found/i.test(e.message||'')?'The game server has not been updated for duels yet.':(e&&e.message)||'Could not reach the server.');return}
   duel={room:r.room,code:code,done:false,waiting:true,opp:null,res:null,off:0};
   dTick(r);clearInterval(dTmr);dTmr=setInterval(dPoll,r.st==='play'?500:1000)
 }
