@@ -443,7 +443,7 @@ function navPrev(){if(navStack.length){const prev=navStack.pop(),keep=navStack.s
 function openPanel(id){   // show a panel again, refreshing the ones whose content can change
   try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
   show(id)}
-function menuBack(){const r=resume;showMenu();if(r&&r.panel!=='main'){navStack=r.stack.slice();navBack=true;openPanel(r.panel);navBack=false;navStack=r.stack.slice();resume={stack:r.stack.slice(),panel:r.panel}}}
+function menuBack(){const r=resume,wasDuel=!!duel;showMenu();if(wasDuel){openDuel();return}if(r&&r.panel!=='main'){navStack=r.stack.slice();navBack=true;openPanel(r.panel);navBack=false;navStack=r.stack.slice();resume={stack:r.stack.slice(),panel:r.panel}}}
 function showMenu(f){if(duel)dEnd();document.getElementById('inpd').hidden=true;spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
@@ -1331,7 +1331,7 @@ async function dJoin(code){
   if(document.getElementById('dcode').value.trim()&&code.length<3&&code!==''){dNote('Room codes are 3 to 6 letters or numbers.');return}
   dNote('');dWait(true,code?'Waiting for someone to join room '+code+'…':'Looking for an opponent…');
   let r;try{r=await httpB.duel('join',code?{code}:{})}catch(e){dWait(false);dNote((e&&e.message)||'Could not reach the server.');return}
-  duel={room:r.room,done:false,waiting:true,opp:null,res:null,off:0};
+  duel={room:r.room,code:code,done:false,waiting:true,opp:null,res:null,off:0};
   dTick(r);clearInterval(dTmr);dTmr=setInterval(dPoll,r.st==='play'?500:1000)
 }
 async function dPoll(){
@@ -1344,11 +1344,13 @@ async function dPoll(){
 }
 function dTick(r){
   if(!duel||duel.done)return;
+  if(duel.waiting&&r.st==='wait'&&r.queue!=null&&!duel.code)document.getElementById('dwt').textContent='Looking for an opponent\u2026 '+r.queue+' in queue';
   duel.opp=r.opp;duel.goal=r.goal||1000;
   if(duel.waiting&&r.st==='play'){duel.waiting=false;dStart(r);clearInterval(dTmr);dTmr=setInterval(dPoll,500);return}
   if(r.st==='done'){dFinish(r)}
 }
 function dStart(r){
+  dWait(false);
   duel.off=r.now-Date.now();duel.t0=r.t0-duel.off;duel.seed=r.seed;
   startEndless(r.seed,true);
   const wait=Math.max(.2,(duel.t0-Date.now())/1000);cd=Math.min(3*CDN,wait);
