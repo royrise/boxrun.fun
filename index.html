@@ -481,7 +481,7 @@ function ovRender(){
     if(!box)return;const k=hi?'high':'pts';
     if(!ovData){box.innerHTML='<small>'+(backend==='http'?'Loading…':'Leaderboards are only available on boxrun.fun.')+'</small>';return}
     const d=hi?ovData.high:ovData,all=d.top||[],list=ovOpen[k]?all:all.slice(0,10);
-    const row=(r,me)=>'<div class="ovr'+(me?' me':'')+'"><span class="rk">'+r.rank+'</span><span class="nm">'+esc(r.name)+'</span><span class="pt">'+(hi?'Level '+r.lv+'<small> · '+f(r.n)+' XP</small>':f(r.pts))+'</span></div>';
+    const row=(r,me)=>'<div class="ovr'+(me?' me':'')+'"><span class="rk">'+r.rank+'</span><span class="nm">'+esc(r.name)+'</span><span class="pt">'+(hi?r.lv+'<small> · '+f(r.n)+' XP</small>':f(r.pts))+'</span></div>';
     const inList=d.me&&list.some(r=>r.id===d.me.id);
     box.innerHTML='<div class="ovh"><b>'+(hi?'Highest level':'Campaign points')+'</b><small>'+(hi?'Profile level (XP)':'Points across all '+LEVELS.length+' maps')+'</small></div>'
       +'<div class="ovl">'+(all.length?list.map(r=>row(r,d.me&&r.id===d.me.id)).join(''):'<small>No times yet. Be the first.</small>')+'</div>'
