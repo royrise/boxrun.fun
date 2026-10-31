@@ -446,6 +446,8 @@ function buildLevels(){
   let h=LEVELS.map((_,i)=>'<div class="crow"><button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button><button class="lbbtn" data-lbs="'+i+'" title="Show the leaderboard for level '+(i+1)+'" aria-label="Leaderboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button></div>').join('');
   h+='<h3 class="sec">Custom levels</h3>'+(customs.length?customs.map(c=>'<div class="crow"><button data-c="'+c.id+'">'+esc(c.name)+'<small>'+(pb.cl[c.id]!=null?'Best '+fmt(pb.cl[c.id]):'Not cleared')+'</small></button><button data-sh="'+c.id+'" title="Share to the community">Share</button><button data-e2="'+c.id+'">Edit</button><button data-x="'+c.id+'">\u2715</button></div>').join(''):'<small>None yet. Make one in the Level Editor.</small>');
   document.getElementById('lvlist').innerHTML=h;
+  // show your rank on each cleared level next to your time (own server only)
+  if(backend==='http'&&httpB&&uid)LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t==null)return;rankOf(fld(i),rnd(t,3),uid).then(r=>{const sm=document.querySelector('#lvlist button[data-l="'+i+'"] small');if(sm&&r&&r.rank&&!/#/.test(sm.textContent))sm.textContent+=' \u00b7 #'+r.rank})});
   lvNote(store.ok?'':'Warning: this browser is blocking saving, so custom levels and records are lost when you close the game. Use Export to keep levels.');
   sideLB('run3','Overall');
 }
