@@ -1715,7 +1715,7 @@ async function ghPutAll(){
     for(const k in pb.cl)if(k.startsWith('cm_')&&pb.cl[k]!=null&&pb.cg[k]&&pb.cg[k].length>1)items.push([cfk(k.slice(3)),pb.cl[k],pb.cg[k]]);
     if(!items.length)return;
     const ref=db.doc('gh/'+uid),sn=await ref.get(),d=sn.exists?sn.data():{},F=d.f||{};let ch=false;
-    for(const [field,t,g] of items){const old=F[field];if(!old||old.t>t+1e-6){const enc=ghEnc(g);if(JSON.stringify(F).length+enc.length>380000)continue;F[field]={t:rnd(t,3),g:enc};ch=true}}
+    for(const [field,t,g] of items){const old=F[field];if(!old||old.t>t+1e-6||(old.v!==5&&t<=old.t+.0601)){const enc=ghEnc(g);if(JSON.stringify(F).length+enc.length>380000)continue;F[field]={t:rnd(t,3),g:enc,v:5};ch=true}}   // v:5 = recorded after the finish-hitbox change; older replays are replaced by the local one when the time is the same run (+0.05) or a better run
     if(ch)await ref.set({f:F});
   }catch(e){}finally{ghBusy=false}
 }
