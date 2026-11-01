@@ -14,7 +14,7 @@
 :root[data-theme="dark"]{--bg:#101015;--fg:#eeeef3;--bar:#1c1c24cc}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font-family:Orbitron,system-ui,sans-serif;overflow:hidden;touch-action:none;user-select:none}
-canvas{display:block;width:100%;height:100%}
+canvas{display:block;width:100%;height:100%}#c{position:fixed;left:0;top:0}
 #hud{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;font-size:14px;pointer-events:none}
 #hud span{color:#fff;text-shadow:0 2px 8px #000,0 0 3px #000;padding:4px 10px}
 #msg{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:13px;opacity:.8;color:#fff;text-shadow:0 1px 4px #000}
@@ -409,8 +409,8 @@ const PCOL={'1':'#b36bff','2':'#ff6bd6','3':'#4fffc0'};
 const U=44, SIZE=0.7, H=SIZE/2, SPEED=4, TURN=2.6;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
 let W,Hh,dpr;
-function resize(){dpr=window.devicePixelRatio||1;W=innerWidth;Hh=innerHeight;cv.width=W*dpr;cv.height=Hh*dpr}
-addEventListener('resize',resize);resize();
+function resize(){dpr=window.devicePixelRatio||1;W=innerWidth;Hh=innerHeight;cv.width=W*dpr;cv.height=Hh*dpr;cv.style.width=W+'px';cv.style.height=Hh+'px'}
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,200));if(window.visualViewport)visualViewport.addEventListener('resize',resize);resize();
 
 let segT=0,lvl=0,grid,p,cp,state='play',timer=0,deaths=0,t=0,lt=0,total=0,attempts=1,wasIce=false,slideA=0,lastA=0;
 // storage: every write is read back, so a blocked or full browser store is reported instead of silently losing levels
