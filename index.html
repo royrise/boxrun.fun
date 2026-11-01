@@ -422,7 +422,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
+function respawn(){if(state==='win'||state==='menu')return;flushNotes();crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
@@ -570,6 +570,7 @@ function load(n,keep){
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
+  flushNotes();
   if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;segT=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=(extGhost&&(mode==='main'||mode==='custom')?extGhost.arr:ghostOf())||null;gi=0;
 }
 const tile=(x,y)=>(grid[y]&&grid[y][x])||'#';
@@ -1020,7 +1021,7 @@ const ACH=[
 function checkAch(){
   let fresh=null;
   for(const a of ACH)if(!pb.ach[a.id]&&a.v()>=a.max){pb.ach[a.id]=Date.now();fresh=a}
-  if(fresh){savePB();toast(fresh.c?'New colour unlocked: '+colOf(fresh.c).n+' \u00b7 '+fresh.d:'Achievement unlocked: '+fresh.n+' \u00b7 '+fresh.d)}
+  if(fresh){savePB();toastRun(fresh.c?'New colour unlocked: '+colOf(fresh.c).n+' \u00b7 '+fresh.d:'Achievement unlocked: '+fresh.n+' \u00b7 '+fresh.d)}
   return fresh;
 }
 let achT=0;
@@ -1029,6 +1030,11 @@ let commList=[],commSort='rel',myVotes={};
 // each time a shared level's layout changes its rv goes up, which starts a fresh speedrun leaderboard (a new field) and clears old local bests
 const cfk=key=>{const l=commList.find(x=>x.key===key);return cfld(l&&l.rv?key+'#'+l.rv:key)};
 const levelLink=key=>(backend==='http'&&/^https?:/.test(location.protocol)?location.origin+location.pathname:'https://boxrun.fun/')+'?level='+encodeURIComponent(key);
+// notices that would interrupt a run (crates, achievements) wait until you die, finish, restart or leave
+let noteQ=[];
+function toastRun(m){if(typeof state!=='undefined'&&state==='play')noteQ.push(m);else toast(m)}
+function flushNotes(){if(!noteQ.length)return;const q=noteQ;noteQ=[];q.forEach((m,i)=>setTimeout(()=>toast(m),i*3300))}
+setInterval(()=>{if(noteQ.length&&state!=='play')flushNotes()},250);
 function toast(m){let e=document.getElementById('toast');if(!e){e=document.createElement('div');e.id='toast';document.body.appendChild(e)}e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3200)}
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){}try{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();if(ok)return true}catch(e){}return false}
 async function copyLink(key){const u=levelLink(key);toast(await copyText(u)?'Link copied: '+u:'Copy this link: '+u)}
@@ -2260,7 +2266,7 @@ function crPlay(dt){
   // anti-AFK: need 4+ separate key presses in the last 10 s, and one attempt can earn at most 150 s of playtime
   if(crPress.filter(x=>t-x<=10).length<4||lt>150||(crDay&&crDay[0]>=crDay[1]))return;
   pb.cpl=(pb.cpl||0)+dt;crSave+=dt;
-  if(pb.cpl>=60){pb.cpl-=60;pb.cmin=(pb.cmin||0)+1;crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb));toast('Crate earned! Open it under Profile > Crates');crFlush()}
+  if(pb.cpl>=60){pb.cpl-=60;pb.cmin=(pb.cmin||0)+1;crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb));toastRun('Crate earned! Open it under Profile > Crates');crFlush()}
   else if(crSave>10){crSave=0;store.set('cubeRunnerPB',JSON.stringify(pb))}
 }
 async function crFlush(){
