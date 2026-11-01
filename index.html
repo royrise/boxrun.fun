@@ -422,7 +422,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;flushNotes();crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
+function respawn(){if(state==='win'||state==='menu')return;flushNotes();lp=null;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
@@ -570,7 +570,7 @@ function load(n,keep){
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
-  flushNotes();
+  flushNotes();lp=null;
   if(!keep)attempts=1;wasIce=false;score=0;state='play';lt=0;segT=0;banner.style.opacity=0;banner.innerHTML='';rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0;ghost=(extGhost&&(mode==='main'||mode==='custom')?extGhost.arr:ghostOf())||null;gi=0;
 }
 const tile=(x,y)=>(grid[y]&&grid[y][x])||'#';
@@ -673,7 +673,14 @@ function drawOv(c,poly,x,y){
   if(c==='#')ctx.fillStyle='#4a4d63';else{const g=.5+.5*Math.sin(t*4+x+y);ctx.fillStyle=lavaFill(x,y,x*U,y*U,1)||`rgb(${230+20*g|0},${70+50*g|0},20)`}
   ctx.fill();if(c!=='#'&&lavaPats){ctx.fillStyle='rgba(255,200,80,'+(.04+.14*(.5+.5*Math.sin(t*4+x+y)))+')';ctx.fill()}
 }
+// anti-tamper: the cube only moves inside update(); if its position changed between frames (someone edited it from dev tools) put it back
+let lp=null,tamperT=0;
 function update(dt){
+  if(lp&&state==='play'&&!spec&&p&&Math.hypot(p.x-lp.x,p.y-lp.y)>.05){p.x=lp.x;p.y=lp.y;if(t-tamperT>4){tamperT=t;toast('Position edit blocked')}}
+  update0(dt);
+  lp=(state==='play'&&!spec&&p)?{x:p.x,y:p.y}:null;
+}
+function update0(dt){
   t+=dt;
   if(state==='menu')return;
   if(spec)cd=0;
