@@ -220,7 +220,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 <div id="duelhud" hidden></div>
 <div id="mphud" hidden></div>
 <div id="banner"></div>
-<div id="pause" hidden><div class="pbox"><h2>Paused</h2><p id="pnote"></p><div class="pbtns"><button data-p="resume" id="pres">Resume</button><button data-p="practice" class="pri" id="pprac">Practice mode</button><button data-p="restart">Restart level</button><button data-p="quit">Quit to menu</button></div></div></div>
+<div id="pause" hidden><div class="pbox"><h2>Paused</h2><p id="pnote"></p><div class="pbtns"><button data-p="resume" id="pres" class="pri">Resume</button><button data-p="practice" id="pprac">Practice mode</button><button data-p="restart">Restart level</button><button data-p="quit">Quit to menu</button></div></div></div>
 <div id="menu"><canvas id="menubg" aria-hidden="true"></canvas>
 <button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
  <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub" id="tagline">Steer. Survive. Don’t touch the lava.</p><div class="icons">
@@ -689,8 +689,8 @@ let paused=false,practice=false;
 const canPause=()=>(mode==='main'||(mode==='custom'&&cur&&/^cm_/.test(cur.id)))&&state==='play'&&!spec&&!duel&&!mp&&cd<=0;
 function setPause(on){
   paused=on;const o=document.getElementById('pause');o.hidden=!on;if(!on)return;
-  document.getElementById('pres').hidden=!practice;document.getElementById('pprac').hidden=practice;
-  document.getElementById('pnote').textContent=practice?'Practice runs are never saved.':'You cannot resume a run once it is paused. Restart the level, or keep going in practice mode (nothing is saved).'}
+  document.getElementById('pres').hidden=false;document.getElementById('pprac').hidden=practice;
+  document.getElementById('pnote').textContent=practice?'Practice runs are never saved.':'The timer is stopped while you are paused.'}
 function setPracticeCp(){if(!practice||state!=='play'||paused||touching(p.x,p.y,p.a,['#']))return;cp={x:p.x,y:p.y,a:p.a,k:1};cpT=.6;toast('Checkpoint set')}
 function endPractice(){practice=false;paused=false;document.body.classList.remove('practice');const o=document.getElementById('pause');if(o)o.hidden=true}
 document.getElementById('pause').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.p;
@@ -861,7 +861,7 @@ addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'&&!e.repeat){setGhost(pb.ghostOn===false);return}
   if(state==='over'&&mode==='endless'&&!duel&&!mp){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){endRetry();return}}
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
-  if(e.key==='Escape'){if(paused){if(practice)setPause(false);else{setPause(false);endPractice();menuBack()}return}if(canPause()){setPause(true);return}endPractice();menuBack();return}
+  if(e.key==='Escape'){if(paused){setPause(false);return}if(canPause()){setPause(true);return}endPractice();menuBack();return}
   if(paused)return;
   if(practice&&!e.repeat&&e.key.toLowerCase()==='c'){setPracticeCp();return}
   if(practice&&!e.repeat&&e.key.toLowerCase()==='r'&&(state==='play'||state==='dead')){state='play';respawn();return}
