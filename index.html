@@ -208,15 +208,19 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #p-duel .drt{margin:0 0 14px;font-size:15px}#p-duel .drt b{display:block;font-size:44px;line-height:1.1;color:#5ec8ff}#p-duel .drt small{opacity:.75}#p-duel .dtop{margin-top:18px;text-align:left;display:flex;flex-direction:column;gap:4px}#p-duel .dtop .lbt{margin-bottom:2px}#p-duel .dtop .row{display:flex;justify-content:space-between;padding:5px 10px;border-radius:8px;background:#1a1a2288;font-size:15px}#p-duel .dtop .row.me{background:#2a6fa0cc}
 #p-pmenu .bar{position:relative}#p-quests{width:min(520px,94vw)}#qbody{display:flex;flex-direction:column;gap:14px;margin:6px 0 18px;text-align:left}.qrow{background:#2a2d44;border:1px solid #4a4d63;border-radius:14px;padding:14px 16px}.qrow.done{border-color:#2fd37a}.qt{display:flex;justify-content:space-between;gap:10px;font-size:17px}.qt b{white-space:nowrap}.qrow.done .qt b{color:#2fd37a}.qb{height:8px;background:#ffffff22;border-radius:4px;margin-top:10px}.qb i{display:block;height:100%;background:#5ec8ff;border-radius:4px}.qrow.done .qb i{background:#2fd37a}.qn{display:block;text-align:center;opacity:.7}.qdot{position:absolute;top:10px;right:10px;width:12px;height:12px;border-radius:50%;background:#ffd23f}
 #mpchat{margin-top:14px;text-align:left}#mpmsgs{height:130px;overflow-y:auto;background:#1a1a2288;border:1px solid #4a4d63;border-radius:10px;padding:8px 10px;font-size:14px;display:flex;flex-direction:column;gap:3px;user-select:text}#mpmsgs .cm{word-break:break-word}#mpmsgs .cm b{color:#5ec8ff}.mpsay{display:flex;gap:8px;margin-top:8px}.mpsay input{flex:1;min-width:0;font-size:16px;padding:10px 12px}.mpsay button{padding:10px 18px}
+#ps{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:120px;width:46px;height:46px;display:none;align-items:center;justify-content:center;background:rgba(20,20,32,.6)!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:12px!important;color:#fff!important;padding:0!important}body.pausable #ps{display:flex}@media (pointer:coarse){#ps{width:60px;height:60px;left:154px;border-radius:16px!important}#ps svg{width:34px;height:34px}}
+#pcp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 76px);right:12px;display:none;background:rgba(20,20,32,.6)!important;border:1px solid #2fd37a!important;color:#2fd37a!important;border-radius:12px!important;padding:10px 14px!important;font-weight:700}body.practice #pcp{display:block}
+#pause{position:fixed;inset:0;z-index:7;background:rgba(8,10,18,.82);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff}#pause[hidden]{display:none}.pbox{width:min(380px,92vw)}.pbox h2{font-size:38px;margin:0 0 8px}.pbox p{opacity:.8;font-size:15px;line-height:1.5;margin:0 0 20px}.pbtns{display:flex;flex-direction:column;gap:12px}.pbtns button{font:inherit;font-size:20px;color:#fff;background:#2a2d44;border:1px solid #4a4d63;border-radius:12px;padding:16px;cursor:pointer}.pbtns button.pri{background:#1f9d5c;border-color:#2fd37a}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="hud"><span id="time"></span><span id="esub"></span><button id="mn" aria-label="Back"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><button id="rt" aria-label="Retry level" title="Retry (R)"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.8-6.1"/><path d="M20 4v5h-5"/></svg></button><button id="gh" aria-label="Toggle PB ghost" title="PB ghost on/off (G)"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0114 0v10l-2.5-2-2 2-2.5-2-2.5 2-2-2z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg></button></div>
+<div id="hud"><span id="time"></span><span id="esub"></span><button id="mn" aria-label="Back"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><button id="rt" aria-label="Retry level" title="Retry (R)"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.8-6.1"/><path d="M20 4v5h-5"/></svg></button><button id="ps" aria-label="Pause" title="Pause (Esc)"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button><button id="pcp" aria-label="Set checkpoint" title="Set checkpoint (C)">Checkpoint</button><button id="gh" aria-label="Toggle PB ghost" title="PB ghost on/off (G)"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0114 0v10l-2.5-2-2 2-2.5-2-2.5 2-2-2z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg></button></div>
 <div id="inpd" hidden aria-hidden="true"><span data-k="l">&#9664;</span><span data-k="r">&#9654;</span></div>
 <div id="duelhud" hidden></div>
 <div id="mphud" hidden></div>
 <div id="banner"></div>
+<div id="pause" hidden><div class="pbox"><h2>Paused</h2><p id="pnote"></p><div class="pbtns"><button data-p="resume" id="pres">Resume</button><button data-p="practice" class="pri" id="pprac">Practice mode</button><button data-p="restart">Restart level</button><button data-p="quit">Quit to menu</button></div></div></div>
 <div id="menu"><canvas id="menubg" aria-hidden="true"></canvas>
 <button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
  <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub" id="tagline">Steer. Survive. Don’t touch the lava.</p><div class="icons">
@@ -459,7 +463,7 @@ function openPanel(id){   // show a panel again, refreshing the ones whose conte
   try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
   show(id)}
 function menuBack(){const r=resume,wasDuel=!!duel,wasMp=!!(mp&&mp.inGame);if(wasMp)mp.nav=true;showMenu();if(wasMp){mp.nav=false;show('mp');mpRender();return}if(wasDuel){openDuel();return}if(r&&r.panel!=='main'){navStack=r.stack.slice();navBack=true;openPanel(r.panel);navBack=false;navStack=r.stack.slice();resume={stack:r.stack.slice(),panel:r.panel}}}
-function showMenu(f){if(duel)dEnd();if(mp){mp.playing=false;mp.inGame=false;document.getElementById('mphud').hidden=true;document.body.classList.remove('mpon')}document.getElementById('inpd').hidden=true;spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
+function showMenu(f){endPractice();if(duel)dEnd();if(mp){mp.playing=false;mp.inGame=false;document.getElementById('mphud').hidden=true;document.body.classList.remove('mpon')}document.getElementById('inpd').hidden=true;spec=false;extGhost=null;pendingGhost=null;if(mode==='test'&&!f&&!cur.tut){openEditor();return}mode='main';state='menu';keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';menuEl.hidden=false;show('main')}
 function startLevel(n,full){extGhost=pendingGhost;pendingGhost=null;mode='main';cur=null;menuEl.hidden=true;fullRun=full;total=0;deaths=0;load(n)}
 function buildLevels(){
   let h=LEVELS.map((_,i)=>'<div class="crow"><button data-l="'+i+'">Level '+(i+1)+'<small>'+(pb.levels[LID[i]]!=null?'Best '+fmt(pb.levels[LID[i]]):'Not cleared')+'</small></button><button class="lbbtn" data-lbs="'+i+'" title="Show the leaderboard for level '+(i+1)+'" aria-label="Leaderboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-8h4v8M10 21V6h4v15M16 21v-11h4v11M2 21h20"/></svg></button></div>').join('');
@@ -543,6 +547,7 @@ function fmt1(s){const m=Math.floor(s/60);return m+':'+(Math.floor((s-m*60)*10)/
 function fmt(s){const ms=Math.round(s*1000),m=Math.floor(ms/60000);return m+':'+((ms-m*60000)/1000).toFixed(3).padStart(6,'0')}
 const lvName=n=>LID[n].replace(/-v\d+$/,'').split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
 function finish(){
+  if(practice){playTick(lt);state='win';timer=1e9;banner.innerHTML='<b>Practice complete</b><small>Practice runs are not saved</small><div class="bb"><button data-b="again">Restart level (R)</button><button data-b="menu" class="pri">Back to menu</button></div>';banner.style.opacity=1;return}
   playTick(lt);state='win';timer=1e9;
   const last=mode!=='main'||lvl+1>=LEVELS.length;
   const prev=bestOf(),isPB=mode!=='test'&&(prev==null||rnd(lt,3)<rnd(prev,3));
@@ -566,7 +571,7 @@ const keys={left:false,right:false};
 const CDN=.5;   // seconds per count (way quicker than a real second)
 var duel=null;
 let inHold={l:0,r:0},eSh={x:0,y:0},cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
-function load(n,keep){
+function load(n,keep){endPractice();
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
   layers=(mode==='main'?null:cur.ov)||{};
@@ -680,7 +685,25 @@ function drawOv(c,poly,x,y){
 }
 // anti-tamper: the cube only moves inside update(); if its position changed between frames (someone edited it from dev tools) put it back
 let lp=null,tamperT=0;
+let paused=false,practice=false;
+const canPause=()=>(mode==='main'||(mode==='custom'&&cur&&/^cm_/.test(cur.id)))&&state==='play'&&!spec&&!duel&&!mp&&cd<=0;
+function setPause(on){
+  paused=on;const o=document.getElementById('pause');o.hidden=!on;if(!on)return;
+  document.getElementById('pres').hidden=!practice;document.getElementById('pprac').hidden=practice;
+  document.getElementById('pnote').textContent=practice?'Practice runs are never saved.':'You cannot resume a run once it is paused. Restart the level, or keep going in practice mode (nothing is saved).'}
+function setPracticeCp(){if(!practice||state!=='play'||paused||touching(p.x,p.y,p.a,['#']))return;cp={x:p.x,y:p.y,a:p.a,k:1};cpT=.6;toast('Checkpoint set')}
+function endPractice(){practice=false;paused=false;document.body.classList.remove('practice');const o=document.getElementById('pause');if(o)o.hidden=true}
+document.getElementById('pause').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.p;
+  if(k==='resume')setPause(false);
+  else if(k==='practice'){practice=true;document.body.classList.add('practice');cp={x:p.x,y:p.y,a:p.a,k:1};setPause(false);toast('Practice mode: C sets a checkpoint, R returns to it. Nothing is saved.')}
+  else if(k==='restart'){setPause(false);endPractice();if(state==='play'||state==='dead'){playTick(segT);load(lvl,true);attempts++}}
+  else if(k==='quit'){setPause(false);endPractice();menuBack()}});
+document.getElementById('ps').addEventListener('pointerdown',e=>{e.stopPropagation();if(canPause())setPause(true)});
+document.getElementById('pcp').addEventListener('pointerdown',e=>{e.stopPropagation();setPracticeCp()});
+document.getElementById('pause').addEventListener('pointerdown',e=>e.stopPropagation());
+setInterval(()=>{document.body.classList.toggle('pausable',canPause()||(paused&&true))},200);
 function update(dt){
+  if(paused){lp=null;return}
   if(lp&&state==='play'&&!spec&&p&&Math.hypot(p.x-lp.x,p.y-lp.y)>.05){p.x=lp.x;p.y=lp.y;if(t-tamperT>4){tamperT=t;toast('Position edit blocked')}}
   update0(dt);
   lp=(state==='play'&&!spec&&p)?{x:p.x,y:p.y}:null;
@@ -705,7 +728,7 @@ function update0(dt){
     return}
   document.getElementById('inpd').hidden=true;
   if(state==='play'){
-    if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}
+    if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}return}
     if(bturn>0){const r=Math.min(bturn,dt*Math.PI/.4),o={x:p.x,y:p.y,a:p.a};p.a+=r;if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y;p.a=o.a+bturn;if(touching(p.x,p.y,p.a,['#'])){p.a=o.a}else{slideA+=bturn;bturn=0}}else{bturn-=r;slideA+=r}}
     const turn=(keys.right?1:0)-(keys.left?1:0);
     // turning: if rotating would put a corner into a wall, push out; if that fails, cancel the turn
@@ -738,8 +761,8 @@ function update0(dt){
     if(gt-lastRec>=1/30){rec.push(mode==='endless'?[gt,p.x-eSh.x,p.y-eSh.y,p.a]:[gt,p.x,p.y,p.a]);lastRec=gt}
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),ck=fx+','+fy;
       for(const q in crumb){crumb[q]-=dt;if(crumb[q]<=0){fell[q]=true;delete crumb[q]}}
-      if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
-    if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'){pb.deaths=(pb.deaths||0)+1;savePB()}}
+      if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
+    if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}}
     else if(touchGoal()){if(mode==='endless'){if(!mp)endRun(true)}else finish()}
   }else{
     timer-=dt;
@@ -837,10 +860,13 @@ addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'&&!e.repeat){setGhost(pb.ghostOn===false);return}
   if(state==='over'&&mode==='endless'&&!duel&&!mp){if(e.key==='Enter'){endNew();return}if(e.key.toLowerCase()==='r'){endRetry();return}}
   if(state==='win'){if(e.key==='Enter'){nextLevel();return}if(e.key.toLowerCase()==='r'&&!e.shiftKey){again();return}}
-  if(e.key==='Escape'){menuBack();return}
+  if(e.key==='Escape'){if(paused){if(practice)setPause(false);else{setPause(false);endPractice();menuBack()}return}if(canPause()){setPause(true);return}endPractice();menuBack();return}
+  if(paused)return;
+  if(practice&&!e.repeat&&e.key.toLowerCase()==='c'){setPracticeCp();return}
+  if(practice&&!e.repeat&&e.key.toLowerCase()==='r'&&(state==='play'||state==='dead')){state='play';respawn();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&spec&&specInfo&&specInfo.ref==='e'){banner.style.opacity=0;banner.innerHTML='';watchEndless(specInfo.seed,specInfo.name,specInfo.arr);return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(duel||mp)return;if(state==='play'||state==='dead')endRetry();return}
-  if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play')playTick(segT);if(state==='play'&&lt>3&&mode!=='test'&&!spec){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
+  if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play')playTick(segT);if(state==='play'&&lt>3&&mode!=='test'&&!spec&&!practice){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
   if(map[e.key]){keys[map[e.key]]=true;e.preventDefault()}
 });
 addEventListener('keyup',e=>{if(map[e.key])keys[map[e.key]]=false});
@@ -2329,7 +2355,7 @@ const crOn=()=>backend==='http'&&!!uid&&!!httpB;
 function crBadge(){const e=document.getElementById('crlbl');if(e)e.textContent='Skins'+(crBal>0?' ('+crBal+')':'')}
 // playtime only counts inside a level (not replays or editor tests) while the player keeps turning: at least once every 10 seconds
 function crPlay(dt){
-  if(spec||mode==='test'||!crOn())return;
+  if(spec||mode==='test'||practice||!crOn())return;
   const dn=!!(keys.left||keys.right);
   if(dn&&!crDn){crPress.push(t);if(crPress.length>8)crPress.shift()}crDn=dn;
   // anti-AFK: need 4+ separate key presses in the last 10 s, and one attempt can earn at most 150 s of playtime
