@@ -793,6 +793,11 @@ function draw(){
   }
   const gp=(state==='menu'||spec||pb.ghostOn===false)?null:ghostAt();
   if(gp){const gs=SIZE*U;ctx.save();ctx.translate(gp[0]*U,gp[1]*U);ctx.rotate(gp[2]);ctx.globalAlpha=.4;ctx.fillStyle='#fff';ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.globalAlpha=.8;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle='#fff';ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8);ctx.restore()}
+  if(mp&&mp.inGame&&mp.gh){const nw=performance.now(),gs=SIZE*U;for(const id in mp.gh){const o=mp.gh[id],c=mpGhostPos(o,nw),sk=o.sk||{p:'sky',s:'navy'};
+    ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(c[2]);ctx.globalAlpha=.6;
+    const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
+    if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
+    ctx.restore();ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(p.a+Math.PI/2);ctx.globalAlpha=.9;ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.fillStyle='#fff';ctx.strokeText(o.n,0,-gs/2-8);ctx.fillText(o.n,0,-gs/2-8);ctx.restore()}}
   if(cpT>0&&cp.k){ctx.lineWidth=4;ctx.strokeStyle='rgba(47,211,122,'+cpT/.6+')';ctx.beginPath();ctx.arc(cp.x*U,cp.y*U,U*(.3+(.6-cpT)*1.6),0,7);ctx.stroke()}
   if(tpK>0){ctx.lineWidth=4;ctx.strokeStyle='rgba(200,150,255,'+tpK*.8+')';for(const q of [tpFrom,p]){ctx.beginPath();ctx.arc(q.x*U,q.y*U,U*(.3+(1-tpK)*1.1),0,7);ctx.stroke()}}
   ctx.save();ctx.translate(p.x*U,p.y*U);ctx.rotate(p.a);ctx.scale(1-.6*tpK,1-.6*tpK);ctx.globalAlpha=1-.5*tpK;
@@ -1402,18 +1407,25 @@ function mpEnter(v){
 async function mpPoll(){
   if(!mp)return;const m=mp;
   try{
-    const v=await httpB.mp('sync',{code:m.code,d:m.playing?Math.floor(score):0,skin:pb.skin});
+    const v=await httpB.mp('sync',{code:m.code,d:m.playing?Math.floor(score):0,skin:pb.skin,g:m.playing&&state!=='menu'&&p?[p.x-eSh.x,p.y-eSh.y,p.a]:null});
     if(mp!==m)return;mpApply(v)
   }catch(e){if(mp===m&&e&&/no longer exists|not in that/i.test(e.message||'')){mpLeave();mpNote('That lobby is gone.');show('mp');mpRender()}}
 }
 function mpApply(v){
   mp.view=v;mp.off=v.now-Date.now();
+  if(v.st==='play'){const nw=performance.now(),G=mp.gh||(mp.gh={}),seen={};   // other players' live positions, smoothed towards each new sample
+    for(const q of v.players){if(q.me||!q.g)continue;seen[q.id]=1;const o=G[q.id];
+      if(!o){G[q.id]={sk:q.skin,n:q.name,fx:q.g[0],fy:q.g[1],fa:q.g[2],tx:q.g[0],ty:q.g[1],ta:q.g[2],at:nw}}
+      else if(o.tx!==q.g[0]||o.ty!==q.g[1]){const c=mpGhostPos(o,nw);o.fx=c[0];o.fy=c[1];o.fa=c[2];o.tx=q.g[0];o.ty=q.g[1];o.ta=q.g[2];o.at=nw;o.sk=q.skin;o.n=q.name}}
+    for(const k in G)if(!seen[k])delete G[k]}
+  else if(mp.gh)mp.gh={};
   const me=v.players.find(p=>p.me);
   if(v.st==='play'&&!mp.inGame&&mp.round!==v.round&&me&&me.in&&Date.now()+mp.off<v.endAt)mpStartRound(v);
   else if(v.st!=='play'&&mp.inGame)mpToLobby();
   mpRender();
 }
-function mpStartRound(v){
+function mpGhostPos(o,nw){const k=Math.min(1,(nw-o.at)/500);let da=o.ta-o.fa;da=Math.atan2(Math.sin(da),Math.cos(da));return [o.fx+(o.tx-o.fx)*k,o.fy+(o.ty-o.fy)*k,o.fa+da*k]}
+function mpStartRound(v){clearInterval(mpTmr);mpTmr=setInterval(mpPoll,500);
   mp.round=v.round;mp.inGame=true;mp.playing=true;mp.endAt=v.endAt-mp.off;mp.t0=v.t0-mp.off;mp.nextCp=100;
   startEndless(v.seed,true);
   const w=Math.max(.2,(mp.t0-Date.now())/1000);cd=Math.min(3*CDN,w);
@@ -1439,7 +1451,7 @@ function mpTimeUp(){
   setTimeout(mpPoll,1600);
 }
 function mpToLobby(){
-  if(!mp)return;mp.nav=true;showMenu();mp.nav=false;mp.inGame=false;mp.playing=false;
+  if(!mp)return;mp.nav=true;showMenu();mp.nav=false;mp.inGame=false;mp.playing=false;mp.gh={};clearInterval(mpTmr);mpTmr=setInterval(mpPoll,800);
   document.getElementById('mphud').hidden=true;document.body.classList.remove('mpon');banner.style.opacity=0;banner.innerHTML='';
   menuEl.hidden=false;show('mp');mpRender()
 }
