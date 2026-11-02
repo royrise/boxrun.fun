@@ -211,7 +211,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #ps{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:120px;width:46px;height:46px;display:none;align-items:center;justify-content:center;background:rgba(20,20,32,.6)!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:12px!important;color:#fff!important;padding:0!important}body.pausable #ps{display:flex}@media (pointer:coarse){#ps{width:60px;height:60px;left:154px;border-radius:16px!important}#ps svg{width:34px;height:34px}}
 #pcp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 76px);right:12px;display:none;background:rgba(20,20,32,.6)!important;border:1px solid #2fd37a!important;color:#2fd37a!important;border-radius:12px!important;padding:10px 14px!important;font-weight:700}body.practice #pcp{display:block}
 #pause{position:fixed;inset:0;z-index:7;background:rgba(8,10,18,.82);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff}#pause[hidden]{display:none}.pbox{width:min(440px,92vw)}.pbox h2{font-size:38px;margin:0 0 8px}.pbox p{opacity:.8;font-size:15px;line-height:1.5;margin:0 0 20px}.pbtns{display:flex;flex-direction:column;gap:12px}.pbtns button{font:inherit;font-size:20px;color:#fff;background:#2a2d44;border:1px solid #4a4d63;border-radius:12px;padding:16px;cursor:pointer}.pbtns button.pri{background:#1f9d5c;border-color:#2fd37a}
-#pause{overflow-y:auto;align-items:flex-start}.pbox{margin:auto;padding:24px 0}#plb{margin-top:22px;text-align:left}#plb .lbt{text-align:center;opacity:.8;font-weight:600;margin-bottom:6px}#plb .row{font-size:15px}#plb button.gbtn{font:inherit;font-size:.8em;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;background:#2a2d44;border:1px solid #4a4d63;margin-left:4px;vertical-align:middle}#pause .pbtns button[data-p=ghost]{font-size:16px;padding:12px}
+#pause{overflow-y:auto;align-items:flex-start}.pbox{margin:auto;padding:24px 0}#plb{margin-top:22px;text-align:left}#plb .lbt{text-align:center;opacity:.8;font-weight:600;margin-bottom:6px}#plb .row{font-size:15px}#plb button.gbtn{font:inherit;font-size:.8em;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;background:#2a2d44;border:1px solid #4a4d63;margin-left:4px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -221,7 +221,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 <div id="duelhud" hidden></div>
 <div id="mphud" hidden></div>
 <div id="banner"></div>
-<div id="pause" hidden><div class="pbox"><h2>Paused</h2><p id="pnote"></p><div class="pbtns"><button data-p="resume" id="pres" class="pri">Resume</button><button data-p="practice" id="pprac">Practice mode</button><button data-p="restart">Restart level</button><button data-p="ghost" id="pgh">PB ghost: on</button><button data-p="quit">Quit to menu</button></div><div id="plb"></div></div></div>
+<div id="pause" hidden><div class="pbox"><h2>Paused</h2><p id="pnote"></p><div class="pbtns"><button data-p="resume" id="pres" class="pri">Resume</button><button data-p="practice" id="pprac">Practice mode</button><button data-p="restart">Restart level</button><button data-p="quit">Quit to menu</button></div><div id="plb"></div></div></div>
 <div id="menu"><canvas id="menubg" aria-hidden="true"></canvas>
 <button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
  <div class="panel" id="p-main"><h1>boxrun.fun</h1><p class="sub" id="tagline">Steer. Survive. Don’t touch the lava.</p><div class="icons">
@@ -708,7 +708,7 @@ async function pauseGhost(d){
   if(isM)startLevel(+ref.slice(1),false);else startComm(ref.slice(1))}
 function setPause(on){
   paused=on;const o=document.getElementById('pause');o.hidden=!on;if(!on)return;
-  pauseKey=mode+':'+(mode==='main'?lvl:cur&&cur.id);document.getElementById('pgh').textContent='PB ghost: '+(pb.ghostOn===false?'off':'on');pauseLB();
+  pauseKey=mode+':'+(mode==='main'?lvl:cur&&cur.id);pauseLB();
   document.getElementById('pres').hidden=false;document.getElementById('pprac').hidden=practice;
   document.getElementById('pnote').textContent=practice?'Practice runs are never saved.':'The timer is stopped while you are paused.'}
 function setPracticeCp(){if(!practice||state!=='play'||paused||touching(p.x,p.y,p.a,['#']))return;cp={x:p.x,y:p.y,a:p.a,k:1};cpT=.6;toast('Checkpoint set')}
@@ -718,7 +718,6 @@ document.getElementById('pause').addEventListener('click',e=>{const b=e.target.c
   else if(k==='practice'){practice=true;document.body.classList.add('practice');cp={x:p.x,y:p.y,a:p.a,k:1};setPause(false);toast('Practice mode: C sets a checkpoint, R returns to it. Nothing is saved.')}
   else if(k==='restart'){setPause(false);endPractice();if(state==='play'||state==='dead'){playTick(segT);load(lvl,true);attempts++}}
   else if(k==='quit'){setPause(false);endPractice();menuBack()}
-  else if(k==='ghost'){setGhost(pb.ghostOn===false);b.textContent='PB ghost: '+(pb.ghostOn===false?'off':'on')}
   else if(b.dataset.wg)pauseGhost(b.dataset);
   else if(b.dataset.rw){const d=b.dataset;setPause(false);endPractice();openReplay(d.rw,d.wr,d.wn,true)}
   else if(b.dataset.rl)copyText(replayLink(b.dataset.rl,b.dataset.wr)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'))});
