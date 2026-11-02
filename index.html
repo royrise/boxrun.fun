@@ -205,6 +205,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #mute.off{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Crect x=%2213%22 y=%229%22 width=%2230%22 height=%2230%22 rx=%225%22 fill=%22%234a5058%22 stroke=%22%239aa0a8%22 stroke-width=%222.5%22/%3E%3Cpath d=%22M21 17v13%22 stroke=%22%2320252b%22 stroke-width=%223.2%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M21 17l10-2.5v13%22 stroke=%22%2320252b%22 stroke-width=%223.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/%3E%3Cellipse cx=%2218.5%22 cy=%2231%22 rx=%223.6%22 ry=%222.8%22 fill=%22%2320252b%22/%3E%3Cellipse cx=%2228.5%22 cy=%2228.5%22 rx=%223.6%22 ry=%222.8%22 fill=%22%2320252b%22/%3E%3Cpath d=%22M6 42L44 6%22 stroke=%22%23fff%22 stroke-width=%227%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M6 42L44 6%22 stroke=%22%23ff3b1f%22 stroke-width=%224%22 stroke-linecap=%22round%22/%3E%3C/svg%3E")}
 #np{position:fixed;left:52px;bottom:8px;height:34px;display:flex;align-items:center;line-height:1;z-index:60;color:#fffc;font:600 12px system-ui,sans-serif;text-shadow:0 1px 3px #000;pointer-events:none;transition:opacity .4s;opacity:0}
 @media(pointer:fine){#np{font-size:14px}}
+#p-duel .drt{margin:0 0 14px;font-size:15px}#p-duel .drt b{display:block;font-size:44px;line-height:1.1;color:#5ec8ff}#p-duel .drt small{opacity:.75}#p-duel .dtop{margin-top:18px;text-align:left;display:flex;flex-direction:column;gap:4px}#p-duel .dtop .lbt{margin-bottom:2px}#p-duel .dtop .row{display:flex;justify-content:space-between;padding:5px 10px;border-radius:8px;background:#1a1a2288;font-size:15px}#p-duel .dtop .row.me{background:#2a6fa0cc}
 </style>
 </head>
 <body>
@@ -234,7 +235,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
  <div class="panel" id="p-contrib" hidden><h2>Contributors</h2><p class="sub">Thanks to everyone who helped make Box Run.</p><div class="row" style="justify-content:center;text-align:center"><span>royrise</span></div><div class="row" style="justify-content:center;text-align:center"><span>the_union_of_soviet_onions</span></div><div class="row" style="justify-content:center;text-align:center"><span>zvelq</span></div><button data-a="back">Back</button></div>
  <div class="panel wide" id="p-skins" hidden><h2>Skins</h2><div class="skgrid"><div class="skl"><h3 class="sec">Colours</h3><div id="skinprev"></div><div class="skcols"><div><div class="lbt">Primary colour</div><div class="sw" id="swp"></div></div><div><div class="lbt">Secondary colour</div><div class="sw" id="sws"></div></div></div><small id="skinnote"></small><div class="skidx"><div class="crhead"><h3 class="sec">Inventory <small id="crcount"></small></h3></div><div id="crindex"></div></div></div><div class="skr"><div id="crtop"></div><div id="crres"></div><div class="lbt" style="margin-top:12px">Skins in the crates</div><div id="crpool"></div></div></div><small id="crnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-weekly" hidden><h2>Weekly challenge</h2><p class="sub" id="wsub"></p><div id="wbest"></div><div class="lbt">Top distances this week</div><div id="wboard"></div><button data-a="wstart" class="pri">Start</button><button data-a="back">Back</button></div>
- <div class="panel duelp" id="p-duel" hidden><h2>1v1 Duel</h2><p class="sub">Race another player on the same endless track. Each player gets 1 life. First to 1000 m wins, or whoever goes the furthest.</p><div id="dmain"><button data-a="dquick" class="pri dbig">Find a match</button><div class="dor"><span>or play a friend</span></div><input id="dcode" maxlength="6" autocomplete="off" aria-label="Room code" placeholder="Room code"><button data-a="dcode" class="dbig2">Join or create room</button><small>Both players type the same code (3 to 6 letters or numbers) to be matched together.</small></div><div id="dwait" hidden><div class="lbt" id="dwt">Looking for an opponent…</div><button data-a="dcancel">Cancel</button></div><small id="dnote"></small><button data-a="back">Back</button></div>
+ <div class="panel duelp" id="p-duel" hidden><h2>1v1 Duel</h2><p class="sub">Race another player on the same endless track. Each player gets 1 life. First to 1000 m wins, or whoever goes the furthest.</p><div id="drt" class="drt"></div><div id="dmain"><button data-a="dquick" class="pri dbig">Find a match</button><div class="dor"><span>or play a friend</span></div><input id="dcode" maxlength="6" autocomplete="off" aria-label="Room code" placeholder="Room code"><button data-a="dcode" class="dbig2">Join or create room</button><small>Both players type the same code (3 to 6 letters or numbers) to be matched together. Room codes are unrated.</small></div><div id="dtop" class="dtop"></div><div id="dwait" hidden><div class="lbt" id="dwt">Looking for an opponent…</div><button data-a="dcancel">Cancel</button></div><small id="dnote"></small><button data-a="back">Back</button></div>
  <div class="panel" id="p-mpmenu" hidden><h2>Multiplayer</h2><div class="bars tiles tiles2"><button data-a="duel" class="bar big"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="8" height="8" rx="1.5"/><rect x="13" y="5" width="8" height="8" rx="1.5"/><path d="M6 6l2-2m10 15l-2 2"/></svg><span>1v1 Duel</span></button><button data-a="mp" class="bar big"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="6" rx="1.2"/><rect x="3" y="14" width="6" height="6" rx="1.2"/><rect x="15" y="14" width="6" height="6" rx="1.2"/><path d="M12 9v3M6 14v-2h12v2"/></svg><span>Multiplayer lobby</span></button></div><button data-a="back">Back</button></div>
  <div class="panel" id="p-lbmenu" hidden><h2>Leaderboards</h2><div class="lbcols"><div id="ovcard" class="ovc"><small>Loading…</small></div><div id="ovcard2" class="ovc"><small>Loading…</small></div></div><button data-a="back">Back</button></div>
  <div class="panel mpp" id="p-mp" hidden><h2>Multiplayer</h2><div id="mpmain"><p class="sub">Race up to 20 players on the same endless track. A checkpoint every 100 m, and whoever has gone the furthest when the time runs out wins the round. Distances add up across rounds.</p><button data-a="mpcreate" class="pri dbig">Create a lobby</button><div class="dor"><span>or join one</span></div><input id="mpcode" maxlength="6" autocomplete="off" aria-label="Lobby code" placeholder="Lobby code"><button data-a="mpjoin" class="dbig2">Join lobby</button><small id="mpnote"></small><button data-a="back">Back</button></div><div id="mplobby" hidden><div id="mphead"></div><div id="mpcfg"></div><div id="mpbody"></div><div id="mpact"></div><small id="mpnote2"></small></div></div>
@@ -1493,7 +1494,14 @@ document.getElementById('p-mp').addEventListener('change',e=>{if(e.target.id==='
 let dTmr=null;
 const dNote=m=>{const e=document.getElementById('dnote');if(e)e.textContent=m||''};
 function dWait(on,txt){document.getElementById('dmain').hidden=on;document.getElementById('dwait').hidden=!on;if(txt)document.getElementById('dwt').textContent=txt}
-function openDuel(){dNote('');dWait(false);show('duel')}
+function openDuel(){dNote('');dWait(false);show('duel');dLoadRating()}
+async function dLoadRating(){
+  const a=document.getElementById('drt'),b=document.getElementById('dtop');if(!a)return;
+  try{const r=await httpB.duel('rating',{});
+    a.innerHTML='<b>'+r.rt+'</b><small>Rating \u00b7 '+r.w+'W '+r.l+'L'+(r.d?' '+r.d+'D':'')+'</small>';
+    b.innerHTML=r.top&&r.top.length?'<div class="lbt">Top rated</div>'+r.top.map(x=>'<div class="row'+(x.me?' me':'')+'"><span>'+x.rank+'. '+esc(x.name)+'</span><b>'+x.rt+'</b></div>').join(''):''
+  }catch(e){a.innerHTML='';b.innerHTML=''}
+}
 async function dJoin(code){
   code=String(code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
   if(!(backend==='http'&&httpB&&uid)){dNote('Sign in on boxrun.fun to play duels.');return}
@@ -1514,7 +1522,7 @@ async function dPoll(){
 function dTick(r){
   if(!duel||duel.done)return;
   if(duel.waiting&&r.st==='wait'&&r.queue!=null&&!duel.code)document.getElementById('dwt').textContent='Looking for an opponent\u2026 '+r.queue+' in queue';
-  duel.opp=r.opp;duel.goal=r.goal||1000;
+  duel.opp=r.opp;duel.me=r.me;duel.ranked=!!r.ranked;duel.goal=r.goal||1000;
   if(duel.waiting&&r.st==='play'){duel.waiting=false;dStart(r);clearInterval(dTmr);dTmr=setInterval(dPoll,500);return}
   if(r.st==='done'){dFinish(r)}
 }
@@ -1528,7 +1536,7 @@ function dStart(r){
 function dHud(){
   const h=document.getElementById('duelhud');if(!duel||h.hidden)return;
   const g=duel.goal||1000,me=Math.min(g,Math.floor(score)),o=duel.opp,od=o?Math.min(g,Math.floor(o.d)):0;
-  h.innerHTML='<div class="dr"><span>You</span><span>'+me+' m</span></div><div class="db"><i style="width:'+me/g*100+'%"></i></div><div class="dr"><span>'+esc(o?o.name:'Opponent')+(o&&o.dead?' <span class="dx">(out)</span>':'')+'</span><span>'+od+' m</span></div><div class="db o"><i style="width:'+od/g*100+'%"></i></div>'
+  h.innerHTML='<div class="dr"><span>You'+(duel.me&&duel.me.rt!=null&&duel.ranked?' <span class="dx">('+duel.me.rt+')</span>':'')+'</span><span>'+me+' m</span></div><div class="db"><i style="width:'+me/g*100+'%"></i></div><div class="dr"><span>'+esc(o?o.name:'Opponent')+(o&&o.rt!=null&&duel.ranked?' <span class="dx">('+o.rt+')</span>':'')+(o&&o.dead?' <span class="dx">(out)</span>':'')+'</span><span>'+od+' m</span></div><div class="db o"><i style="width:'+od/g*100+'%"></i></div>'
 }
 setInterval(()=>{if(duel&&!duel.waiting)dHud()},120);
 function dMyEnd(){   // I died (or hit the track end): tell the server and wait for the result
@@ -1540,8 +1548,10 @@ function dFinish(r){
   if(!duel||duel.done)return;duel.done=true;clearInterval(dTmr);dTmr=null;
   if(state==='play'||state==='dead'){state='over';timer=1e9}
   const w=r.win,t=w==='me'?'You win!':w==='opp'?'You lose':'Draw';
-  banner.innerHTML='<b>'+t+'</b><small class="lvn">'+esc(r.me.name)+' '+Math.floor(r.me.d)+' m · '+esc(r.opp.name)+' '+Math.floor(r.opp.d)+' m</small><div class="bb"><button data-b="menu" class="pri">Back to menu</button></div>';
+  const rl=x=>x.ranked&&r.me.dr!=null?'<small id="drl">Rating '+r.me.rt2+' ('+(r.me.dr>=0?'+':'')+r.me.dr+')</small>':x.ranked?'<small id="drl">Updating rating\u2026</small>':'<small id="drl">Unrated match</small>';
+  banner.innerHTML='<b>'+t+'</b><small class="lvn">'+esc(r.me.name)+' '+Math.floor(r.me.d)+' m · '+esc(r.opp.name)+' '+Math.floor(r.opp.d)+' m</small>'+rl(r)+'<div class="bb"><button data-b="menu" class="pri">Back to menu</button></div>';
   banner.style.opacity=1;duel.opp=r.opp;
+  if(r.ranked&&r.me.dr==null){const rm=duel.room;setTimeout(async()=>{try{const q=await httpB.duel('sync',{room:rm});const e=document.getElementById('drl');if(e&&q.me&&q.me.dr!=null)e.textContent='Rating '+q.me.rt2+' ('+(q.me.dr>=0?'+':'')+q.me.dr+')'}catch(e){}},1200)}
   const o=duel.opp;dHud();
 }
 async function dCancel(){
