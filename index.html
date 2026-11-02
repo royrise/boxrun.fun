@@ -820,7 +820,8 @@ function draw(){
   }
   const gp=(state==='menu'||spec||pb.ghostOn===false)?null:ghostAt();
   if(gp){const gs=SIZE*U;ctx.save();ctx.translate(gp[0]*U,gp[1]*U);ctx.rotate(gp[2]);ctx.globalAlpha=.4;ctx.fillStyle='#fff';ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.globalAlpha=.8;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle='#fff';ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8);ctx.restore()}
-  if(mp&&mp.inGame&&mp.gh){const nw=performance.now(),gs=SIZE*U;for(const id in mp.gh){const o=mp.gh[id],c=mpGhostPos(o,nw),sk=o.sk||{p:'sky',s:'navy'};
+  const GH=duel&&duel.gh&&!duel.done?{d:duel.gh}:mp&&mp.inGame&&mp.gh?mp.gh:null;
+  if(GH){const nw=performance.now(),gs=SIZE*U;for(const id in GH){const o=GH[id],c=mpGhostPos(o,nw),sk=o.sk||{p:'sky',s:'navy'};
     ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(c[2]);ctx.globalAlpha=.6;
     const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
     if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
@@ -1560,7 +1561,7 @@ async function dJoin(code){
   if(!(backend==='http'&&httpB&&uid)){dNote('Sign in on boxrun.fun to play duels.');return}
   if(document.getElementById('dcode').value.trim()&&code.length<3&&code!==''){dNote('Room codes are 3 to 6 letters or numbers.');return}
   dNote('');dWait(true,code?'Waiting for someone to join room '+code+'…':'Looking for an opponent…');
-  let r;try{r=await httpB.duel('join',code?{code}:{})}catch(e){dWait(false);dNote(e&&/^not found/i.test(e.message||'')?'The game server has not been updated for duels yet.':(e&&e.message)||'Could not reach the server.');return}
+  let r;try{r=await httpB.duel('join',code?{code,skin:pb.skin}:{skin:pb.skin})}catch(e){dWait(false);dNote(e&&/^not found/i.test(e.message||'')?'The game server has not been updated for duels yet.':(e&&e.message)||'Could not reach the server.');return}
   duel={room:r.room,code:code,done:false,waiting:true,opp:null,res:null,off:0};
   dTick(r);clearInterval(dTmr);dTmr=setInterval(dPoll,r.st==='play'?500:1000)
 }
@@ -1568,14 +1569,18 @@ async function dPoll(){
   if(!duel)return;
   const wasWait=duel.waiting;
   try{
-    const r=await httpB.duel('sync',{room:duel.room,d:duel.waiting?0:Math.floor(score),dead:!duel.waiting&&(state==='over'||state==='dead')?1:0});
+    const r=await httpB.duel('sync',{room:duel.room,d:duel.waiting?0:Math.floor(score),dead:!duel.waiting&&(state==='over'||state==='dead')?1:0,g:!duel.waiting&&state==='play'&&p?[p.x-eSh.x,p.y-eSh.y,p.a]:null});
     if(!duel)return;dTick(r);
   }catch(e){if(duel&&duel.waiting&&e&&/no longer|not in/i.test(e.message||'')){dEnd();dNote('That match is gone.');dWait(false)}}
 }
 function dTick(r){
   if(!duel||duel.done)return;
   if(duel.waiting&&r.st==='wait'&&r.queue!=null&&!duel.code)document.getElementById('dwt').textContent='Looking for an opponent\u2026 '+r.queue+' in queue';
-  duel.opp=r.opp;duel.me=r.me;duel.ranked=!!r.ranked;duel.goal=r.goal||1000;
+  duel.opp=r.opp;
+  if(r.st==='play'&&r.opp&&r.opp.g){const nw=performance.now(),g=r.opp.g,o=duel.gh;
+    if(!o)duel.gh={sk:r.opp.sk,n:r.opp.name,fx:g[0],fy:g[1],fa:g[2],tx:g[0],ty:g[1],ta:g[2],at:nw};
+    else if(o.tx!==g[0]||o.ty!==g[1]){const c=mpGhostPos(o,nw);o.fx=c[0];o.fy=c[1];o.fa=c[2];o.tx=g[0];o.ty=g[1];o.ta=g[2];o.at=nw;o.sk=r.opp.sk}}
+  duel.me=r.me;duel.ranked=!!r.ranked;duel.goal=r.goal||1000;
   if(duel.waiting&&r.st==='play'){duel.waiting=false;dStart(r);clearInterval(dTmr);dTmr=setInterval(dPoll,500);return}
   if(r.st==='done'){dFinish(r)}
 }
