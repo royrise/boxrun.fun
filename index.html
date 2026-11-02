@@ -1498,7 +1498,7 @@ function openDuel(){dNote('');dWait(false);show('duel');dLoadRating()}
 async function dLoadRating(){
   const a=document.getElementById('drt'),b=document.getElementById('dtop');if(!a)return;
   try{const r=await httpB.duel('rating',{});
-    a.innerHTML='<b>'+r.rt+'</b><small>Rating \u00b7 '+r.w+'W '+r.l+'L'+(r.d?' '+r.d+'D':'')+'</small>';
+    a.innerHTML='<b>Your Elo: '+r.rt+'</b><small>'+r.w+'W '+r.l+'L'+(r.d?' '+r.d+'D':'')+'</small>';
     b.innerHTML=r.top&&r.top.length?'<div class="lbt">Top rated</div>'+r.top.map(x=>'<div class="row'+(x.me?' me':'')+'"><span>'+x.rank+'. '+esc(x.name)+'</span><b>'+x.rt+'</b></div>').join(''):''
   }catch(e){a.innerHTML='';b.innerHTML=''}
 }
@@ -1726,12 +1726,13 @@ async function showProfile(id){
   const defs=LEVELS.map((_,i)=>['Level '+(i+1)+' \u00b7 '+lvName(i),fld(i)]);
   const allT=LEVELS.map((_,i)=>times[fld(i)]),combined=allT.every(t=>t!=null)?allT.reduce((a,b)=>a+b,0):null;
   el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s,skin.f,skin.b)+'<div><div class="pname">'+esc(name)+'</div>'+(skin.b&&crSkin(skin.b.k)?'<div class="crtag">'+esc(crName(skin.b.k))+(skin.b.s?' \u2726':'')+' #'+(skin.b.n|0)+'</div>':'')+'<div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
-   +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Full run',times.run3!=null?fmt(times.run3):st.run?'Done':'Not yet'],['Combined best times',combined!=null?fmt(combined):'Clear every level']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
+   +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Elo (1v1)','<span id="pelo">\u2026</span>'],['Full run',times.run3!=null?fmt(times.run3):st.run?'Done':'Not yet'],['Combined best times',combined!=null?fmt(combined):'Clear every level']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
    +(!mine&&backend==='http'&&httpB&&httpB.admin()?'<button data-ar="'+esc(id)+'" data-an="'+esc(name)+'">Rename player (admin)</button>':'')
    +(mine&&backend==='http'?'<small class="srv">'+srvLine()+'</small>':'');
   document.getElementById('psignout').hidden=!(mine&&backend==='http'&&uid);
+  if(backend==='http'&&httpB&&uid)httpB.duel('rating',{id}).then(r=>{const e=document.getElementById('pelo');if(e)e.textContent=r.rt+(r.w+r.l+r.d?' ('+r.w+'W '+r.l+'L)':'')}).catch(()=>{const e=document.getElementById('pelo');if(e)e.textContent='\u2014'});else{const e=document.getElementById('pelo');if(e)e.textContent='\u2014'}
   let ranked=false;const pl=el.querySelector('.plc');   // ranks are only looked up when the dropdown is opened
   if(pl)pl.addEventListener('toggle',()=>{if(!pl.open||ranked)return;ranked=true;defs.forEach(([n,f],i)=>{if(times[f]==null)return;rankOf(f,times[f],id).then(r=>{const c=document.getElementById('rk'+i);if(c&&r)c.textContent=r.rank?'#'+r.rank:'100+'})})});
 }
