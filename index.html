@@ -1469,8 +1469,7 @@ function mpApply(v){
   mp.view=v;mp.off=v.now-Date.now();
   if(v.st==='play'){const nw=performance.now(),G=mp.gh||(mp.gh={}),seen={};   // other players' live positions, smoothed towards each new sample
     for(const q of v.players){if(q.me||!q.g)continue;seen[q.id]=1;const o=G[q.id];
-      if(!o){G[q.id]={sk:q.skin,n:q.name,fx:q.g[0],fy:q.g[1],fa:q.g[2],tx:q.g[0],ty:q.g[1],ta:q.g[2],at:nw}}
-      else if(o.tx!==q.g[0]||o.ty!==q.g[1]){const c=mpGhostPos(o,nw);o.fx=c[0];o.fy=c[1];o.fa=c[2];o.tx=q.g[0];o.ty=q.g[1];o.ta=q.g[2];o.at=nw;o.sk=q.skin;o.n=q.name}}
+      if(!o||o.tx!==q.g[0]||o.ty!==q.g[1])ghUpd(G,q.id,q.g,q.gt!=null?(v.now-q.gt)/1000:.5,{sk:q.skin,n:q.name})}
     for(const k in G)if(!seen[k])delete G[k]}
   else if(mp.gh)mp.gh={};
   const me=v.players.find(p=>p.me);
@@ -1478,7 +1477,14 @@ function mpApply(v){
   else if(v.st!=='play'&&mp.inGame)mpToLobby();
   mpRender();
 }
-function mpGhostPos(o,nw){const k=Math.min(1,(nw-o.at)/500);let da=o.ta-o.fa;da=Math.atan2(Math.sin(da),Math.cos(da));return [o.fx+(o.tx-o.fx)*k,o.fy+(o.ty-o.fy)*k,o.fa+da*k]}
+// other players' cubes: each position sample is old by the time it arrives, so the cube is carried forward along its heading by that age (cubes move at a fixed speed) and eased towards it
+function ghUpd(O,key,g,age0,extra){const o=O[key]||(O[key]={});o.tx=g[0];o.ty=g[1];o.ta=g[2];o.at=performance.now();o.age0=Math.max(0,Math.min(1.5,age0));Object.assign(o,extra)}
+function mpGhostPos(o,nw){
+  const age=o.dead?0:Math.min(1.6,o.age0+(nw-o.at)/1000),tx=o.tx+Math.cos(o.ta)*SPEED*age,ty=o.ty+Math.sin(o.ta)*SPEED*age;
+  if(o.dx===undefined){o.dx=tx;o.dy=ty;o.da=o.ta;o.lt=nw}
+  const k=Math.min(1,1-Math.exp(-(nw-o.lt)/1000*9));let da=o.ta-o.da;da=Math.atan2(Math.sin(da),Math.cos(da));
+  if(Math.hypot(tx-o.dx,ty-o.dy)>6){o.dx=tx;o.dy=ty;o.da=o.ta}else{o.dx+=(tx-o.dx)*k;o.dy+=(ty-o.dy)*k;o.da+=da*k}
+  o.lt=nw;return [o.dx,o.dy,o.da]}
 function mpStartRound(v){clearInterval(mpTmr);mpTmr=setInterval(mpPoll,500);
   mp.round=v.round;mp.inGame=true;mp.playing=true;mp.endAt=v.endAt-mp.off;mp.t0=v.t0-mp.off;mp.nextCp=100;
   startEndless(v.seed,true);
@@ -1601,8 +1607,9 @@ function dTick(r){
   if(duel.waiting&&r.st==='wait'&&r.queue!=null&&!duel.code)document.getElementById('dwt').textContent='Looking for an opponent\u2026 '+r.queue+' in queue';
   duel.opp=r.opp;
   if(r.st==='play'&&r.opp&&r.opp.g){const nw=performance.now(),g=r.opp.g,o=duel.gh;
-    if(!o)duel.gh={sk:r.opp.sk,n:r.opp.name,fx:g[0],fy:g[1],fa:g[2],tx:g[0],ty:g[1],ta:g[2],at:nw};
-    else if(o.tx!==g[0]||o.ty!==g[1]){const c=mpGhostPos(o,nw);o.fx=c[0];o.fy=c[1];o.fa=c[2];o.tx=g[0];o.ty=g[1];o.ta=g[2];o.at=nw;o.sk=r.opp.sk}}
+    const O=duel.ghs||(duel.ghs={});
+    if(!o||o.tx!==g[0]||o.ty!==g[1])ghUpd(O,'o',g,r.opp.gt!=null?(r.now-r.opp.gt)/1000:.5,{sk:r.opp.sk,n:r.opp.name});
+    O.o.dead=!!r.opp.dead;duel.gh=O.o}
   duel.me=r.me;duel.ranked=!!r.ranked;duel.goal=r.goal||1000;
   if(duel.waiting&&r.st==='play'){duel.waiting=false;dStart(r);clearInterval(dTmr);dTmr=setInterval(dPoll,500);return}
   if(r.st==='done'){dFinish(r)}
