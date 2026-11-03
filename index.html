@@ -1482,8 +1482,12 @@ function ghUpd(O,key,g,age0,extra){const o=O[key]||(O[key]={});o.tx=g[0];o.ty=g[
 function mpGhostPos(o,nw){
   const age=o.dead?0:Math.min(1.6,o.age0+(nw-o.at)/1000),tx=o.tx+Math.cos(o.ta)*SPEED*age,ty=o.ty+Math.sin(o.ta)*SPEED*age;
   if(o.dx===undefined){o.dx=tx;o.dy=ty;o.da=o.ta;o.lt=nw}
-  const k=Math.min(1,1-Math.exp(-(nw-o.lt)/1000*9));let da=o.ta-o.da;da=Math.atan2(Math.sin(da),Math.cos(da));
-  if(Math.hypot(tx-o.dx,ty-o.dy)>6){o.dx=tx;o.dy=ty;o.da=o.ta}else{o.dx+=(tx-o.dx)*k;o.dy+=(ty-o.dy)*k;o.da+=da*k}
+  const dt=Math.min(.1,Math.max(0,(nw-o.lt)/1000));let da=o.ta-o.da;da=Math.atan2(Math.sin(da),Math.cos(da));
+  if(Math.hypot(tx-o.dx,ty-o.dy)>8){o.dx=tx;o.dy=ty;o.da=o.ta}
+  else{   // keep moving at cube speed along the current heading, and only nudge gently towards the estimate so it never jerks
+    o.da+=da*(1-Math.exp(-dt*8));
+    if(!o.dead){o.dx+=Math.cos(o.da)*SPEED*dt;o.dy+=Math.sin(o.da)*SPEED*dt}
+    const k=1-Math.exp(-dt*2.5);o.dx+=(tx-o.dx)*k;o.dy+=(ty-o.dy)*k}
   o.lt=nw;return [o.dx,o.dy,o.da]}
 function mpStartRound(v){clearInterval(mpTmr);mpTmr=setInterval(mpPoll,500);
   mp.round=v.round;mp.inGame=true;mp.playing=true;mp.endAt=v.endAt-mp.off;mp.t0=v.t0-mp.off;mp.nextCp=100;
