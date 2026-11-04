@@ -576,7 +576,7 @@ function finish(){
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
   checkAch();savePB();
   lastRun=mode==='test'?null:{name:mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name,time:fmt(lt),first:prev==null,pb:isPB&&prev!=null,rank:null};
-  banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+(mode!=='test'?'<button data-b="card" title="Make a picture of this run to share">Share card</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
+  banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+(mode!=='test'?'<button data-b="card" title="Copy a picture of this run to the clipboard">Copy card</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
   if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const mi2=all?all.findIndex(r=>r.me):-1;if(lastRun&&mi2>=0)lastRun.rank=mi2+1;const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
@@ -1689,7 +1689,7 @@ function endRun(done){
   const shot=snapShot(),d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
   lastRun=mp?null:{endless:true,shot,done:!!done,name:curWeekly?'Weekly challenge':'Endless \u00b7 '+(curSet?'set seed ':'seed ')+curSeed,big:d+' m',nb:nb&&d>0,time:fmt(lt)};
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
-  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="card" title="Make a picture of this run to share">Share card</button><button data-b="menu">Menu</button></div>';
+  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="card" title="Copy a picture of this run to the clipboard">Copy card</button><button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
   if(curWeekly)weeklyDone(d);else if(!curSet&&d>0)endBoardDone(d);
 }
@@ -1894,26 +1894,28 @@ async function cardImage(o){
   if(o.line2){g.fillStyle='#5ec8ff';g.font='700 34px '+F;g.fillText(o.line2,70,462)}
   g.fillStyle='#ffffff55';g.font='600 26px '+F;g.fillText('Can you beat it? boxrun.fun',70,H-50);
   return new Promise(r=>c.toBlob(r,'image/png'))}
-async function shareImage(blob,file,text){
-  if(!blob){toast('Could not make the image');return}
-  try{const f=new File([blob],file,{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text,url:'https://boxrun.fun'});return}}catch(e){if(e&&e.name==='AbortError')return}
-  try{if(navigator.clipboard&&window.ClipboardItem){await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);toast('Card copied. Paste it anywhere.');return}}catch(e){}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Card saved')}
-async function shareRun(){
-  if(!lastRun)return;const r=lastRun,me0=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
+// the card is copied to the clipboard the moment the button is pressed (the image is handed over as a promise so the browser still counts it as part of the click)
+function copyCard(make,file){
+  const p=make().then(b=>{if(!b)throw new Error('no image');return b});
+  const save=async()=>{try{const blob=await p,a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Could not copy, so the card was saved instead')}catch(e){toast('Could not make the card')}};
+  try{if(navigator.clipboard&&window.ClipboardItem){navigator.clipboard.write([new ClipboardItem({'image/png':p})]).then(()=>toast('Card copied to clipboard'),save);return}}catch(e){}
+  save()}
+function shareRun(){if(lastRun)copyCard(runBlob,lastRun.endless?'boxrun-endless.png':'boxrun-run.png')}
+async function runBlob(){
+  const r=lastRun,me0=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
   if(r.endless){const blob=await cardImage({skin:pb.skin,name:r.name,big:r.big,shot:r.shot,cap:r.done?'Track complete!':'Where it ended',line1:(me0?me0+' \u00b7 ':'')+(r.done?'Cleared the track':'Time '+r.time),line2:r.nb?'New personal best!':''});
-    shareImage(blob,'boxrun-endless.png','I got '+r.big+' in '+r.name+' on boxrun.fun');return}
+    return blob}
   const me=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
   const l2=r.first?'First clear!':r.pb?'New personal best!':'';
   const blob=await cardImage({skin:pb.skin,name:r.name,big:r.time,line1:(me?me+' \u00b7 ':'')+'Level time',line2:(r.rank?'#'+r.rank+' on the leaderboard'+(l2?' \u00b7 ':''):'')+l2});
-  shareImage(blob,'boxrun-run.png','I finished '+r.name+' in '+r.time+' on boxrun.fun')}
-async function shareProfile(id){
+  return blob}
+function shareProfile(id){copyCard(()=>profBlob(id),'boxrun-profile.png')}
+async function profBlob(id){
   const el=document.getElementById('profbody'),nm=(el.querySelector('.pname')||{}).textContent||'Player',lvEl=el.querySelector('.phead>div>div:nth-child(2)'),lv=lvEl?lvEl.childNodes[0].textContent.trim():'';
   const elo=(document.getElementById('pelo')||{}).textContent||'';
   const skin=id===uid?pb.skin:(profSkin||pb.skin);
   const blob=await cardImage({skin,name:nm,big:lv.replace('Level ','LVL ')||'PROFILE',line1:(el.querySelector('.srow b')||{}).textContent?'Levels cleared '+el.querySelector('.srow b').textContent:'',line2:elo&&elo!=='\u2026'&&elo!=='\u2014'?'Elo '+elo.replace(/ \(.*/,''):''});
-  shareImage(blob,'boxrun-profile.png',nm+' on boxrun.fun')}
+  return blob}
 let profSkin=null,profId=null;
 async function showProfile(id){
   show('profile');document.getElementById('psignout').hidden=true;const el=document.getElementById('profbody');
@@ -1937,7 +1939,7 @@ async function showProfile(id){
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
    +(!mine&&backend==='http'&&httpB&&httpB.admin()?'<button data-ar="'+esc(id)+'" data-an="'+esc(name)+'">Rename player (admin)</button>':'')
-   +'<button data-a="pcard">Share card</button>'
+   +'<button data-a="pcard">Copy card</button>'
    +(mine&&backend==='http'?'<small class="srv">'+srvLine()+'</small>':'');
   document.getElementById('psignout').hidden=!(mine&&backend==='http'&&uid);
   if(backend==='http'&&httpB&&uid)httpB.duel('rating',{id}).then(r=>{const e=document.getElementById('pelo');if(e)e.textContent=r.rt+(r.w+r.l+r.d?' ('+r.w+'W '+r.l+'L)':'')}).catch(()=>{const e=document.getElementById('pelo');if(e)e.textContent='\u2014'});else{const e=document.getElementById('pelo');if(e)e.textContent='\u2014'}
