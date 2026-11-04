@@ -16,7 +16,7 @@ html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font-family:Orbitron,system-ui,sans-serif;overflow:hidden;touch-action:none;user-select:none}
 canvas{display:block;width:100%;height:100%}#c{position:fixed;left:0;top:0}
 #hud{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;font-size:14px;pointer-events:none}
-#nextp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 64px);right:14px;z-index:4;pointer-events:none;background:rgba(10,12,20,.62);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:6px 12px;color:#fff;text-align:right;line-height:1.25;max-width:46vw}#nextp[hidden]{display:none}#nextp small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.65}#nextp b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#nextp i{font-style:normal;font-size:15px;color:#5ec8ff}#nextp.top i{color:#2fd37a}
+#nextp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 64px);right:14px;z-index:4;pointer-events:none;background:rgba(10,12,20,.62);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:6px 12px;color:#fff;box-sizing:border-box;width:100px;height:64px;display:flex;flex-direction:column;justify-content:center;gap:3px}#nextp[hidden]{display:none}#nextp b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}#nextp .r2{display:flex;align-items:center;justify-content:space-between;gap:6px}#nextp .r2 svg,#nextp .r2 img{width:28px;height:28px;flex:none}#nextp i{font-style:normal;font-size:15px;font-weight:700;color:#5ec8ff}#nextp.top{text-align:center}#nextp.top i{color:#2fd37a;font-size:12px;line-height:1.3}
 #hud span{color:#fff;text-shadow:0 2px 8px #000,0 0 3px #000;padding:4px 10px}
 #msg{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:13px;opacity:.8;color:#fff;text-shadow:0 1px 4px #000}
 #time{font-family:Orbitron,sans-serif;font-variant-numeric:tabular-nums;font-size:clamp(22px,5vw,32px);font-weight:800;padding:0 18px!important}
@@ -1746,20 +1746,21 @@ async function openWeekly(){
 }
 function startWeekly(){startEndless(weekSeed(),true,true)}
 // "next player" box (like Subway Surfers): the nearest best distance above yours on the weekly board, or on the random-seed endless board
-let nextList=null,nextTxt='';
+let nextList=null,nextTxt='';const nextSk={};   // skins of the players shown, fetched from their profile when they come up
+const nextSkin=id=>{if(id in nextSk)return nextSk[id];nextSk[id]=null;if(db)db.doc('pf/'+id).get().then(sn=>{const d=sn.exists?sn.data():null;nextSk[id]=d&&d.skin||{p:'sky',s:'navy'};nextTxt=''}).catch(()=>{nextSk[id]={p:'sky',s:'navy'}});return null};
 async function loadNext(){
   nextList=null;nextTxt='';if(!db||!uid||duel||mp)return;
   const wk=curWeekly,seed=curSeed;if(!wk&&curSet)return;
   const rows=await lbTop(wk?wfld():EBF,50);
   if(!rows||curSeed!==seed||curWeekly!==wk)return;
-  nextList=rows.filter(r=>!r.me).map(r=>({n:r.name,d:wdist(r.t)})).sort((a,b)=>a.d-b.d)}
+  nextList=rows.filter(r=>!r.me).map(r=>({id:r.id,n:r.name,d:wdist(r.t)})).sort((a,b)=>a.d-b.d)}
 function nextUpd(){
   const el=document.getElementById('nextp');if(!el)return;
   const on=mode==='endless'&&nextList&&!spec&&!duel&&!(mp&&mp.inGame)&&state!=='menu'&&menuEl.hidden;
   if(!on){if(!el.hidden){el.hidden=true;nextTxt=''}return}
   const sc=Math.floor(score);let nx=null;for(const r of nextList)if(r.d>sc){nx=r;break}
   const t=nx?nx.n+'|'+(nx.d-sc):'top';
-  if(t!==nextTxt){nextTxt=t;el.className=nx?'':'top';el.innerHTML=nx?'<small>Next player</small><b>'+esc(nx.n)+'</b><i>+'+(nx.d-sc)+' m</i>':'<small>Leaderboard</small><i>You are ahead of everyone</i>'}
+  if(t!==nextTxt){nextTxt=t;el.className=nx?'':'top';const sk=nx?(nextSkin(nx.id)||{p:'sky',s:'navy'}):null;el.innerHTML=nx?'<b>'+esc(nx.n)+'</b><div class="r2">'+cubeSvg(sk.p,sk.s,null,sk.b)+'<i>+'+(nx.d-sc)+' m</i></div>':'<i>You are ahead of everyone</i>'}
   el.hidden=false}
 // where everyone died on their best run of the weekly track, drawn in the world with their name and board rank
 let wkMarks=[];
