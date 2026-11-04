@@ -861,12 +861,19 @@ function draw(){
     const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
     if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s,1);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
     ctx.restore();ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(p.a+Math.PI/2);ctx.globalAlpha=.9;ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.fillStyle='#fff';ctx.strokeText(o.n,0,-gs/2-8);ctx.fillText(o.n,0,-gs/2-8);ctx.restore()}}
-  if(curWeekly&&mode==='endless'&&wkMarks.length&&p&&state!=='menu'){
-    for(const m of wkMarks){const mx=m.x+eSh.x,my=m.y+eSh.y,dx=mx-p.x,dy=my-p.y,dd=dx*dx+dy*dy;if(dd>2500)continue;
-      const col=m.me?'#ffd24a':'#ff6b6b';ctx.save();ctx.translate(mx*U,my*U);ctx.globalAlpha=Math.max(.25,Math.min(1,1.4-Math.sqrt(dd)/40));
-      ctx.lineWidth=3;ctx.strokeStyle=col;const r=U*.32;ctx.beginPath();ctx.moveTo(-r,-r);ctx.lineTo(r,r);ctx.moveTo(r,-r);ctx.lineTo(-r,r);ctx.stroke();ctx.beginPath();ctx.arc(0,0,r*1.5,0,7);ctx.stroke();
-      ctx.rotate(p.a+Math.PI/2);ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';ctx.fillStyle=col;
-      const tx=(m.rank?'#'+m.rank+' ':'')+m.name;ctx.strokeText(tx,0,-r*1.5-6);ctx.fillText(tx,0,-r*1.5-6);ctx.restore()}}
+  if(curWeekly&&mode==='endless'&&wkMarks.length&&p&&state!=='menu'&&cur&&cur.gen){
+    const G=cur.gen.g,Gs=cur.gen.sh,N=cur.N,safe=(x,y)=>{if(x<0||y<0||x>=N||y>=N)return false;const c=G[y][x];return c!=='L'&&c!=='#'&&!Gs[x+','+y]};
+    for(const m of wkMarks){
+      if(!m.sd){   // park the marker on the edge of the nearest safe floor, so it sits beside the track and not in the lava
+        const gx=m.x+eSh.x,gy=m.y+eSh.y;if(gx<8||gy<8||gx>N-8||gy>N-8)continue;
+        let best=null,bd=1e9;for(let dy=-8;dy<=8;dy++)for(let dx=-8;dx<=8;dx++){const cx=Math.floor(gx)+dx,cy=Math.floor(gy)+dy;if(!safe(cx,cy))continue;const d=Math.hypot(cx+.5-gx,cy+.5-gy);if(d<bd){bd=d;best=[cx+.5,cy+.5]}}
+        if(!best)continue;let ex=gx-best[0],ey=gy-best[1];const L=Math.hypot(ex,ey);if(L>.5){ex=ex/L*.5;ey=ey/L*.5}
+        m.sd=[best[0]+ex-eSh.x,best[1]+ey-eSh.y]}
+      const mx=m.sd[0]+eSh.x,my=m.sd[1]+eSh.y,dx=mx-p.x,dy=my-p.y,dd=dx*dx+dy*dy;if(dd>2500)continue;
+      ctx.save();ctx.translate(mx*U,my*U);ctx.globalAlpha=Math.max(.3,Math.min(1,1.4-Math.sqrt(dd)/40));
+      ctx.fillStyle='#fff';ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,U*.17,0,7);ctx.fill();ctx.stroke();
+      ctx.rotate(p.a+Math.PI/2);ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';ctx.fillStyle='#fff';
+      ctx.strokeText(m.name,0,-U*.17-6);ctx.fillText(m.name,0,-U*.17-6);ctx.restore()}}
   if(cpT>0&&cp.k){ctx.lineWidth=4;ctx.strokeStyle='rgba(47,211,122,'+cpT/.6+')';ctx.beginPath();ctx.arc(cp.x*U,cp.y*U,U*(.3+(.6-cpT)*1.6),0,7);ctx.stroke()}
   if(tpK>0){ctx.lineWidth=4;ctx.strokeStyle='rgba(200,150,255,'+tpK*.8+')';for(const q of [tpFrom,p]){ctx.beginPath();ctx.arc(q.x*U,q.y*U,U*(.3+(1-tpK)*1.1),0,7);ctx.stroke()}}
   ctx.save();ctx.translate(p.x*U,p.y*U);ctx.rotate(p.a);ctx.scale(1-.6*tpK,1-.6*tpK);ctx.globalAlpha=1-.5*tpK;
