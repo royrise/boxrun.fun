@@ -1293,7 +1293,8 @@ function genEndless(seed,nb,mid){   // nb: also use the newer blocks (crumbling 
   // Each obstacle is checked on its own and removed if it would make the corridor impassable.
   const features=(r,w,L)=>{
     const lo=(w-1)>>1,hi=w-1-lo,px=-DY[dir],py=DX[dir],at=(k,o)=>[x+DX[dir]*k+px*o,y+DY[dir]*k+py*o];
-    const z0=w+2-(r>.8?1:0),zl=L-2*w-4+(r>.8?2:0),end=z0+zl,snap=[],put=(k,o,c)=>{const [cx,cy]=at(k,o);if(g[cy][cx]==='.'){snap.push([cx,cy]);g[cy][cx]=c}};
+    const z0=w+2-(r>.8?1:0),zl=L-2*w-4+(r>.8?2:0),end=z0+zl,snap=[],icz=[],put=(k,o,c)=>{if(nb&&c!=='I'&&icz.some(([a,b])=>k>=a-6&&k<=b+6))return;const [cx,cy]=at(k,o);if(g[cy][cx]==='.'){snap.push([cx,cy]);g[cy][cx]=c}};   // chaos mode: ice (you cannot steer on it) is never mixed with other obstacles, they stay 6 tiles clear on both sides
+    const iceClear=(a,b)=>{for(let q=Math.max(0,a);q<=Math.min(L,b);q++)for(let o=-lo;o<=hi;o++){const [cx,cy]=at(q,o);if(g[cy][cx]!=='.')return false}return true};
     const pas=(a,b)=>g[b][a]!=='#'&&g[b][a]!=='L'&&!sh[a+','+b],clr=(a,b)=>pas(a,b)&&pas(a+1,b)&&pas(a,b+1)&&pas(a+1,b+1);
     const xs=[at(0,-lo)[0],at(L,hi)[0],at(0,hi)[0],at(L,-lo)[0]],ys=[at(0,-lo)[1],at(L,hi)[1],at(0,hi)[1],at(L,-lo)[1]];
     const x0=Math.min(...xs)-1,x1=Math.max(...xs)+1,y0=Math.min(...ys)-1,y1=Math.max(...ys)+1,tt=(a,b)=>(a-x)*DX[dir]+(b-y)*DY[dir];
@@ -1323,9 +1324,9 @@ function genEndless(seed,nb,mid){   // nb: also use the newer blocks (crumbling 
       if(ty==='mud'){const len=3+((rnd()*3)|0);for(let q=0;q<len;q++)for(let o=-lo;o<=hi;o++)put(k+q,o,'M');return len+5}
       if(ty==='bnc'){const o=rnd()<.5?-lo:hi;put(k,o,'B');put(k+1,o,'B');return 4}
       if(ty==='pad'){for(let q=0;q<3;q++)for(let o=-lo;o<=hi;o++)put(k+q,o,'P');return r<.9?8:3}
-      if(ty==='ice'){const len=4+((rnd()*3)|0);for(let q=0;q<len;q++)for(let o=-lo;o<=hi;o++)put(k+q,o,'I');return len+8}
+      if(ty==='ice'){const len=4+((rnd()*3)|0);if(nb){if(k+len+9>L||!iceClear(k-6,k+len+6))return 2;icz.push([k,k+len-1])}for(let q=0;q<len;q++)for(let o=-lo;o<=hi;o++)put(k+q,o,'I');return len+8}
       if(ty==='dia'){const [cx,cy]=at(k,rnd()<.5?-lo:hi-1),cells=[[cx,cy],[cx+1,cy],[cx,cy+1],[cx+1,cy+1]];
-        if(cells.every(([a,b])=>g[b][a]==='.')){const O=[2,3,1,0];cells.forEach(([a,b],j)=>{snap.push([a,b]);g[b][a]='#';sh[a+','+b]=['h',O[j]]})}return 2}
+        if(cells.every(([a,b])=>g[b][a]==='.')&&!(nb&&icz.some(([ia,ib])=>k>=ia-6&&k<=ib+6))){const O=[2,3,1,0];cells.forEach(([a,b],j)=>{snap.push([a,b]);g[b][a]='#';sh[a+','+b]=['h',O[j]]})}return 2}
       const o=rnd()<.5?-lo:hi,oo=o===-lo?hi:-lo;put(k,o,'#');put(k+1,o,'#');if(r>.5&&k+4<=end){put(k+3,oo,'#');put(k+4,oo,'#');return 5}return 2;
     };
     for(let k=z0+((rnd()*3)|0);k<=end;){
