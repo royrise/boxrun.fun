@@ -1892,7 +1892,7 @@ async function cardImage(o){
   g.fillStyle='#2fd37a';g.font='800 '+(o.shot?(o.big.length>6?100:120):(o.big.length>8?118:150))+'px '+F;g.fillText(o.big,70,340);
   const fit=(t,px,w)=>{let f=px;g.font='700 '+f+'px '+F;while(g.measureText(t).width>w&&f>16){f-=2;g.font='700 '+f+'px '+F}};
   g.fillStyle='#cfd3ee';fit(o.line1,38,colW);g.fillText(o.line1,70,410);
-  if(o.line2){const np=/^Not a/.test(o.line2);g.fillStyle=np?'#ffb454':'#5ec8ff';fit(o.line2,32,colW);g.fillText(o.line2,70,462)}
+  if(o.line2){const np=/^Personal best:/.test(o.line2);g.fillStyle=np?'#ffb454':'#5ec8ff';fit(o.line2,32,colW);g.fillText(o.line2,70,462)}
   g.fillStyle='#ffffff55';g.font='600 26px '+F;g.fillText('Can you beat it? boxrun.fun',70,H-50);
   return new Promise(r=>c.toBlob(r,'image/png'))}
 // the card is copied to the clipboard the moment the button is pressed (the image is handed over as a promise so the browser still counts it as part of the click)
@@ -1904,10 +1904,10 @@ function copyCard(make,file){
 function shareRun(){if(lastRun)copyCard(runBlob,lastRun.endless?'boxrun-endless.png':'boxrun-run.png')}
 async function runBlob(){
   const r=lastRun,me0=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
-  if(r.endless){const blob=await cardImage({skin:pb.skin,name:r.name,big:r.big,shot:r.shot,cap:r.done?'Track complete!':'Where it ended',line1:(me0?me0+' \u00b7 ':'')+(r.done?'Cleared the track':'Time '+r.time),line2:r.nb?'New personal best!':(r.best?'Not a personal best \u00b7 best '+r.best:'')});
+  if(r.endless){const blob=await cardImage({skin:pb.skin,name:r.name,big:r.big,shot:r.shot,cap:r.done?'Track complete!':'Where it ended',line1:(me0?me0+' \u00b7 ':'')+(r.done?'Cleared the track':'Time '+r.time),line2:r.nb?'New personal best!':(r.best?'Personal best: '+r.best:'')});
     return blob}
   const me=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
-  const l2=r.first?'First clear!':r.pb?'New personal best!':r.best?'Not a personal best \u00b7 best '+r.best:'';
+  const l2=r.first?'First clear!':r.pb?'New personal best!':r.best?'Personal best: '+r.best:'';
   const blob=await cardImage({skin:pb.skin,name:r.name,big:r.time,line1:(me?me+' \u00b7 ':'')+'Level time',line2:(r.rank?'#'+r.rank+' on the leaderboard'+(l2?' \u00b7 ':''):'')+l2});
   return blob}
 function shareProfile(id){copyCard(()=>profBlob(id),'boxrun-profile.png')}
