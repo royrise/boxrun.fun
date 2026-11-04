@@ -1726,6 +1726,7 @@ async function weeklyBoard(mine,limit,F){
 async function weeklyDone(d,dp){
   if(!pb.wk)pb.wk={};if(!pb.wkd)pb.wkd={};const k=wkKey(),v=wval(d,lt);let better=false;
   if(d>0&&(pb.wk[k]==null||v<pb.wk[k])){better=true;pb.wk[k]=v;if(dp)pb.wkd[k]=[Math.round((dp[0]+10000)*10)/10,Math.round((dp[1]+10000)*10)/10];for(const o in pb.wk)if(o[0]!=='n'||+o.slice(1)<weekIdx()-8){delete pb.wk[o];delete pb.wkd[o]}savePB()}
+  if(!better&&pb.wk[k]!=null&&!pb.wkd[k]&&dp){pb.wkd[k]=[Math.round((dp[0]+10000)*10)/10,Math.round((dp[1]+10000)*10)/10];savePB()}   // best set before markers existed: the next death stands in for it, so every player gets a marker
   const mine=pb.wk[k];
   if(mine!=null){await lbPut({[wfld()]:mine});const dd=pb.wkd[k];if(dd)await lbSet({[wkXY()[0]]:dd[0],[wkXY()[1]]:dd[1]},!better)}
   const rows=await weeklyBoard(mine,8),b=document.getElementById('banner');
