@@ -212,6 +212,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #pcp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 76px);right:12px;display:none;background:rgba(20,20,32,.6)!important;border:1px solid #2fd37a!important;color:#2fd37a!important;border-radius:12px!important;padding:10px 14px!important;font-weight:700}body.practice #pcp{display:block}
 #pause{position:fixed;inset:0;z-index:7;background:rgba(8,10,18,.82);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff}#pause[hidden]{display:none}.pbox{width:min(440px,92vw)}.pbox h2{font-size:38px;margin:0 0 8px}.pbox p{opacity:.8;font-size:15px;line-height:1.5;margin:0 0 20px}.pbtns{display:flex;flex-direction:column;gap:12px}.pbtns button{font:inherit;font-size:20px;color:#fff;background:#2a2d44;border:1px solid #4a4d63;border-radius:12px;padding:16px;cursor:pointer}.pbtns button.pri{background:#1f9d5c;border-color:#2fd37a}
 #pause{overflow-y:auto;align-items:flex-start}.pbox{margin:auto;padding:24px 0}#plb{margin-top:22px;text-align:left}#plb .lbt{text-align:center;opacity:.8;font-weight:600;margin-bottom:6px}#plb .row{font-size:15px}#plb button.gbtn{font:inherit;font-size:.8em;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;background:#2a2d44;border:1px solid #4a4d63;margin-left:4px;vertical-align:middle}
+#netwarn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 70px);left:50%;transform:translateX(-50%);z-index:8;background:#7a1f1f;border:1px solid #ff6b6b;color:#fff;padding:8px 16px;border-radius:10px;font:700 14px system-ui,sans-serif;max-width:92vw;text-align:center;pointer-events:none}#netwarn[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -221,6 +222,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 <div id="duelhud" hidden></div>
 <div id="mphud" hidden></div>
 <div id="banner"></div>
+<div id="netwarn" hidden></div>
 <div id="pause" hidden><div class="pbox"><h2>Paused</h2><p id="pnote"></p><div class="pbtns"><button data-p="resume" id="pres" class="pri">Resume</button><button data-p="practice" id="pprac">Practice mode</button><button data-p="restart">Restart level</button><button data-p="quit">Quit to menu</button></div><div id="plb"></div></div></div>
 <div id="menu"><canvas id="menubg" aria-hidden="true"></canvas>
 <button id="topback" data-a="back" aria-label="Back" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -1460,11 +1462,12 @@ function mpEnter(v){
   mpTmr=setInterval(mpPoll,800);
 }
 async function mpPoll(){
-  if(!mp)return;const m=mp;
+  if(!mp||mpBusy)return;const m=mp;mpBusy=true;
   try{
     const v=await httpB.mp('sync',{code:m.code,d:m.playing?Math.floor(score):0,skin:pb.skin,g:m.playing&&state!=='menu'&&p?[p.x-eSh.x,p.y-eSh.y,p.a]:null});
-    if(mp!==m)return;mpApply(v)
-  }catch(e){if(mp===m&&e&&/no longer exists|not in that/i.test(e.message||'')){mpLeave();mpNote('That lobby is gone.');show('mp');mpRender()}}
+    if(mp!==m)return;netWatch(true);mpApply(v)
+  }catch(e){if(mp===m&&!(e&&e.status))netWatch(false,20);else if(e&&e.status)netWatch(true);if(mp===m&&e&&/no longer exists|not in that/i.test(e.message||'')){mpLeave();mpNote('That lobby is gone.');show('mp');mpRender()}}
+  finally{mpBusy=false}
 }
 function mpApply(v){
   mp.view=v;mp.off=v.now-Date.now();
@@ -1599,13 +1602,27 @@ async function dJoin(code){
   duel={room:r.room,code:code,done:false,waiting:true,opp:null,res:null,off:0};
   dTick(r);clearInterval(dTmr);dTmr=setInterval(dPoll,r.st==='play'?500:1000)
 }
+// connection watch for live games: a short outage just keeps retrying, and the player is told about it
+let netBad=0,netLast=Date.now(),netGrace=0;
+function netWatch(ok,grace){const el=document.getElementById('netwarn');
+  if(ok){netBad=0;netLast=Date.now();if(el)el.hidden=true;return}
+  netBad++;netGrace=grace||20;netShow()}
+function netShow(){const el=document.getElementById('netwarn');if(!el)return;
+  if(netBad<2||!(duel||(mp&&mp.inGame))){el.hidden=true;return}
+  const left=Math.max(0,Math.ceil(netGrace-(Date.now()-netLast)/1000));
+  el.textContent=duel?(left>0?'Connection lost. Reconnecting\u2026 you are out in '+left+'s':'Connection lost. You may have been counted out.'):'Connection lost. Reconnecting\u2026';el.hidden=false}
+setInterval(()=>{if(netBad)netShow()},1000);
+const netKick=()=>{if(duel&&!duel.done)dPoll();if(mp)mpPoll()};
+addEventListener('online',netKick);document.addEventListener('visibilitychange',()=>{if(!document.hidden)netKick()});
+let dBusy=false,mpBusy=false;
 async function dPoll(){
-  if(!duel)return;
+  if(!duel||dBusy)return;dBusy=true;
   const wasWait=duel.waiting;
   try{
     const r=await httpB.duel('sync',{room:duel.room,d:duel.waiting?0:Math.floor(score),dead:!duel.waiting&&(state==='over'||state==='dead')?1:0,g:!duel.waiting&&state==='play'&&p?[p.x-eSh.x,p.y-eSh.y,p.a]:null});
-    if(!duel)return;dTick(r);
-  }catch(e){if(duel&&duel.waiting&&e&&/no longer|not in/i.test(e.message||'')){dEnd();dNote('That match is gone.');dWait(false)}}
+    if(!duel)return;netWatch(true);dTick(r);
+  }catch(e){if(e&&e.status)netWatch(true);else netWatch(false,25);if(duel&&duel.waiting&&e&&/no longer|not in/i.test(e.message||'')){dEnd();dNote('That match is gone.');dWait(false)}}
+  finally{dBusy=false}
 }
 function dTick(r){
   if(!duel||duel.done)return;
@@ -1715,7 +1732,8 @@ let db=null,uid=null,usersNS=null,backend='none',httpB=null;
 function httpBackend(base){
   let token=store.get('boxrunToken')||null,me=null;
   const call=async(path,opt)=>{
-    const r=await fetch(base+path,Object.assign({},opt,{headers:Object.assign({'Content-Type':'application/json'},token?{Authorization:'Bearer '+token}:{})}));
+    const ac=new AbortController(),to=setTimeout(()=>ac.abort(),/^\/(duel|lobby)\//.test(path)?8000:60000);   // a stalled live-game request gives up quickly so polling can retry
+    let r;try{r=await fetch(base+path,Object.assign({},opt,{signal:ac.signal,headers:Object.assign({'Content-Type':'application/json'},token?{Authorization:'Bearer '+token}:{})}))}finally{clearTimeout(to)}
     let j=null;try{j=await r.json()}catch(e){}
     if(!r.ok){const er=new Error((j&&j.error)||'The server said '+r.status);er.status=r.status;throw er}
     return j;
