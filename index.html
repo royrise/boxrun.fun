@@ -859,7 +859,7 @@ function draw(){
   if(GH){const nw=performance.now(),gs=SIZE*U;for(const id in GH){const o=GH[id],c=mpGhostPos(o,nw),sk=o.sk||{p:'sky',s:'navy'};
     ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(c[2]);ctx.globalAlpha=.6;
     const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
-    if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
+    if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s,1);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
     ctx.restore();ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(p.a+Math.PI/2);ctx.globalAlpha=.9;ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.fillStyle='#fff';ctx.strokeText(o.n,0,-gs/2-8);ctx.fillText(o.n,0,-gs/2-8);ctx.restore()}}
   if(cpT>0&&cp.k){ctx.lineWidth=4;ctx.strokeStyle='rgba(47,211,122,'+cpT/.6+')';ctx.beginPath();ctx.arc(cp.x*U,cp.y*U,U*(.3+(.6-cpT)*1.6),0,7);ctx.stroke()}
   if(tpK>0){ctx.lineWidth=4;ctx.strokeStyle='rgba(200,150,255,'+tpK*.8+')';for(const q of [tpFrom,p]){ctx.beginPath();ctx.arc(q.x*U,q.y*U,U*(.3+(1-tpK)*1.1),0,7);ctx.stroke()}}
@@ -869,7 +869,7 @@ function draw(){
   const bc=pb.skin.b&&state!=='dead'?crCan(pb.skin.b,pb.skin.p,pb.skin.s):null;
   if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm}else{
   ctx.fillStyle=state==='dead'?'#ff4d4d':skinCol(pb.skin.p);ctx.fillRect(-s/2,-s/2,s,s);
-  ctx.fillStyle=skinCol(pb.skin.s);ctx.fillRect(s/2-7,-s/2+4,5,s-8)}} // front marker
+  ctx.fillStyle=skinCol(pb.skin.s,1);ctx.fillRect(s/2-7,-s/2+4,5,s-8)}} // front marker
   ctx.restore();
   if(state==='dead'){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='rgba(255,40,0,.25)';ctx.fillRect(0,0,W,Hh)}
   if((cd>0||goT>0)&&state==='play'){   // countdown overlay
@@ -1016,7 +1016,7 @@ const COLORS=[
 ];
 const skinStats=()=>({comp:pb.completions||0,dead:pb.deaths||0,clear:LEVELS.filter((_,i)=>pb.levels[LID[i]]!=null).length,tut:pb.levels.tutorial!=null,run:pb.run!=null,ach:pb.ach||{}});
 const colOf=id=>COLORS.find(c=>c.id===id)||COLORS[0];
-const skinCol=id=>{const h=colOf(id).h;return h==='rainbow'?'hsl('+((t*90)%360)+',90%,60%)':h};
+const skinCol=(id,sec)=>{const h=colOf(id).h;return h==='rainbow'?'hsl('+((t*90+(sec?180:0))%360)+',90%,60%)':h};   // a prismatic secondary runs half a turn ahead of the primary, so the two never match
 // ---- crate base skins: catalogue and pixel-art generator. Each is a 20 x 20 pattern drawn in the player's primary and secondary colours
 const CR_RAR=[['common','Common',45,'#b7c0cc'],['uncommon','Uncommon',30,'#4ade80'],['rare','Rare',15,'#4da6ff'],['epic','Epic',7,'#b36bff'],['legendary','Legendary',3,'#ffb81f'],['mythic','Mythic',1,'#ff3d78'],['ultra','Ultra',.2,'#22d3ee'],['super','Super',.01,'rainbow']];
 // colour slots: 0 primary, 1 secondary, 2 dark primary, 3 light primary, 4 dark secondary, 5 white, 6 black
@@ -1065,9 +1065,12 @@ function crCanvas(id,shiny,pc,sc){const sp=crSkin(id);if(!sp)return null;const k
   if(Object.keys(crCache).length>400)for(const q in crCache)delete crCache[q];
   crCache[k]=cv;return cv}
 // the current look of a base skin item [k,shiny,serial] in the given colour ids (rainbow is frozen to the hue at that moment)
-const crQ=css=>/^hsl\((\d+)/.test(css)?'hsl('+(Math.round(+RegExp.$1/30)*30)+',90%,60%)':css;
-const crCan=(b,p,s)=>b?crCanvas(b.k,b.s,crQ(skinCol(p)),crQ(skinCol(s))):null;
-const crImg=(b,p,s,px)=>{const c=crCan(b,p,s);return c?'<img src="'+c.toDataURL()+'" width="'+px+'" height="'+px+'" style="image-rendering:pixelated" alt="">':''};
+const crQ=css=>/^hsl\((\d+)/.test(css)?'hsl('+(Math.round(+RegExp.$1/10)*10)+',90%,60%)':css;
+const crCan=(b,p,s)=>b?crCanvas(b.k,b.s,crQ(skinCol(p)),crQ(skinCol(s,1))):null;
+const crRb=id=>colOf(id).h==='rainbow';
+const crImg=(b,p,s,px)=>{const c=crCan(b,p,s);return c?'<img src="'+c.toDataURL()+'" width="'+px+'" height="'+px+'" style="image-rendering:pixelated" alt=""'+(crRb(p)||crRb(s)?' data-cr="'+b.k+'|'+(b.s?1:0)+'|'+p+'|'+s+'"':'')+'>':''};
+// prismatic colours keep cycling in every preview that is on screen (skins page, crates, profile)
+setInterval(()=>{if(document.hidden)return;document.querySelectorAll('img[data-cr]').forEach(im=>{if(!im.offsetParent)return;const [k,sh,p,s]=im.dataset.cr.split('|'),c=crCan({k,s:+sh},p,s);if(c)im.src=c.toDataURL()});const sp=document.getElementById('skinprev');if(sp&&sp.offsetParent&&(crRb(pb.skin.p)||crRb(pb.skin.s)))sp.innerHTML=crCan(pb.skin.b,pb.skin.p,pb.skin.s)?crImg(pb.skin.b,pb.skin.p,pb.skin.s,72):'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s,1)+'"/></svg>'},120);
 
 function buildSkins(note){
   const S=skinStats();
@@ -1075,7 +1078,7 @@ function buildSkins(note){
     return '<button class="swb'+(pb.skin[k]===c.id?' on':'')+(ok?'':' lock')+'" data-sk="'+k+'" data-ci="'+i+'" title="'+esc(c.n+(ok?'':' - '+c.t))+'" style="background:'+(c.h==='rainbow'?'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)':c.h)+'">'+(ok?'':'\u{1F512}')+'</button>'}).join('');
     try{crRender()}catch(e){}
   document.getElementById('skinnote').textContent=note||'';
-  document.getElementById('skinprev').innerHTML=crCan(pb.skin.b,pb.skin.p,pb.skin.s)?crImg(pb.skin.b,pb.skin.p,pb.skin.s,72):'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg>';
+  document.getElementById('skinprev').innerHTML=crCan(pb.skin.b,pb.skin.p,pb.skin.s)?crImg(pb.skin.b,pb.skin.p,pb.skin.s,72):'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s,1)+'"/></svg>';
 }
 function pickSkin(k,i){const c=COLORS[i];if(!c.u(skinStats())){buildSkins(c.n+': '+c.t);return}pb.skin[k]=c.id;savePB();buildSkins(c.n+' selected')}
 
@@ -1860,7 +1863,7 @@ async function rankOf(field,t,id){
 const offMsg=()=>backend==='none'?(window.claude?'Online features are not available in this view.':'No server address is set, so the online features are off. Add boxrun-config.js next to index.html (see boxrun-server/README.md).'):backendErr?'Cannot reach your server ('+backendErr+'). Check the address in boxrun-config.js, and that ALLOW_ORIGIN matches this site.':backend==='http'&&!uid?'Sign in with the Profile icon to post times.':'Not available right now.';
 const srvLine=()=>backend==='http'?(backendErr?'Server problem: '+backendErr:'Server: '+new URL(BOXRUN_API).host+' (connected)'):backend==='claude'?'Using your claude.ai account':'No server set up';
 const loginForm=()=>(gateNote?'<div class="gaten">'+gateNote+'</div>':'')+'<div class="lbt">Sign in or create an account</div><input id="au" placeholder="Username" maxlength="20" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="crow"><button data-a="alogin" class="pri">Sign in</button><button data-a="areg">Create account</button></div><small id="aerr"><b>No email required.</b> Your account keeps your times, level and skin on every device.</small><small class="srv">'+srvLine()+'</small>';
-const cubeSvg=(p,s,f,b)=>crCan(b,p,s)?crImg(b,p,s,64):'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s)+'"/></svg>';
+const cubeSvg=(p,s,f,b)=>crCan(b,p,s)?crImg(b,p,s,64):'<svg viewBox="0 0 60 60" width="64" height="64"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(s,1)+'"/></svg>';
 async function adminRename(id,old){
   const n=await askText('New name for '+old+' (3 to 20 letters, numbers, _ . or -)',old,'Rename');if(!n||n===old)return;
   try{await httpB.rename(id,n);toast(old+' is now '+n);showProfile(id)}catch(e){toast((e&&e.message)||'Could not rename')}
@@ -1887,7 +1890,7 @@ async function cardImage(o){
   // cube
   const cs=o.shot?0:190,cx=W-250,cy=H/2-10;g.save();g.translate(cx,cy);g.rotate(.12);if(cs){
   const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
-  if(bc){g.imageSmoothingEnabled=false;g.drawImage(bc,-cs/2,-cs/2,cs,cs)}else{g.fillStyle=skinCol(sk.p);g.fillRect(-cs/2,-cs/2,cs,cs);g.fillStyle=skinCol(sk.s);g.fillRect(cs/2-24,-cs/2+14,17,cs-28)}}
+  if(bc){g.imageSmoothingEnabled=false;g.drawImage(bc,-cs/2,-cs/2,cs,cs)}else{g.fillStyle=skinCol(sk.p);g.fillRect(-cs/2,-cs/2,cs,cs);g.fillStyle=skinCol(sk.s,1);g.fillRect(cs/2-24,-cs/2+14,17,cs-28)}}
   g.restore();
   g.textBaseline='alphabetic';g.fillStyle='#8a8fb0';g.font='700 30px '+F;g.fillText('BOXRUN.FUN',70,86);
   const colW=o.shot?W-520-60-70-40:W-140;let tf=40;g.font='800 '+tf+'px '+F;while(g.measureText(o.name).width>colW&&tf>20){tf-=2;g.font='800 '+tf+'px '+F}g.fillStyle='#fff';g.fillText(o.name,70,170);
@@ -1937,7 +1940,7 @@ async function showProfile(id){
   if(mine){LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)times[fld(i)]=t});if(pb.run!=null)times.run3=pb.run}else if(lbd)Object.assign(times,lbd);
   const defs=LEVELS.map((_,i)=>['Level '+(i+1)+' \u00b7 '+lvName(i),fld(i)]);
   const allT=LEVELS.map((_,i)=>times[fld(i)]),combined=allT.every(t=>t!=null)?allT.reduce((a,b)=>a+b,0):null;
-  el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s,skin.f,skin.b)+'<div><div class="pname">'+esc(name)+'</div>'+(skin.b&&crSkin(skin.b.k)?'<div class="crtag">'+esc(crName(skin.b.k))+(skin.b.s?' \u2726':'')+' #'+(skin.b.n|0)+'</div>':'')+'<div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
+  el.innerHTML='<div class="phead">'+cubeSvg(skin.p,skin.s,skin.f,skin.b)+'<div><div class="pname">'+esc(name)+'</div>'+(skin.b&&crSkin(skin.b.k)?'<div class="crtag">'+esc(crName(skin.b.k))+(skin.b.s?' \u2726':'')+'</div>':'')+'<div>Level '+li.l+' <small>('+Math.floor(li.cur)+' / '+li.next+' XP)</small></div><div class="xpbar"><i style="width:'+Math.min(100,100*li.cur/li.next)+'%"></i></div></div></div>'
    +[['Levels cleared',(st.clear||0)+' / '+LEVELS.length],['Level completions',st.comp||0],['Deaths',st.dead||0],['Endless best',(st.endBest||0)+' m'],['Elo (1v1)','<span id="pelo">\u2026</span>'],['Full run',times.run3!=null?fmt(times.run3):st.run?'Done':'Not yet'],['Combined best times',combined!=null?fmt(combined):'Clear every level']].map(r=>'<div class="row srow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
@@ -2506,7 +2509,7 @@ async function crFlush(){
   crFlushing=false;crBadge();if(pb.cmin>0&&!crFlushing)setTimeout(crFlush,20000)}
 async function crSync(){if(!crOn())return;try{const r=await httpB.crate('state');crBal=r.bal|0;if(r.limit)crDay=[r.today|0,r.limit];crItems=Array.isArray(r.items)?r.items.filter(it=>crSkin(it[0])):[];if(pb.skin.b&&!crSkin(pb.skin.b.k)){pb.skin.b=null;savePB()}}catch(e){}crBadge();crFlush()}
 const crCard=it=>{const k=it[0],sh=it[1],n=it[2],ra=crRarOf(k),c=crRar(ra);
-  return '<div class="crc'+(sh?' sh':'')+'" style="--rc:'+crRC(ra)+'">'+crImg({k,s:sh},pb.skin.p,pb.skin.s,96)+'<div class="crn">'+esc(crName(k))+'</div><div class="crr'+(ra==='super'?' rb':'')+'" style="color:'+crRC(ra)+'">'+c[1]+(sh?' \u00b7 \u2726 Shiny':'')+'</div><div class="crs">#'+n+(n===1?' \u00b7 the first one ever!':'')+'</div></div>'};
+  return '<div class="crc'+(sh?' sh':'')+'" style="--rc:'+crRC(ra)+'">'+crImg({k,s:sh},pb.skin.p,pb.skin.s,96)+'<div class="crn">'+esc(crName(k))+'</div><div class="crr'+(ra==='super'?' rb':'')+'" style="color:'+crRC(ra)+'">'+c[1]+(sh?' \u00b7 \u2726 Shiny':'')+'</div></div>'};
 async function openSkins(){buildSkins();show('skins');await crSync();crRender()}
 let crPoolOn=false,crCopies=[];
 function crRender(){
@@ -2522,9 +2525,9 @@ function crRender(){
   const eq=pb.skin.b,cr=crRar('common');
   crCopies=crItems.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[0].localeCompare(b[0])||a[2]-b[2]).slice(0,400);
   document.getElementById('crcount').textContent='\u00b7 '+(crItems.length+1)+' skin'+(crItems.length?'s':'');
-  idx.innerHTML='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" style="--rc:'+rc(cr)+'" title="Default \u00b7 Common"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s)+'"/></svg><span class="nm">Default</span><span class="ct">Common</span></button>'
+  idx.innerHTML='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" style="--rc:'+rc(cr)+'" title="Default \u00b7 Common"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s,1)+'"/></svg><span class="nm">Default</span><span class="ct">Common</span></button>'
    +crCopies.map((it,i)=>{const ra=crRarOf(it[0]),r=crRar(ra),w=eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2];
-     return '<button class="crt idx'+(w?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+rc(r)+'" title="'+esc(crName(it[0])+' \u00b7 '+r[1]+(it[1]?' \u00b7 Shiny':'')+' \u00b7 #'+it[2])+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(crName(it[0]))+'</span><span class="ct">#'+it[2]+(it[1]?' \u2726':'')+'</span></button>'}).join('')+'</div>'
+     return '<button class="crt idx'+(w?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+rc(r)+'" title="'+esc(crName(it[0])+' \u00b7 '+r[1]+(it[1]?' \u00b7 Shiny':''))+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(crName(it[0]))+'</span><span class="ct">'+(it[1]?'\u2726':'')+'</span></button>'}).join('')+'</div>'
    +(crItems.length>400?'<small>Showing your 400 rarest.</small>':'');
 }
 async function crOpen(n){
@@ -2534,7 +2537,7 @@ async function crOpen(n){
   try{for(let i=0;i<n;i++){const r=await httpB.crate('open');crBal=r.bal|0;crItems.push(r.item);got.push(r.item)}}catch(e){err=e.message||'Could not open the crate.'}
   await new Promise(r=>setTimeout(r,500));
   if(got.length){const best=got.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[2]-b[2])[0];
-    res.innerHTML=crCard(got.length===1?got[0]:best)+(got.length>1?'<small>Best of '+got.length+' crates. All of them: '+got.map(g=>esc(crName(g[0]))+(g[1]?'\u2726':'')+' #'+g[2]).join(', ')+'</small>':'')}
+    res.innerHTML=crCard(got.length===1?got[0]:best)+(got.length>1?'<small>Best of '+got.length+' crates. All of them: '+got.map(g=>esc(crName(g[0]))+(g[1]?'\u2726':'')).join(', ')+'</small>':'')}
   else res.innerHTML='';
   document.getElementById('crnote').textContent=err;crBusy=false;crBadge();crRender()}
 function crEquip(i){
