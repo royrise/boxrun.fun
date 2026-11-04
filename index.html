@@ -1682,12 +1682,14 @@ function dEnd(){   // leaving a match (menu, Esc, cancel): forfeits it if it is 
   document.getElementById('duelhud').hidden=true;document.body.classList.remove('duelon');
   if(!d.done){try{httpB.duel('sync',{room:d.room,d:d.waiting?0:Math.floor(score),dead:1,leave:1})}catch(e){}}
 }
+function snapShot(){try{const w=cv.width,h=cv.height,sw=Math.min(w,h*1.6),sh=sw/1.6,c=document.createElement('canvas');c.width=800;c.height=500;c.getContext('2d').drawImage(cv,(w-sw)/2,(h-sh)/2,sw,sh,0,0,800,500);return c}catch(e){return null}}
 function endRun(done){
   state='over';timer=1e9;
   if(duel){dMyEnd();return}
-  const d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
+  const shot=snapShot(),d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
+  lastRun=mp?null:{endless:true,shot,done:!!done,name:curWeekly?'Weekly challenge':'Endless \u00b7 '+(curSet?'set seed ':'seed ')+curSeed,big:d+' m',nb:nb&&d>0,time:fmt(lt)};
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
-  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="menu">Menu</button></div>';
+  banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="card" title="Make a picture of this run to share">Share card</button><button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
   if(curWeekly)weeklyDone(d);else if(!curSet&&d>0)endBoardDone(d);
 }
@@ -1875,14 +1877,19 @@ async function cardImage(o){
   g.strokeStyle='#ffffff0d';g.lineWidth=2;for(let x=0;x<W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
   g.fillStyle='#5ec8ff';g.fillRect(0,0,W,8);
   const F='Orbitron, system-ui, sans-serif',sk=o.skin||{p:'sky',s:'navy'};
+  if(o.shot){   // screenshot of where the run ended, in a frame
+    const fw=520,fh=325,fx=W-fw-60,fy=(H-fh)/2+10;g.save();g.shadowColor='#000a';g.shadowBlur=30;g.fillStyle='#000';g.beginPath();g.roundRect(fx-8,fy-8,fw+16,fh+16,18);g.fill();g.restore();
+    g.save();g.beginPath();g.roundRect(fx,fy,fw,fh,12);g.clip();g.drawImage(o.shot,fx,fy,fw,fh);g.restore();
+    g.strokeStyle='#ff6b6b';g.lineWidth=4;g.beginPath();g.roundRect(fx-8,fy-8,fw+16,fh+16,18);g.stroke();
+    g.fillStyle='#ff6b6b';g.font='800 24px Orbitron, system-ui, sans-serif';g.textAlign='center';g.fillText(o.cap||'',fx+fw/2,fy+fh+46);g.textAlign='left'}
   // cube
-  const cs=190,cx=W-250,cy=H/2-10;g.save();g.translate(cx,cy);g.rotate(.12);
+  const cs=o.shot?0:190,cx=W-250,cy=H/2-10;g.save();g.translate(cx,cy);g.rotate(.12);if(cs){
   const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
-  if(bc){g.imageSmoothingEnabled=false;g.drawImage(bc,-cs/2,-cs/2,cs,cs)}else{g.fillStyle=skinCol(sk.p);g.fillRect(-cs/2,-cs/2,cs,cs);g.fillStyle=skinCol(sk.s);g.fillRect(cs/2-24,-cs/2+14,17,cs-28)}
+  if(bc){g.imageSmoothingEnabled=false;g.drawImage(bc,-cs/2,-cs/2,cs,cs)}else{g.fillStyle=skinCol(sk.p);g.fillRect(-cs/2,-cs/2,cs,cs);g.fillStyle=skinCol(sk.s);g.fillRect(cs/2-24,-cs/2+14,17,cs-28)}}
   g.restore();
   g.textBaseline='alphabetic';g.fillStyle='#8a8fb0';g.font='700 30px '+F;g.fillText('BOXRUN.FUN',70,86);
   g.fillStyle='#fff';g.font='800 40px '+F;g.fillText(o.name,70,170);
-  g.fillStyle='#2fd37a';g.font='800 '+(o.big.length>8?118:150)+'px '+F;g.fillText(o.big,70,340);
+  g.fillStyle='#2fd37a';g.font='800 '+(o.shot?(o.big.length>6?100:120):(o.big.length>8?118:150))+'px '+F;g.fillText(o.big,70,340);
   g.fillStyle='#cfd3ee';g.font='700 38px '+F;g.fillText(o.line1,70,410);
   if(o.line2){g.fillStyle='#5ec8ff';g.font='700 34px '+F;g.fillText(o.line2,70,462)}
   g.fillStyle='#ffffff55';g.font='600 26px '+F;g.fillText('Can you beat it? boxrun.fun',70,H-50);
@@ -1894,7 +1901,10 @@ async function shareImage(blob,file,text){
   try{if(navigator.clipboard&&window.ClipboardItem){await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);toast('Card copied. Paste it anywhere.');return}}catch(e){}
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Card saved')}
 async function shareRun(){
-  if(!lastRun)return;const r=lastRun,me=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
+  if(!lastRun)return;const r=lastRun,me0=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
+  if(r.endless){const blob=await cardImage({skin:pb.skin,name:r.name,big:r.big,shot:r.shot,cap:r.done?'Track complete!':'Where it ended',line1:(me0?me0+' \u00b7 ':'')+(r.done?'Cleared the track':'Time '+r.time),line2:r.nb?'New personal best!':''});
+    shareImage(blob,'boxrun-endless.png','I got '+r.big+' in '+r.name+' on boxrun.fun');return}
+  const me=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
   const l2=r.first?'First clear!':r.pb?'New personal best!':'';
   const blob=await cardImage({skin:pb.skin,name:r.name,big:r.time,line1:(me?me+' \u00b7 ':'')+'Level time',line2:(r.rank?'#'+r.rank+' on the leaderboard'+(l2?' \u00b7 ':''):'')+l2});
   shareImage(blob,'boxrun-run.png','I finished '+r.name+' in '+r.time+' on boxrun.fun')}
