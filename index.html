@@ -531,9 +531,9 @@ menuEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
   else if(d.cl)copyLink(d.cl);
   else if(d.cr)commRemove(d.cr);
   else if(d.lb)showLB(d.lb);
-  else{const a=d.a;if(gate(a)){}else if(a==='go-play')show('pmenu');else if(a==='go-edit')show('emenu');else if(a==='duel')openDuel();else if(a==='mpmenu')show('mpmenu');else if(a==='mpsend')mpSay();else if(a==='quests'){qRender();show('quests')}else if(a==='lbmenu'){ovOpen={pts:false,high:false};show('lbmenu');ovLoad()}else if(a==='mp')openMp();else if(a==='ovtoggle'){const k=b.dataset.t;ovOpen[k]=!ovOpen[k];ovRender()}else if(a==='mpcreate')mpCreate();else if(a==='mpjoin')mpJoin(pendingMpUse?mpPending:document.getElementById('mpcode').value);else if(a==='mpjoinp')mpJoin(mpPending);else if(a==='mpcopy')mpCopy();else if(a==='mpstart')mpStart();else if(a==='mpagain')mpAgain();else if(a==='mpleave')mpLeave(true);else if(a==='dquick')dJoin('');else if(a==='dcode')dJoin(document.getElementById('dcode').value);else if(a==='dcancel')dCancel();else if(a==='copen')crOpen(1);else if(a==='copenall')crOpen(99);else if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins')openSkins();else if(a==='contrib'){show('contrib')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
+  else{const a=d.a;if(gate(a)){}else if(a==='go-play')show('pmenu');else if(a==='go-edit')show('emenu');else if(a==='duel')openDuel();else if(a==='mpmenu')show('mpmenu');else if(a==='mpsend')mpSay();else if(a==='pcard')shareProfile(profId);else if(a==='quests'){qRender();show('quests')}else if(a==='lbmenu'){ovOpen={pts:false,high:false};show('lbmenu');ovLoad()}else if(a==='mp')openMp();else if(a==='ovtoggle'){const k=b.dataset.t;ovOpen[k]=!ovOpen[k];ovRender()}else if(a==='mpcreate')mpCreate();else if(a==='mpjoin')mpJoin(pendingMpUse?mpPending:document.getElementById('mpcode').value);else if(a==='mpjoinp')mpJoin(mpPending);else if(a==='mpcopy')mpCopy();else if(a==='mpstart')mpStart();else if(a==='mpagain')mpAgain();else if(a==='mpleave')mpLeave(true);else if(a==='dquick')dJoin('');else if(a==='dcode')dJoin(document.getElementById('dcode').value);else if(a==='dcancel')dCancel();else if(a==='copen')crOpen(1);else if(a==='copenall')crOpen(99);else if(a==='play')startLevel(0,true);else if(a==='levels'){buildLevels();show('levels')}else if(a==='stats'){buildStats();show('stats')}else if(a==='lb')showLB('run3');else if(a==='edit')openEditor(null);else if(a==='bkup')backupAll();else if(a==='rstr')document.getElementById('bfile').click();else if(a==='skins')openSkins();else if(a==='contrib'){show('contrib')}else if(a==='comm')showComm();else if(a==='endless')openEndless();else if(a==='weekly')openWeekly();else if(a==='wstart')startWeekly();else if(a==='prof')showProfile();else if(a==='alogin')acctDo('login');else if(a==='areg')acctDo('register');else if(a==='alogout')acctOut();else if(a==='emrand'){pb.endSet=false;savePB();endUI()}else if(a==='emset'){pb.endSet=true;savePB();endUI()}else if(a==='estart')endStart();else navPrev()}});
 menuEl.addEventListener('pointerdown',e=>e.stopPropagation());
-document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
+document.getElementById('banner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.b==='card'){shareRun();return}if(b.dataset.b==='rshare'){const ref=mode==='main'?'m'+lvl:cur&&/^cm_/.test(cur.id)?'c'+cur.id.slice(3):null;if(ref&&uid)copyText(replayLink(uid,ref)).then(ok=>toast(ok?'Replay link copied':'Could not copy the link'));return}
   if(spec&&specInfo){const k=b.dataset.b;banner.style.opacity=0;banner.innerHTML='';if(k==='rewatch'){if(specInfo.ref==='e')watchEndless(specInfo.seed,specInfo.name,specInfo.arr);else startRef(specInfo.ref,specInfo.name,specInfo.arr,true)}else if(k==='playit')startRef(specInfo.ref,specInfo.name,specInfo.arr,false);else menuBack();return}
   if(mode==='endless'){const k=b.dataset.b;if(k==='again')endRetry();else if(k==='new')endNew();else menuBack();return}if(b.dataset.b==='again')again();else nextLevel()});
 document.getElementById('banner').addEventListener('pointerdown',e=>e.stopPropagation());
@@ -564,9 +564,10 @@ function finish(){
   if(cmk&&pb.cl[cur.id]!=null)patch[cfk(cmk)]=rnd(pb.cl[cur.id],3);
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
   checkAch();savePB();
-  banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
+  lastRun=mode==='test'?null:{name:mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name,time:fmt(lt),first:prev==null,pb:isPB&&prev!=null,rank:null};
+  banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+(mode!=='test'?'<button data-b="card" title="Make a picture of this run to share">Share card</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
-  if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
+  if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const mi2=all?all.findIndex(r=>r.me):-1;if(lastRun&&mi2>=0)lastRun.rank=mi2+1;const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
 }
 const keys={left:false,right:false};
 const CDN=.5;   // seconds per count (way quicker than a real second)
@@ -1824,6 +1825,45 @@ const GATED={'go-edit':'the editor','edit':'the editor','prof':'your profile','c
 let gateNote='',pendingAct=null;
 function gate(a){if(!GATED[a]||backend!=='http'||uid)return false;gateNote='Create a free account to use '+GATED[a]+'.';pendingAct=(a==='prof')?null:a;showProfile();return true}
 function resumeAct(){const a=pendingAct;pendingAct=null;gateNote='';if(!a||!uid)return;const b=document.createElement('button');b.dataset.a=a;menuEl.appendChild(b);b.click();b.remove()}
+// ---- share cards: a picture of a run or a profile, made on a canvas and handed to the share sheet (or downloaded)
+let lastRun=null;
+async function cardImage(o){
+  try{await document.fonts.ready}catch(e){}
+  const W=1200,H=630,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  const gr=g.createLinearGradient(0,0,W,H);gr.addColorStop(0,'#14172b');gr.addColorStop(1,'#0a0c18');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.strokeStyle='#ffffff0d';g.lineWidth=2;for(let x=0;x<W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
+  g.fillStyle='#5ec8ff';g.fillRect(0,0,W,8);
+  const F='Orbitron, system-ui, sans-serif',sk=o.skin||{p:'sky',s:'navy'};
+  // cube
+  const cs=190,cx=W-250,cy=H/2-10;g.save();g.translate(cx,cy);g.rotate(.12);
+  const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
+  if(bc){g.imageSmoothingEnabled=false;g.drawImage(bc,-cs/2,-cs/2,cs,cs)}else{g.fillStyle=skinCol(sk.p);g.fillRect(-cs/2,-cs/2,cs,cs);g.fillStyle=skinCol(sk.s);g.fillRect(cs/2-24,-cs/2+14,17,cs-28)}
+  g.restore();
+  g.textBaseline='alphabetic';g.fillStyle='#8a8fb0';g.font='700 30px '+F;g.fillText('BOXRUN.FUN',70,86);
+  g.fillStyle='#fff';g.font='800 40px '+F;g.fillText(o.name,70,170);
+  g.fillStyle='#2fd37a';g.font='800 '+(o.big.length>8?118:150)+'px '+F;g.fillText(o.big,70,340);
+  g.fillStyle='#cfd3ee';g.font='700 38px '+F;g.fillText(o.line1,70,410);
+  if(o.line2){g.fillStyle='#5ec8ff';g.font='700 34px '+F;g.fillText(o.line2,70,462)}
+  g.fillStyle='#ffffff55';g.font='600 26px '+F;g.fillText('Can you beat it? boxrun.fun',70,H-50);
+  return new Promise(r=>c.toBlob(r,'image/png'))}
+async function shareImage(blob,file,text){
+  if(!blob){toast('Could not make the image');return}
+  try{const f=new File([blob],file,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text,url:'https://boxrun.fun'});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{if(navigator.clipboard&&window.ClipboardItem){await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);toast('Card copied. Paste it anywhere.');return}}catch(e){}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Card saved')}
+async function shareRun(){
+  if(!lastRun)return;const r=lastRun,me=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
+  const l2=r.first?'First clear!':r.pb?'New personal best!':'';
+  const blob=await cardImage({skin:pb.skin,name:r.name,big:r.time,line1:(me?me+' \u00b7 ':'')+'Level time',line2:(r.rank?'#'+r.rank+' on the leaderboard'+(l2?' \u00b7 ':''):'')+l2});
+  shareImage(blob,'boxrun-run.png','I finished '+r.name+' in '+r.time+' on boxrun.fun')}
+async function shareProfile(id){
+  const el=document.getElementById('profbody'),nm=(el.querySelector('.pname')||{}).textContent||'Player',lvEl=el.querySelector('.phead>div>div:nth-child(2)'),lv=lvEl?lvEl.childNodes[0].textContent.trim():'';
+  const elo=(document.getElementById('pelo')||{}).textContent||'';
+  const skin=id===uid?pb.skin:(profSkin||pb.skin);
+  const blob=await cardImage({skin,name:nm,big:lv.replace('Level ','LVL ')||'PROFILE',line1:(el.querySelector('.srow b')||{}).textContent?'Levels cleared '+el.querySelector('.srow b').textContent:'',line2:elo&&elo!=='\u2026'&&elo!=='\u2014'?'Elo '+elo.replace(/ \(.*/,''):''});
+  shareImage(blob,'boxrun-profile.png',nm+' on boxrun.fun')}
+let profSkin=null,profId=null;
 async function showProfile(id){
   show('profile');document.getElementById('psignout').hidden=true;const el=document.getElementById('profbody');
   if(backend==='none'){el.innerHTML='<small>'+offMsg()+'</small>';return}
@@ -1835,7 +1875,7 @@ async function showProfile(id){
   const get=async path=>{try{const d=await db.doc(path).get();return d.exists?d.data():null}catch(e){return null}};
   const [pfd,lbd,names]=await Promise.all([get('pf/'+id),get('lb/'+id),usersNS?usersNS.profiles([id]).catch(()=>({})):{}]);
   const name=(names&&names[id]&&names[id].name)||(mine&&httpB&&httpB.name())||'Player';
-  const skin=mine?pb.skin:(pfd&&pfd.skin)||{p:'sky',s:'navy'};
+  const skin=mine?pb.skin:(pfd&&pfd.skin)||{p:'sky',s:'navy'};profSkin=skin;profId=id;
   const st=mine?(()=>{const S=skinStats();return {comp:S.comp,dead:S.dead,clear:S.clear,endBest:pb.endBest||0,run:S.run?1:0}})():(pfd&&pfd.stats)||{};
   const xp=mine?xpOf():(pfd&&pfd.xp)||0,li=levelInfo(xp),times={};
   if(mine){LEVELS.forEach((_,i)=>{const t=pb.levels[LID[i]];if(t!=null)times[fld(i)]=t});if(pb.run!=null)times.run3=pb.run}else if(lbd)Object.assign(times,lbd);
@@ -1846,6 +1886,7 @@ async function showProfile(id){
    +'<details class="plc"><summary>Individual levels</summary>'
    +defs.map(([n,f],i)=>'<div class="row"><span>'+esc(n)+'</span><span>'+(times[f]!=null?fmt(times[f]):'\u2014')+' <b id="rk'+i+'"></b></span></div>').join('')+'</details>'
    +(!mine&&backend==='http'&&httpB&&httpB.admin()?'<button data-ar="'+esc(id)+'" data-an="'+esc(name)+'">Rename player (admin)</button>':'')
+   +'<button data-a="pcard">Share card</button>'
    +(mine&&backend==='http'?'<small class="srv">'+srvLine()+'</small>':'');
   document.getElementById('psignout').hidden=!(mine&&backend==='http'&&uid);
   if(backend==='http'&&httpB&&uid)httpB.duel('rating',{id}).then(r=>{const e=document.getElementById('pelo');if(e)e.textContent=r.rt+(r.w+r.l+r.d?' ('+r.w+'W '+r.l+'L)':'')}).catch(()=>{const e=document.getElementById('pelo');if(e)e.textContent='\u2014'});else{const e=document.getElementById('pelo');if(e)e.textContent='\u2014'}
