@@ -575,7 +575,7 @@ function finish(){
   if(cmk&&pb.cl[cur.id]!=null)patch[cfk(cmk)]=rnd(pb.cl[cur.id],3);
   if(mode==='main'&&last&&fullRun){const rp=pb.run,runPB=rp==null||rnd(total,3)<rnd(rp,3);if(runPB)pb.run=rnd(total,3);patch.run3=rnd(pb.run,3);txt+='<br>Total '+fmt(total)+(rp==null?' \u00b7 First full run!':runPB?' \u00b7 New best run! (was '+fmt(rp)+')':rnd(total,3)===rnd(rp,3)?' \u00b7 Tied your best run':' \u00b7 Best run '+fmt(rp))}
   checkAch();savePB();
-  lastRun=mode==='test'?null:{name:mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name,time:fmt(lt),first:prev==null,pb:isPB&&prev!=null,rank:null};
+  lastRun=mode==='test'?null:{name:mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name,time:fmt(lt),first:prev==null,pb:isPB&&prev!=null,best:prev!=null&&!isPB?fmt(prev):null,rank:null};
   banner.innerHTML='<b>'+(mode==='main'&&last?'All levels complete!':cur&&cur.tut?'Tutorial complete!':'Level complete!')+'</b><small class="lvn">'+esc(mode==='main'?'Level '+(lvl+1)+' \u00b7 '+lvName(lvl):cur.name)+'</small><small>'+txt+'</small><div id="lbbox"></div><div class="bb"><button data-b="again">Play again (R)</button>'+(uid&&mode!=='test'&&(mode==='main'||(cur&&/^cm_/.test(cur.id)))?'<button data-b="rshare" title="Copy a link to your best replay of this level">Share replay</button>':'')+(mode!=='test'?'<button data-b="card" title="Copy a picture of this run to the clipboard">Copy card</button>':'')+'<button class="pri" data-b="next">'+(last?(mode==='test'&&!cur.tut?'Back to editor':'Main menu'):'Next level')+' (Enter)</button></div>';
   banner.style.opacity=1;
   if(mode==='main'||cmk){const f=cmk?cfk(cmk):fld(lvl);(async()=>{await lbPut(patch);if(isPB)ghPutAll();const raw=await lbTop(f,50),rawN=raw?raw.length:0,rawMe=!!(raw&&raw.some(r=>r.me)),all=lbMerge(raw,patch[f]);let rows=all;if(all){rows=all.slice(0,8);const mi=all.findIndex(r=>r.me);if(mi>=8){let rk=mi+1;if(rawN>=50&&!rawMe){const r=await rankOf(f,patch[f],uid);rk=r&&r.rank?r.rank:'50+'}rows.push(Object.assign({},all[mi],{rank:rk}))}}const mi2=all?all.findIndex(r=>r.me):-1;if(lastRun&&mi2>=0)lastRun.rank=mi2+1;const el=document.getElementById('lbbox');if(el&&state==='win')el.innerHTML='<div class="lbt">Leaderboard</div>'+lbHTML(rows)})()}
@@ -1687,7 +1687,7 @@ function endRun(done){
   state='over';timer=1e9;
   if(duel){dMyEnd();return}
   const shot=snapShot(),d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
-  lastRun=mp?null:{endless:true,shot,done:!!done,name:curWeekly?'Weekly challenge':'Endless \u00b7 '+(curSet?'set seed ':'seed ')+curSeed,big:d+' m',nb:nb&&d>0,time:fmt(lt)};
+  lastRun=mp?null:{endless:true,shot,done:!!done,name:curWeekly?'Weekly challenge':'Endless \u00b7 '+(curSet?'set seed ':'seed ')+curSeed,big:d+' m',nb:nb&&d>0,best:!nb&&prevBest>0?prevBest+' m':null,time:fmt(lt)};
   if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
   banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="card" title="Copy a picture of this run to the clipboard">Copy card</button><button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
@@ -1888,10 +1888,11 @@ async function cardImage(o){
   if(bc){g.imageSmoothingEnabled=false;g.drawImage(bc,-cs/2,-cs/2,cs,cs)}else{g.fillStyle=skinCol(sk.p);g.fillRect(-cs/2,-cs/2,cs,cs);g.fillStyle=skinCol(sk.s);g.fillRect(cs/2-24,-cs/2+14,17,cs-28)}}
   g.restore();
   g.textBaseline='alphabetic';g.fillStyle='#8a8fb0';g.font='700 30px '+F;g.fillText('BOXRUN.FUN',70,86);
-  g.fillStyle='#fff';g.font='800 40px '+F;g.fillText(o.name,70,170);
+  const colW=o.shot?W-520-60-70-40:W-140;let tf=40;g.font='800 '+tf+'px '+F;while(g.measureText(o.name).width>colW&&tf>20){tf-=2;g.font='800 '+tf+'px '+F}g.fillStyle='#fff';g.fillText(o.name,70,170);
   g.fillStyle='#2fd37a';g.font='800 '+(o.shot?(o.big.length>6?100:120):(o.big.length>8?118:150))+'px '+F;g.fillText(o.big,70,340);
-  g.fillStyle='#cfd3ee';g.font='700 38px '+F;g.fillText(o.line1,70,410);
-  if(o.line2){g.fillStyle='#5ec8ff';g.font='700 34px '+F;g.fillText(o.line2,70,462)}
+  const fit=(t,px,w)=>{let f=px;g.font='700 '+f+'px '+F;while(g.measureText(t).width>w&&f>16){f-=2;g.font='700 '+f+'px '+F}};
+  g.fillStyle='#cfd3ee';fit(o.line1,38,colW);g.fillText(o.line1,70,410);
+  if(o.line2){const np=/^Not a/.test(o.line2);g.fillStyle=np?'#ffb454':'#5ec8ff';fit(o.line2,32,colW);g.fillText(o.line2,70,462)}
   g.fillStyle='#ffffff55';g.font='600 26px '+F;g.fillText('Can you beat it? boxrun.fun',70,H-50);
   return new Promise(r=>c.toBlob(r,'image/png'))}
 // the card is copied to the clipboard the moment the button is pressed (the image is handed over as a promise so the browser still counts it as part of the click)
@@ -1903,10 +1904,10 @@ function copyCard(make,file){
 function shareRun(){if(lastRun)copyCard(runBlob,lastRun.endless?'boxrun-endless.png':'boxrun-run.png')}
 async function runBlob(){
   const r=lastRun,me0=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
-  if(r.endless){const blob=await cardImage({skin:pb.skin,name:r.name,big:r.big,shot:r.shot,cap:r.done?'Track complete!':'Where it ended',line1:(me0?me0+' \u00b7 ':'')+(r.done?'Cleared the track':'Time '+r.time),line2:r.nb?'New personal best!':''});
+  if(r.endless){const blob=await cardImage({skin:pb.skin,name:r.name,big:r.big,shot:r.shot,cap:r.done?'Track complete!':'Where it ended',line1:(me0?me0+' \u00b7 ':'')+(r.done?'Cleared the track':'Time '+r.time),line2:r.nb?'New personal best!':(r.best?'Not a personal best \u00b7 best '+r.best:'')});
     return blob}
   const me=(uid&&usersNS&&await usersNS.profiles([uid]).then(p=>p[uid]&&p[uid].name).catch(()=>null))||'';
-  const l2=r.first?'First clear!':r.pb?'New personal best!':'';
+  const l2=r.first?'First clear!':r.pb?'New personal best!':r.best?'Not a personal best \u00b7 best '+r.best:'';
   const blob=await cardImage({skin:pb.skin,name:r.name,big:r.time,line1:(me?me+' \u00b7 ':'')+'Level time',line2:(r.rank?'#'+r.rank+' on the leaderboard'+(l2?' \u00b7 ':''):'')+l2});
   return blob}
 function shareProfile(id){copyCard(()=>profBlob(id),'boxrun-profile.png')}
