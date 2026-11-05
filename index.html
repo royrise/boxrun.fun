@@ -478,7 +478,12 @@ function show(id){newHint();if(mp&&!mp.inGame&&!mp.nav&&id!=='mp')mpLeave();
   try{if(id!=='profile')gateNote=''}catch(e){}
   if(id==='main')navStack=[];else if(!navBack&&lastPanel!==id){navStack.push(lastPanel);if(navStack.length>30)navStack.shift()}
   lastPanel=id;resume={stack:navStack.slice(),panel:id};
-  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','duel','mp','mpmenu','lbmenu','quests','settings'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id)}
+  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','duel','mp','mpmenu','lbmenu','quests','settings'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id);alignHead();requestAnimationFrame(alignHead);setTimeout(alignHead,350)}
+// when a panel starts at the very top of the screen (phones), its heading is lined up with the back arrow instead of sitting beside it at a different height
+function alignHead(){try{const b=document.getElementById('topback');if(!b||b.hidden)return;const br=b.getBoundingClientRect();document.querySelectorAll('#menu .panel h2').forEach(h=>{h.style.marginTop=''});
+  const p=[...document.querySelectorAll('#menu .panel')].find(x=>!x.hidden),h=p&&p.querySelector('h2');if(!h)return;const hr=h.getBoundingClientRect();if(!hr.height||hr.top>br.bottom)return;
+  const z=hr.height/(h.offsetHeight||1)||1,d=(br.top+br.height/2)-(hr.top+hr.height/2);if(d>1)h.style.marginTop=(d/z)+'px'}catch(e){}}
+addEventListener('resize',()=>alignHead());
 function navPrev(){if(navStack.length){const prev=navStack.pop(),keep=navStack.slice();navBack=true;openPanel(prev);navBack=false;navStack=keep;resume={stack:keep.slice(),panel:prev}}else show('main')}
 function openPanel(id){   // show a panel again, refreshing the ones whose content can change
   try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
