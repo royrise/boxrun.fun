@@ -451,7 +451,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;flushNotes();lp=null;crumb={};fell={};bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
+function respawn(){if(state==='win'||state==='menu')return;flushNotes();lp=null;if(!cp.k){crumb={};fell={};mvT=0}bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;mvT+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
@@ -597,13 +597,13 @@ function finish(){
 const keys={left:false,right:false};
 const CDN=.5;   // seconds per count (way quicker than a real second)
 var duel=null;
-let inHold={l:0,r:0},eSh={x:0,y:0},cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
+let mvT=0,inHold={l:0,r:0},eSh={x:0,y:0},cd=0,goT=0,crumb={},fell={},spec=false,specInfo=null,cpT=0,movers=[],portals={},bcd=0,bturn=0,tpLock=false,tpK=0,tpFrom={x:0,y:0};
 function load(n,keep){endPractice();
   lvl=n;grid=mode==='endless'&&cur.gen?cur.gen.g:(mode==='main'?LEVELS[n]:cur.rows).map(r=>r.split(''));
   shapes=(mode==='main'?LSH[n]:cur.sh)||{};
   layers=(mode==='main'?null:cur.ov)||{};
   texts=mode==='main'?[]:txLabels(cur.tx);
-  crumb={};fell={};movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?(keep?1:3)*CDN:0;goT=0;eSh.x=eSh.y=0;inHold.l=inHold.r=0;
+  crumb={};fell={};mvT=0;movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?(keep?1:3)*CDN:0;goT=0;eSh.x=eSh.y=0;inHold.l=inHold.r=0;
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y])}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
@@ -666,7 +666,7 @@ function sat(px,py,a,poly,mtv){
   }
   return mtv?[bn[0]*(best+1e-4),bn[1]*(best+1e-4)]:true;
 }
-const moverPolys=()=>movers.map(m=>{const d=m.d*(.5-.5*Math.cos(lt*1.6*2/Math.sqrt(m.d*2))),x=m.v?m.x:m.x+d,y=m.v?m.y+d:m.y;return [[x,y],[x+1,y],[x+1,y+1],[x,y+1]]});
+const moverPolys=()=>movers.map(m=>{const d=m.d*(.5-.5*Math.cos(mvT*1.6*2/Math.sqrt(m.d*2))),x=m.v?m.x:m.x+d,y=m.v?m.y+d:m.y;return [[x,y],[x+1,y],[x+1,y+1],[x,y+1]]});
 function touching(px,py,a,types){
   const x0=Math.floor(px-1),x1=Math.floor(px+1),y0=Math.floor(py-1),y1=Math.floor(py+1);
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)
@@ -757,12 +757,15 @@ function update(dt){
   update0(dt);
   lp=(state==='play'&&!spec&&p)?{x:p.x,y:p.y}:null;
 }
+// crumbling tiles: .4 s after you step on one it falls, and it grows back 10 s later (this runs while you are dead too)
+function crTick(dt){for(const q in crumb){crumb[q]-=dt;if(crumb[q]<=0){fell[q]=10;delete crumb[q]}}for(const q in fell){fell[q]-=dt;if(fell[q]<=0)delete fell[q]}}
 function update0(dt){
   t+=dt;
   if(state==='menu')return;
   if(spec)cd=0;
   if(goT>0)goT-=dt;
   if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.5}if(hudOn)document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
+  if(state==='play'||state==='dead'){mvT+=dt;crTick(dt)}
   if(state==='play'){lt+=dt;segT+=dt;gt+=dt;total+=dt;lt=Math.round(lt*1e3)/1e3;segT=Math.round(segT*1e3)/1e3;gt=Math.round(gt*1e3)/1e3;total=Math.round(total*1e3)/1e3;lastA=p.a;crPlay(dt)}
   if(hudOn){document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
   document.getElementById('esub').textContent=duel?'1v1 Duel':mp&&mp.inGame?'Multiplayer':mode==='endless'?(spec?'Replay':curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
@@ -810,7 +813,6 @@ function update0(dt){
       if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){bump('tps');tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
     if(gt-lastRec>=1/30){rec.push(mode==='endless'?[gt,p.x-eSh.x,p.y-eSh.y,p.a]:[gt,p.x,p.y,p.a]);lastRec=gt}
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),ck=fx+','+fy;
-      for(const q in crumb){crumb[q]-=dt;if(crumb[q]<=0){fell[q]=true;delete crumb[q]}}
       if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
     if(touching(p.x,p.y,p.a,['L'])){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}}
     else if(touchGoal()){if(mode==='endless'){if(!mp)endRun(true)}else finish()}
