@@ -1053,7 +1053,7 @@ const COLORS=[
  {id:'orchid',n:'Orchid',h:'#da70d6',t:'Clear 5 community levels',u:S=>S.ach.explorer},
  {id:'amber',n:'Amber',h:'#ffbf00',t:'Share a level with the community',u:S=>S.ach.creator},
  {id:'silver',n:'Silver',h:'#c0c0c8',t:'Watch 3 replays',u:S=>S.ach.fan},
- {id:'crimson',n:'Crimson',h:'#c0143c',t:'Finish the weekly challenge',u:S=>S.ach.weekly},
+ {id:'crimson',n:'Crimson',h:'#c0143c',t:'Reach 500 m in the weekly challenge',u:S=>S.ach.weekly},
  {id:'prism',n:'Prismatic',h:'rainbow',t:'Finish a full run of all 25 levels',u:S=>S.run}
 ];
 const skinStats=()=>({comp:pb.completions||0,dead:pb.deaths||0,clear:LEVELS.filter((_,i)=>pb.levels[LID[i]]!=null).length,tut:pb.levels.tutorial!=null,run:pb.run!=null,ach:pb.ach||{}});
@@ -1139,7 +1139,7 @@ const ACH=[
  {id:'explorer',n:'Explorer',d:'Clear 5 community levels',v:commClears,max:5,c:'orchid'},
  {id:'creator',n:'Creator',d:'Share a level with the community',v:()=>pb.st.shares||0,max:1,c:'amber'},
  {id:'fan',n:'Fan',d:'Watch 3 replays',v:()=>pb.st.replays||0,max:3,c:'silver'},
- {id:'weekly',n:'Weekly Warrior',d:'Finish the weekly challenge',v:()=>pb.st.weekly||0,max:1,c:'crimson'},
+ {id:'weekly',n:'Weekly Warrior',d:'Reach 500 m in the weekly challenge',v:()=>pb.st.wkBest||0,max:500,c:'crimson'},
   {id:'centurion',n:'Centurion',d:'Complete 100 levels',v:()=>pb.completions||0,max:100},
   {id:'flagship',n:'Flag Bearer',d:'Touch 100 checkpoints',v:()=>pb.st.cps||0,max:100},
   {id:'allclear',n:'Completionist',d:'Clear all 25 levels',v:()=>skinStats().clear,max:25}
@@ -1735,7 +1735,7 @@ function endRun(done){
   if(duel){dMyEnd();return}
   const shot=snapShot(),d=Math.floor(score),prevBest=pb.endBest||0,nb=d>prevBest;
   lastRun=mp?null:{endless:true,shot,done:!!done,name:curWeekly?'Weekly challenge':'Endless \u00b7 '+(curSet?'set seed ':'seed ')+curSeed,big:d+' m',nb:nb&&d>0,best:!nb&&prevBest>0?prevBest+' m':null,time:fmt(lt)};
-  if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly&&done)bump('weekly');checkAch();savePB();
+  if(nb)pb.endBest=d;pb.endRuns=(pb.endRuns||0)+1;if(curWeekly){pb.st.wkBest=Math.max(pb.st.wkBest||0,d||0);if(done)bump('weekly')}checkAch();savePB();
   banner.innerHTML='<b>'+(done?'Track complete!':'Run over')+'</b><small class="lvn">'+(curWeekly?'Weekly challenge \u00b7 ':'Endless \u00b7 ')+(curWeekly?'':curSet?'set seed ':'random seed ')+esc(curSeed)+' '+seedCopy(curSeed)+'</small><small>Distance '+d+' m'+(nb&&d>0?' \u00b7 New best!':' \u00b7 Best '+Math.max(d,prevBest)+' m')+'<br>Time '+fmt(lt)+'</small><div class="bb"><button data-b="again">'+(curWeekly?'Retry':curSet?'Retry seed':'New seed')+' (R)</button>'+(curSet||curWeekly?'<button class="pri" data-b="new">'+(curWeekly?'Weekly board':'Change seed')+' (Enter)</button>':'')+'<button data-b="card" title="Copy a picture of this run to the clipboard">Copy card</button><button data-b="menu">Menu</button></div>';
   banner.style.opacity=1;
   if(curWeekly)weeklyDone(d,done||!p?null:[p.x-eSh.x,p.y-eSh.y]);else if(!curSet&&d>0)endBoardDone(d);
