@@ -871,12 +871,12 @@ function draw(){
     }
   }
   const gp=(state==='menu'||spec||pb.ghostOn===false)?null:ghostAt();
-  if(gp){const gs=SIZE*U;ctx.save();ctx.translate(gp[0]*U,gp[1]*U);ctx.rotate(gp[2]);ctx.globalAlpha=.4*SET.gop;ctx.fillStyle='#fff';ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.globalAlpha=.8*SET.gop;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle='#fff';ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8);ctx.restore()}
+  if(gp){const gs=SIZE*U;ctx.save();ctx.translate(gp[0]*U,gp[1]*U);ctx.rotate(gp[2]);ctx.globalAlpha=.4*SET.gop;ctx.fillStyle='#fff';ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.globalAlpha=.8*SET.gop;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(-gs/2+.75,-gs/2+.75,gs-1.5,gs-1.5);ctx.fillStyle='#fff';ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8);ctx.restore()}
   const GH=duel&&duel.gh&&!duel.done?{d:duel.gh}:mp&&mp.inGame&&mp.gh?mp.gh:null;
   if(GH){const nw=performance.now(),gs=SIZE*U;for(const id in GH){const o=GH[id],c=mpGhostPos(o,nw),sk=o.sk||{p:'sky',s:'navy'};
     ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(c[2]);ctx.globalAlpha=.6;
     const bc=sk.b?crCan(sk.b,sk.p,sk.s):null;
-    if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s,1);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
+    if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-gs/2,-gs/2,gs,gs);ctx.imageSmoothingEnabled=sm;ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1;ctx.strokeRect(-gs/2+.5,-gs/2+.5,gs-1,gs-1)}else{ctx.fillStyle=skinCol(sk.p);ctx.fillRect(-gs/2,-gs/2,gs,gs);ctx.fillStyle=skinCol(sk.s,1);ctx.fillRect(gs/2-7,-gs/2+4,5,gs-8)}
     ctx.restore();ctx.save();ctx.translate((c[0]+eSh.x)*U,(c[1]+eSh.y)*U);ctx.rotate(p.a+Math.PI/2);ctx.globalAlpha=.9;ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.fillStyle='#fff';ctx.strokeText(o.n,0,-gs/2-8);ctx.fillText(o.n,0,-gs/2-8);ctx.restore()}}
   if(curWeekly&&mode==='endless'&&wkMarks.length&&p&&state!=='menu'&&cur&&cur.gen){
     const G=cur.gen.g,Gs=cur.gen.sh,N=cur.N,safe=(x,y)=>{if(x<0||y<0||x>=N||y>=N)return false;const c=G[y][x];return c!=='L'&&c!=='#'&&!Gs[x+','+y]};
@@ -897,7 +897,7 @@ function draw(){
   const s=SIZE*U;
   {
   const bc=pb.skin.b&&state!=='dead'?crCan(pb.skin.b,pb.skin.p,pb.skin.s):null;
-  if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm}else{
+  if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm;ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1;ctx.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1)}else{
   ctx.fillStyle=state==='dead'?'#ff4d4d':skinCol(pb.skin.p);ctx.fillRect(-s/2,-s/2,s,s);
   ctx.fillStyle=skinCol(pb.skin.s,1);ctx.fillRect(s/2-7,-s/2+4,5,s-8)}} // front marker
   ctx.restore();
