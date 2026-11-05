@@ -751,11 +751,11 @@ function update0(dt){
   if(state==='menu')return;
   if(spec)cd=0;
   if(goT>0)goT-=dt;
-  if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.5}document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
-  if(state==='play'){lt+=dt;segT+=dt;gt+=dt;total+=dt;lastA=p.a;crPlay(dt)}
-  document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
+  if(cd>0&&state==='play'){cd-=dt;if(cd<=0){cd=0;goT=.5}if(hudOn)document.getElementById('time').textContent=fmt1(0);return}   // 3 2 1: nothing moves and the clock waits
+  if(state==='play'){lt+=dt;segT+=dt;gt+=dt;total+=dt;lt=Math.round(lt*1e3)/1e3;segT=Math.round(segT*1e3)/1e3;gt=Math.round(gt*1e3)/1e3;total=Math.round(total*1e3)/1e3;lastA=p.a;crPlay(dt)}
+  if(hudOn){document.getElementById('time').textContent=mode==='endless'?Math.floor(score)+' m':(state==='win'?fmt:fmt1)(lt);
   document.getElementById('esub').textContent=duel?'1v1 Duel':mp&&mp.inGame?'Multiplayer':mode==='endless'?(spec?'Replay':curWeekly?'Weekly':curSet?'Set seed':'Random seed')+' \u00b7 '+curSeed:extGhost?(spec?'Replay \u00b7 ':'Racing ')+extGhost.name:'';
-  nextUpd();
+  nextUpd()}
   if(spec){
     const idp=document.getElementById('inpd');inHold.l-=dt;inHold.r-=dt;
     if(state==='play'){const g=ghostAt();if(g){
@@ -763,13 +763,13 @@ function update0(dt){
       p.a=g[2];
       const A=ghost[gi],B=ghost[gi+1];if(A&&B&&!B[4]&&B[0]>A[0]){const rate=(B[3]-A[3])/(B[0]-A[0]);if(Math.abs(rate)<TURN*1.4){if(rate>TURN*.2)inHold.r=.13;else if(rate<-TURN*.2)inHold.l=.13}}   // the replay has no key log, so the keys are worked out from how fast the cube is turning
     }const end=ghost&&ghost.length?ghost[ghost.length-1][0]:0;if(gt>end+.6)specEnd()}
-    idp.hidden=state!=='play';idp.querySelector('[data-k=l]').classList.toggle('on',inHold.l>0);idp.querySelector('[data-k=r]').classList.toggle('on',inHold.r>0);
+    if(hudOn){idp.hidden=state!=='play';idp.querySelector('[data-k=l]').classList.toggle('on',inHold.l>0);idp.querySelector('[data-k=r]').classList.toggle('on',inHold.r>0);}
     return}
-  document.getElementById('inpd').hidden=true;
+  if(hudOn)document.getElementById('inpd').hidden=true;
   if(state==='play'){
     if(movers.length&&touching(p.x,p.y,p.a,['#'])&&!resolve()){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}return}
     if(bturn>0){const r=Math.min(bturn,dt*Math.PI/.4),o={x:p.x,y:p.y,a:p.a};p.a+=r;if(touching(p.x,p.y,p.a,['#'])&&!resolve()){p.x=o.x;p.y=o.y;p.a=o.a+bturn;if(touching(p.x,p.y,p.a,['#'])){p.a=o.a}else{slideA+=bturn;bturn=0}}else{bturn-=r;slideA+=r}}
-    const turn=(keys.right?1:0)-(keys.left?1:0);
+    const turn=(pk.right?1:0)-(pk.left?1:0);
     // turning: if rotating would put a corner into a wall, push out; if that fails, cancel the turn
     if(turn){
       const o={x:p.x,y:p.y,a:p.a};
@@ -894,10 +894,24 @@ function draw(){
     ctx.save();ctx.globalAlpha=go?Math.max(0,goT/.5):1;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 '+sz+'px system-ui,sans-serif';ctx.lineWidth=sz*.08;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.fillStyle=go?'#2fd37a':'#fff';
     const tx=go?'GO!':String(n);ctx.strokeText(tx,W/2,118);ctx.fillText(tx,W/2,118);ctx.restore()}
 }
-let last=performance.now();
+// Fixed 1 ms simulation step: every frame catches the game up in whole milliseconds, so a run plays out the same on a 60, 120 or 240 Hz screen
+// and every time to the millisecond is possible. Key presses carry their own timestamps and take effect on the exact millisecond they happened.
+let last=performance.now(),simMs=0,hudOn=true;
+const pk={left:false,right:false},kq=[];
+const keyPush=ts=>kq.push([ts,!!keys.left,!!keys.right]);
+function keyReset(){keys.left=keys.right=false;pk.left=pk.right=false;kq.length=0}
 function loop(now){
-  const dt=Math.min(.05,(now-last)/1000);last=now;
-  update(dt);draw();requestAnimationFrame(loop);
+  if(!simMs)simMs=now;
+  if(now-simMs>50)simMs=now-50;   // a long stall slows the game down instead of jumping it forward
+  const n=Math.floor(now-simMs);
+  for(let i=0;i<n;i++){
+    simMs+=1;
+    while(kq.length&&kq[0][0]<=simMs){const q=kq.shift();pk.left=q[1];pk.right=q[2]}
+    hudOn=i===n-1;
+    update(.001);
+  }
+  hudOn=true;last=now;
+  draw();requestAnimationFrame(loop);
 }
 const map={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right'};
 addEventListener('keydown',e=>{
@@ -920,13 +934,13 @@ addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='r'&&!e.repeat&&spec&&specInfo&&specInfo.ref==='e'){banner.style.opacity=0;banner.innerHTML='';watchEndless(specInfo.seed,specInfo.name,specInfo.arr);return}
   if(e.key.toLowerCase()==='r'&&!e.repeat&&mode==='endless'){if(duel||mp)return;if(state==='play'||state==='dead')endRetry();return}
   if(e.key.toLowerCase()==='r'&&!e.repeat){if(state==='play'||state==='dead'){if(state==='play')playTick(segT);if(state==='play'&&lt>3&&mode!=='test'&&!spec&&!practice){deaths++;pb.deaths=(pb.deaths||0)+1;savePB()}load(lvl,true);attempts++}return}
-  if(map[e.key]){keys[map[e.key]]=true;e.preventDefault()}
+  if(map[e.key]){keys[map[e.key]]=true;keyPush(e.timeStamp);e.preventDefault()}
 });
-addEventListener('keyup',e=>{if(map[e.key])keys[map[e.key]]=false});
+addEventListener('keyup',e=>{if(map[e.key]){keys[map[e.key]]=false;keyPush(e.timeStamp)}});
 const touches=new Map();
-function sync(){let l=false,r=false;touches.forEach(v=>v?r=true:l=true);keys.left=l;keys.right=r;tbl.classList.toggle('on',l);tbr.classList.toggle('on',r)}
-addEventListener('pointerdown',e=>{touches.set(e.pointerId,e.clientX>W/2);sync()});
-['pointerup','pointercancel'].forEach(n=>addEventListener(n,e=>{touches.delete(e.pointerId);sync()}));
+function sync(ts){let l=false,r=false;touches.forEach(v=>v?r=true:l=true);keys.left=l;keys.right=r;keyPush(ts||performance.now());tbl.classList.toggle('on',l);tbr.classList.toggle('on',r)}
+addEventListener('pointerdown',e=>{touches.set(e.pointerId,e.clientX>W/2);sync(e.timeStamp)});
+['pointerup','pointercancel'].forEach(n=>addEventListener(n,e=>{touches.delete(e.pointerId);sync(e.timeStamp)}));
 let mode='main',cur=null,shapes={},layers={},texts=[];
 if(!pb.cl)pb.cl={};if(!pb.cg)pb.cg={};if(!pb.ach)pb.ach={};if(!pb.st)pb.st={};
 // the tutorial became Level 1: shift saved levels/ghosts down one and retire old-format run times
@@ -2326,7 +2340,7 @@ function openEditor(id){
     if(dr&&Array.isArray(dr.rows)&&dr.rows.length&&dr.rows.every(r=>typeof r==='string'&&r.length===dr.rows[0].length)){
       eg=dr.rows.map(r=>r.split(''));eshp=dr.sh||{};eov=dr.ov||{};etx=dr.tx||{};esa=dr.sa|0;document.getElementById('ename').value=String(dr.name||'My level').slice(0,24);eDirty=true;eRestored=true}}
   document.getElementById('ew').value=eg[0].length;document.getElementById('eh').value=eg.length;
-  keys.left=keys.right=false;touches.clear();banner.style.opacity=0;banner.innerHTML='';
+  keyReset();touches.clear();banner.style.opacity=0;banner.innerHTML='';
   state='menu';menuEl.hidden=true;editorEl.hidden=false;markTool();eStat(eRestored?'Restored your unsaved changes. Press Save to keep them.':(store.ok?'':'Warning: this browser is blocking saving. Use Export to keep levels.'));eRestored=false;eRender();
 }
 function eMovers(cs){
