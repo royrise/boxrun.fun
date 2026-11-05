@@ -59,6 +59,7 @@ canvas{display:block;width:100%;height:100%}#c{position:fixed;left:0;top:0}
 .crgrid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:260px;overflow:auto;padding:4px}
 .panel button.crt{width:62px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;border:2px solid var(--rc,#4a4d63)}.crt.on{background:#3d4166;outline:2px solid #fff}.crt.sh{box-shadow:0 0 8px #ffd24a99}
 .crtag{font-size:13px;opacity:.85}
+.panel button.crt.stk{position:relative;margin:0 8px 8px 0;box-shadow:3px 3px 0 0 #1c1e30,3px 3px 0 1px var(--rc,#4a4d63),6px 6px 0 0 #14151f,6px 6px 0 1px var(--rc,#4a4d63)}.crt .cn{position:absolute;top:-7px;right:-7px;min-width:20px;padding:1px 5px;border-radius:10px;background:#fff;color:#111;font-size:11px;font-weight:800;line-height:16px;text-align:center;z-index:2}
 .crodds{display:flex;flex-direction:column;gap:3px;max-width:260px;margin:4px auto;font-size:14px}.crodds div{display:flex;justify-content:space-between;gap:12px;padding:3px 10px;border-radius:6px;background:#12121a99}.crodds b{font-variant-numeric:tabular-nums}
 .crhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}.crhead .sec{margin:0}
 .crsw{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;user-select:none}.crsw input{display:none}.crsw span{width:38px;height:22px;border-radius:12px;background:#3a3d55;position:relative;transition:background .15s}.crsw span::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}.crsw input:checked+span{background:#2fd37a}.crsw input:checked+span::after{left:19px}
@@ -2580,8 +2581,10 @@ function crRender(){
   crCopies=crItems.slice().sort((a,b)=>crRank(b[0])-crRank(a[0])||b[1]-a[1]||a[0].localeCompare(b[0])||a[2]-b[2]).slice(0,400);
   document.getElementById('crcount').textContent='\u00b7 '+(crItems.length+1)+' skin'+(crItems.length?'s':'');
   idx.innerHTML='<div class="crgrid"><button class="crt idx'+(eq?'':' on')+'" data-ce="-1" style="--rc:'+rc(cr)+'" title="Default \u00b7 Common"><svg viewBox="0 0 60 60" width="48" height="48"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s,1)+'"/></svg><span class="nm">Default</span><span class="ct">Common</span></button>'
-   +crCopies.map((it,i)=>{const ra=crRarOf(it[0]),r=crRar(ra),w=eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2];
-     return '<button class="crt idx'+(w?' on':'')+(it[1]?' sh':'')+'" data-ce="'+i+'" style="--rc:'+rc(r)+'" title="'+esc(crName(it[0])+' \u00b7 '+r[1]+(it[1]?' \u00b7 Shiny':''))+'">'+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(crName(it[0]))+'</span><span class="ct">'+(it[1]?'\u2726':'')+'</span></button>'}).join('')+'</div>'
+   +(()=>{const grp=[],at={};   // identical skins (same design, same shiny) share one stacked tile
+     crCopies.forEach((it,i)=>{const key=it[0]+'|'+(it[1]?1:0);let g=at[key];if(!g){g=at[key]={i,it,n:0,w:false};grp.push(g)}g.n++;if(eq&&eq.k===it[0]&&!!eq.s===!!it[1]&&eq.n===it[2]){g.w=true;g.i=i;g.it=it}});
+     return grp.map(g=>{const it=g.it,ra=crRarOf(it[0]),r=crRar(ra);
+       return '<button class="crt idx'+(g.w?' on':'')+(it[1]?' sh':'')+(g.n>1?' stk':'')+'" data-ce="'+g.i+'" style="--rc:'+rc(r)+'" title="'+esc(crName(it[0])+' \u00b7 '+r[1]+(it[1]?' \u00b7 Shiny':'')+(g.n>1?' \u00b7 x'+g.n:''))+'">'+(g.n>1?'<span class="cn">x'+g.n+'</span>':'')+crImg({k:it[0],s:it[1]},pb.skin.p,pb.skin.s,48)+'<span class="nm">'+esc(crName(it[0]))+'</span><span class="ct">'+(it[1]?'\u2726':'')+'</span></button>'}).join('')})()+'</div>'
    +(crItems.length>400?'<small>Showing your 400 rarest.</small>':'');
 }
 async function crOpen(n){
