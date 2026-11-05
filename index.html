@@ -27,11 +27,16 @@ canvas{display:block;width:100%;height:100%}#c{position:fixed;left:0;top:0}
 #menu:not([hidden])~#tb,#editor:not([hidden])~#tb{display:none!important}
 #tb i.on{background:rgba(94,200,255,.55)}}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);max-width:90vw;background:#22243a;border:1px solid #5ec8ff;color:#eef;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;word-break:break-all;text-align:center}#toast.on{opacity:1}
-#topback{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:7;width:46px;height:46px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#2a2d44;color:#eef;border:1px solid #4a4d63;cursor:pointer}#topback[hidden]{display:none}
+#topback{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:7;width:46px;height:46px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(20,20,32,.6);color:#fff;border:1px solid rgba(255,255,255,.25);cursor:pointer}#topback[hidden]{display:none}
 #askm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65)}#askm div{background:#22243a;border:1px solid #4a4d63;border-radius:14px;padding:20px 22px;max-width:320px;text-align:center;color:#eef;font-size:15px}#askm p{margin:0 0 16px}#askm button{font:inherit;font-size:14px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:8px 14px;margin:0 5px;cursor:pointer}#askm .pri{background:#1f6fb5;border-color:#5ec8ff}
 #mn,#rt{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:rgba(20,20,32,.6)!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:12px!important;color:#fff!important;font-size:26px!important;line-height:1;padding:0!important}
 #mn{left:12px}#rt{left:66px}
-@media (pointer:coarse){#mn,#rt{width:60px;height:60px;font-size:34px!important;border-radius:16px!important}#rt{left:84px}#mn{left:14px}#rt svg{width:34px;height:34px}#mn svg{width:30px;height:30px}}
+#edback{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:8;width:46px;height:46px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(20,20,32,.6);color:#fff;border:1px solid rgba(255,255,255,.25);cursor:pointer}
+@media (pointer:coarse){#mn,#rt,#topback,#edback{width:60px;height:60px;font-size:34px!important;border-radius:16px!important}#rt{left:84px}#mn,#topback,#edback{left:14px}#rt svg{width:34px;height:34px}#mn svg,#topback svg,#edback svg{width:30px;height:30px}}
+/* the back arrow sits in the same top-left spot on every screen: menus, game and editor, and always above the panels */
+#menu>#topback,#topback{z-index:50!important}#topback *,#edback *{pointer-events:none}
+#etools .erow:first-child{padding-left:62px;min-height:46px}@media (pointer:coarse){#etools .erow:first-child{padding-left:78px;min-height:60px}}
+#etools .grp button[data-e=back]{display:none}
 #hud button{pointer-events:auto;font:inherit;color:var(--fg);background:var(--bar);border:0;padding:4px 10px;border-radius:8px;cursor:pointer}
 #menu{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(10,12,20,.9);color:#eef;padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px);overflow:auto}
 #menu[hidden],.panel[hidden]{display:none}
@@ -263,6 +268,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
 <div id="tb"><i id="tbl">◀</i><i id="tbr">▶</i></div>
 <div id="msg">Hold ← / → (or A / D) to turn · R restart level · G ghost on/off · touch: hold left/right side</div>
 <div id="editor" hidden>
+ <button id="edback" data-e="back" aria-label="Back"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
  <div id="etools">
   <div class="erow"><input id="ename" maxlength="24" placeholder="Level name" value="My level">
    <span class="grp"><input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
