@@ -276,7 +276,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="share" class="shareb" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="back">Back</button></span></div>
   
   <div class="erow"><span id="epal"></span></div>
-  <div class="erow"><select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="mvbar" hidden>Move distance <button id="mvm" title="Shorter">−</button> <b id="mvd">2</b> tiles <button id="mvp" title="Longer">+</button></span><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
+  <div class="erow"><span class="grp" id="ezoomg"><button data-e="zout" title="Zoom out (-)">−</button><button data-e="zfit" title="Fit the whole level (0)">Fit</button><button data-e="zin" title="Zoom in (+). The mouse wheel zooms too">+</button><button data-e="hand" id="ehand" title="Pan tool: drag to move around. You can also hold Space or use the middle mouse button">✋</button></span><select id="eshape" title="Block shape"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><button data-e="rot" id="erot" title="Rotate shape (R)">◤</button><span id="mvbar" hidden>Move distance <button id="mvm" title="Shorter">−</button> <b id="mvd">2</b> tiles <button id="mvp" title="Longer">+</button></span><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
  </div>
  <canvas id="ec"></canvas>
 </div>
@@ -2154,6 +2154,8 @@ async function showLB(field){
 const editorEl=document.getElementById('editor'),ec=document.getElementById('ec'),ex=ec.getContext('2d');
 let efill=false;const NOFILL=['S','H','V','1','2','3','sel','txt'];
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
+// editor zoom: ezoom 1 = whole level fits the screen; ecx/ecy = the tile at the centre of the view
+let ezoom=1,ecx=0,ecy=0,efit=30,ehand=false,espace=false,epan=null;
 const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['>','Wind right'],['<','Wind left'],['^','Wind up'],['v','Wind down'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
@@ -2351,7 +2353,7 @@ function openEditor(id){
       eg=dr.rows.map(r=>r.split(''));eshp=dr.sh||{};eov=dr.ov||{};etx=dr.tx||{};esa=dr.sa|0;document.getElementById('ename').value=String(dr.name||'My level').slice(0,24);eDirty=true;eRestored=true}}
   document.getElementById('ew').value=eg[0].length;document.getElementById('eh').value=eg.length;
   keyReset();touches.clear();banner.style.opacity=0;banner.innerHTML='';
-  state='menu';menuEl.hidden=true;editorEl.hidden=false;markTool();eStat(eRestored?'Restored your unsaved changes. Press Save to keep them.':(store.ok?'':'Warning: this browser is blocking saving. Use Export to keep levels.'));eRestored=false;eRender();
+  ezoom=1;state='menu';menuEl.hidden=true;editorEl.hidden=false;markTool();eStat(eRestored?'Restored your unsaved changes. Press Save to keep them.':(store.ok?'':'Warning: this browser is blocking saving. Use Export to keep levels.'));eRestored=false;eRender();
 }
 function eMovers(cs){
   const tm=performance.now()/1000;
@@ -2370,10 +2372,11 @@ let lastER=0,eHasMv=false;
 function eRender(){lastER=performance.now();eHasMv=eg.some(r=>r.some(c=>mvInfo(c)));
   const r=ec.getBoundingClientRect();ec.width=r.width*dpr;ec.height=r.height*dpr;
   ex.setTransform(dpr,0,0,dpr,0,0);
-  const rows=eg.length,cols=eg[0].length,cs=Math.min(40,(r.width-8)/cols,(r.height-8)/rows);
-  eo={x:(r.width-cs*cols)/2,y:(r.height-cs*rows)/2,cs};
+  const rows=eg.length,cols=eg[0].length,fit=Math.min(40,(r.width-8)/cols,(r.height-8)/rows);efit=fit;ezoom=Math.max(1,Math.min(ezoom,96/fit));const cs=fit*ezoom,vw=r.width/cs,vh=r.height/cs;
+  ecx=cols*cs<=r.width-8?cols/2:Math.max(vw/2-.5,Math.min(cols-vw/2+.5,ecx));ecy=rows*cs<=r.height-8?rows/2:Math.max(vh/2-.5,Math.min(rows-vh/2+.5,ecy));
+  eo={x:r.width/2-ecx*cs,y:r.height/2-ecy*cs,cs};
   for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
-    const v=eg[y][x],px=eo.x+x*cs,py=eo.y+y*cs;
+    const v=eg[y][x],px=eo.x+x*cs,py=eo.y+y*cs;if(px>r.width||py>r.height||px+cs<0||py+cs<0)continue;
     const sh=eshp[x+','+y];if(sh&&v==='G'){ex.fillStyle=ECOL['.'];ex.fillRect(px,py,cs,cs);chk(ex,px,py,cs,polyOf(x,y,sh).map(([X,Y])=>[eo.x+X*cs,eo.y+Y*cs]))}else if(sh&&SHT.includes(v)){ex.fillStyle=ECOL['.'];ex.fillRect(px,py,cs,cs);ex.fillStyle=v==='G'?'#2fd37a':v==='L'?(lavaFill(x,y,px,py,cs/44)||ECOL[v]):ECOL[v];ex.beginPath();polyOf(x,y,sh).forEach(([X,Y],i)=>{const qx=eo.x+X*cs,qy=eo.y+Y*cs;i?ex.lineTo(qx,qy):ex.moveTo(qx,qy)});ex.closePath();ex.fill()}else{ex.fillStyle=v==='L'?(lavaFill(x,y,px,py,cs/44)||ECOL[v]):ECOL[v];ex.fillRect(px,py,cs,cs)}
     if(v==='G'&&!sh)chk(ex,px,py,cs);
     if(v==='S'){ex.fillStyle='#5ec8ff';const m=cs*.15;ex.fillRect(px+m,py+m,cs-2*m,cs-2*m);
@@ -2450,6 +2453,14 @@ function setPieces(x,y,list){
   if(list.length&&list[0][1]!=='f')eshp[key]=[list[0][1],list[0][2]];else delete eshp[key];
   const rest=list.slice(1).filter(p=>p[1]!=='f');if(rest.length)eov[key]=rest;else delete eov[key];
 }
+// zoom keeps the tile under the pointer where it is
+function eZoom(f,px,py){const tx=(px-eo.x)/eo.cs,ty=(py-eo.y)/eo.cs,r=ec.getBoundingClientRect();ezoom=Math.max(1,Math.min(ezoom*f,Math.max(1,96/efit)));const cs=efit*ezoom;ecx=tx-(px-r.width/2)/cs;ecy=ty-(py-r.height/2)/cs;eRender()}
+ec.addEventListener('wheel',e=>{e.preventDefault();const q=ec.getBoundingClientRect();eZoom(Math.exp(-e.deltaY*(e.ctrlKey?.01:.0022)),e.clientX-q.left,e.clientY-q.top)},{passive:false});
+ec.addEventListener('pointerdown',e=>{if(e.button===1||espace||ehand){e.stopImmediatePropagation();e.preventDefault();ec.setPointerCapture(e.pointerId);epan={x:e.clientX,y:e.clientY,cx:ecx,cy:ecy,cs:eo.cs};ec.style.cursor='grabbing'}});
+ec.addEventListener('pointermove',e=>{if(!epan)return;e.stopImmediatePropagation();ecx=epan.cx-(e.clientX-epan.x)/epan.cs;ecy=epan.cy-(e.clientY-epan.y)/epan.cs;eRender()});
+['pointerup','pointercancel'].forEach(n=>ec.addEventListener(n,()=>{if(epan){epan=null;ec.style.cursor=ehand||espace?'grab':''}}));
+addEventListener('keydown',e=>{if(editorEl.hidden||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||''))return;if(e.code==='Space'){e.preventDefault();if(!espace){espace=true;ec.style.cursor='grab'}return}const q=ec.getBoundingClientRect();if(e.key==='+'||e.key==='='){eZoom(1.4,q.width/2,q.height/2)}else if(e.key==='-'||e.key==='_'){eZoom(1/1.4,q.width/2,q.height/2)}else if(e.key==='0'){ezoom=1;eRender()}});
+addEventListener('keyup',e=>{if(e.code==='Space'){espace=false;if(!epan)ec.style.cursor=ehand?'grab':''}});
 ec.addEventListener('pointerdown',e=>{ec.setPointerCapture(e.pointerId);if(etool==='sel'){const c=cellAt(e);if(paste){commitPaste(c);return}if(esel.has(c[0]+','+c[1])&&!(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||selAdd)){startMove(c);return}selA=selB=c;selMode=e.altKey?'sub':(e.shiftKey||e.ctrlKey||e.metaKey||selAdd)?'add':'set';eRender();return}if(efill&&!NOFILL.includes(etool)){const c=cellAt(e);eFill(c[0],c[1]);return}epaint=true;ePush();ePaint(e,true)});
 ec.addEventListener('pointerleave',()=>{if(eHover){eHover=null;eRender()}});
 ec.addEventListener('pointermove',e=>{lastCell=cellAt(e);
@@ -2472,6 +2483,7 @@ editorEl.addEventListener('click',e=>{
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
   if(paste&&['save','share','tags','test','export','back','new','resize','import'].includes(a))cancelPaste();
+  if(a==='zin'||a==='zout'||a==='zfit'||a==='hand'){if(a==='hand'){ehand=!ehand;b.classList.toggle('on',ehand);ec.style.cursor=ehand?'grab':''}else if(a==='zfit'){ezoom=1;eRender()}else{const q=ec.getBoundingClientRect();eZoom(a==='zin'?1.4:1/1.4,q.width/2,q.height/2)}return}
   if(a==='rot')eRot();
   else if(a==='selall')selAll();
   else if(a==='selcopy')selCopy();
