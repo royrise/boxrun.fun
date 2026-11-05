@@ -271,7 +271,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
  <button id="edback" data-e="back" aria-label="Back"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
  <div id="etools">
   <div class="erow"><input id="ename" maxlength="24" placeholder="Level name" value="My level">
-   <span class="grp"><input id="ew" type="number" min="6" max="40" title="Width"><span>×</span><input id="eh" type="number" min="6" max="40" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
+   <span class="grp"><input id="ew" type="number" min="6" max="100" title="Width"><span>×</span><input id="eh" type="number" min="6" max="100" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
    <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="share" class="shareb" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="back">Back</button></span></div>
   
@@ -1215,7 +1215,7 @@ function autoTags(rows,sh,ov){const j=rows.join(''),r=[],area=rows.length*rows[0
 function cleanLvl(L){
   try{
     const rows=(L.rows||[]).map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHV123a-p<>^v]/.test(r)))return null;
+    if(rows.length<3||rows.length>100||w<3||w>100||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHV123a-p<>^v]/.test(r)))return null;
     if((rows.join('').match(/S/g)||[]).length!==1||!rows.join('').includes('G'))return null;
     const sh={},s0=typeof L.sh==='string'?JSON.parse(L.sh):(L.sh||{});
     for(const k in s0){const v=s0[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)sh[k]=[v[0],v[1]|0]}
@@ -2312,7 +2312,7 @@ document.getElementById('efile').addEventListener('change',async e=>{
     const d=JSON.parse(await f.text());
     if(!d||d.game!=='boxrun.fun'&&d.game!=='cube-runner'||!Array.isArray(d.rows))throw 0;
     const rows=d.rows.map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>60||w<3||w>60||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHV123a-p<>^v]/.test(r)))throw 0;
+    if(rows.length<3||rows.length>100||w<3||w>100||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHV123a-p<>^v]/.test(r)))throw 0;
     ePush();esel=new Set();eg=rows.map(r=>r.split(''));eid=null;esa=(d.sa|0)&3;eshp={};eov=cleanOv(d.ov,rows);etx=cleanTx(d.tx,rows);
     for(const k in d.sh||{}){const v=d.sh[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)eshp[k]=[v[0],v[1]|0]}
     document.getElementById('ename').value=String(d.name||'Imported').slice(0,24);
@@ -2485,7 +2485,7 @@ editorEl.addEventListener('click',e=>{
   else if(a==='import')document.getElementById('efile').click();
   else if(a==='back'){editorEl.hidden=true;showMenu(true)}
   else if(a==='resize'){
-    const w=Math.max(6,Math.min(40,+document.getElementById('ew').value||20)),h=Math.max(6,Math.min(40,+document.getElementById('eh').value||12)),g=newGrid(w,h,false);
+    const w=Math.max(6,Math.min(100,+document.getElementById('ew').value||20)),h=Math.max(6,Math.min(100,+document.getElementById('eh').value||12)),g=newGrid(w,h,false);
     const oh=eg.length,ow=eg[0].length,ax=eanc%3,ay=(eanc/3)|0,ox=ax===0?0:ax===1?Math.floor((w-ow)/2):w-ow,oy=ay===0?0:ay===1?Math.floor((h-oh)/2):h-oh,ns={};
     for(let y=0;y<h;y++)for(let x=0;x<w;x++){const sx=x-ox,sy=y-oy;if(sx>=0&&sy>=0&&sx<ow&&sy<oh)g[y][x]=eg[sy][sx]}
     for(const k in eshp){const [sx,sy]=k.split(',').map(Number),nx=sx+ox,ny=sy+oy;if(nx>=0&&ny>=0&&nx<w&&ny<h)ns[nx+','+ny]=eshp[k]}
