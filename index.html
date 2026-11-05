@@ -1107,12 +1107,13 @@ function crCanvas(id,shiny,pc,sc){const sp=crSkin(id);if(!sp)return null;const k
   if(Object.keys(crCache).length>400)for(const q in crCache)delete crCache[q];
   crCache[k]=cv;return cv}
 // the current look of a base skin item [k,shiny,serial] in the given colour ids (rainbow is frozen to the hue at that moment)
-const crQ=css=>/^hsl\((\d+)/.test(css)?'hsl('+(Math.round(+RegExp.$1/10)*10)+',90%,60%)':css;
+const crQ=css=>css.charCodeAt(0)===104?'hsl('+((Math.round(parseInt(css.slice(4))/15)*15)%360)+',90%,60%)':css;
 const crCan=(b,p,s)=>b?crCanvas(b.k,b.s,crQ(skinCol(p)),crQ(skinCol(s,1))):null;
 const crRb=id=>colOf(id).h==='rainbow';
 const crImg=(b,p,s,px)=>{const c=crCan(b,p,s);return c?'<img src="'+c.toDataURL()+'" width="'+px+'" height="'+px+'" style="image-rendering:pixelated" alt=""'+(crRb(p)||crRb(s)?' data-cr="'+b.k+'|'+(b.s?1:0)+'|'+p+'|'+s+'"':'')+'>':''};
 // prismatic colours keep cycling in every preview that is on screen (skins page, crates, profile)
-setInterval(()=>{if(document.hidden)return;document.querySelectorAll('img[data-cr]').forEach(im=>{if(!im.offsetParent)return;const [k,sh,p,s]=im.dataset.cr.split('|'),c=crCan({k,s:+sh},p,s);if(c)im.src=c.toDataURL()});const sp=document.getElementById('skinprev');if(sp&&sp.offsetParent&&(crRb(pb.skin.p)||crRb(pb.skin.s)))sp.innerHTML=crCan(pb.skin.b,pb.skin.p,pb.skin.s)?crImg(pb.skin.b,pb.skin.p,pb.skin.s,72):'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s,1)+'"/></svg>'},120);
+let warmI=0,warmK='';function warmPrism(){const b=pb.skin.b;if(!b||!(crRb(pb.skin.p)||crRb(pb.skin.s)))return;const wk=b.k+(b.s?1:0)+pb.skin.p+pb.skin.s;if(wk!==warmK){warmK=wk;warmI=0}if(warmI>=24)return;const h=warmI++*15,H=h2=>'hsl('+(h2%360)+',90%,60%)';crCanvas(b.k,b.s,crRb(pb.skin.p)?H(h):crQ(skinCol(pb.skin.p)),crRb(pb.skin.s)?H(h+180):crQ(skinCol(pb.skin.s,1)))}
+setInterval(()=>{if(document.hidden)return;warmPrism();document.querySelectorAll('img[data-cr]').forEach(im=>{if(!im.offsetParent)return;const [k,sh,p,s]=im.dataset.cr.split('|'),c=crCan({k,s:+sh},p,s);if(c)im.src=c.toDataURL()});const sp=document.getElementById('skinprev');if(sp&&sp.offsetParent&&(crRb(pb.skin.p)||crRb(pb.skin.s)))sp.innerHTML=crCan(pb.skin.b,pb.skin.p,pb.skin.s)?crImg(pb.skin.b,pb.skin.p,pb.skin.s,72):'<svg viewBox="0 0 60 60" width="72" height="72"><rect x="8" y="8" width="44" height="44" rx="3" fill="'+skinCol(pb.skin.p)+'"/><rect x="40" y="13" width="7" height="34" fill="'+skinCol(pb.skin.s,1)+'"/></svg>'},120);
 
 function buildSkins(note){
   const S=skinStats();
