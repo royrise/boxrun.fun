@@ -2156,7 +2156,7 @@ let efill=false;const NOFILL=['S','H','V','1','2','3','sel','txt'];
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
 // editor zoom: ezoom 1 = whole level fits the screen; ecx/ecy = the tile at the centre of the view
 let ezoom=1,ecx=0,ecy=0,efit=30,ehand=false,espace=false,epan=null;
-const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['>','Wind right'],['<','Wind left'],['^','Wind up'],['v','Wind down'],['H','Moving wall (sideways)'],['V','Moving wall (up/down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
+const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['>','Wind (click again or press R to turn it)'],['H','Moving wall (click again or press R to switch sideways / up-down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
   '#':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.5"/><path d="M2 9h20M2 16h20M9 2v7M15 9v7M9 16v6" stroke="#9a9fc0" stroke-width="1" fill="none"/>'),
@@ -2184,12 +2184,15 @@ const ICONS={
   'G':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#fff"/><path d="M2 2h5v5H2zM12 2h5v5h-5zM7 7h5v5H7zM17 7h5v5h-5zM2 12h5v5H2zM12 12h5v5h-5zM7 17h5v5H7zM17 17h5v5h-5z" fill="#111"/>')
 };
 // editor hotkeys: tool -> key (arrows are the four wind tools)
-const EKEY={'#':'W','L':'L','P':'P','I':'I','.':'E','S':'S','G':'G','B':'B','M':'M','C':'C','K':'K','>':'\u2192','<':'\u2190','^':'\u2191','v':'\u2193','H':'H','V':'V','1':'1','2':'2','3':'3','sel':'Q','txt':'T'};
+const EKEY={'#':'W','L':'L','P':'P','I':'I','.':'E','S':'S','G':'G','B':'B','M':'M','C':'C','K':'K','>':'A','H':'H','1':'1','2':'2','3':'3','sel':'Q','txt':'T'};
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" data-hk="'+EKEY[t[0]]+'" title="'+t[1]+' ('+EKEY[t[0]]+')" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('')+'<button data-bucket="1" data-hk="F" title="Fill (F)" aria-label="Fill">'+ICONS.bucket+'</button>';
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
 for(const c of 'abcdefghijklmnop')ECOL[c]='#1e1e2a';
+// wind and moving walls are one tool each: click it again (or press R) to turn it, and what you place next follows
+const GRP={'>':'>v<^','H':'HV'},lastDir={'>':'>','H':'H'},grpOf=t=>'>v<^'.includes(t||'#')&&t!=='#'?'>':t==='H'||t==='V'?'H':null;
+const nextDir=g=>{const q=GRP[g];return grpOf(etool)===g?q[(q.indexOf(etool)+1)%q.length]:lastDir[g]};
 let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t;
-function markTool(){if(NOFILL.includes(etool))efill=false;document.querySelectorAll('#epal button[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===etool));const bk=document.querySelector('#epal [data-bucket]');if(bk){bk.classList.toggle('on',efill);bk.disabled=NOFILL.includes(etool)}ec.style.cursor=efill?'cell':'';const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
+function markTool(){if(NOFILL.includes(etool))efill=false;for(const g in GRP)if(grpOf(etool)===g)lastDir[g]=etool;document.querySelectorAll('#epal button[data-t]').forEach(b=>{const gb=grpOf(b.dataset.t);b.classList.toggle('on',gb?gb===grpOf(etool):b.dataset.t===etool);if(gb){const ic=ICONS[lastDir[gb]];if(b._ic!==ic){b._ic=ic;b.innerHTML=ic}}});const bk=document.querySelector('#epal [data-bucket]');if(bk){bk.classList.toggle('on',efill);bk.disabled=NOFILL.includes(etool)}ec.style.cursor=efill?'cell':'';const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
 let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
 // selection: a set of 'x,y' tiles; drag a rectangle (Shift/+ Add adds, Alt removes), then Delete clears them
 let esel=new Set(),selA=null,selB=null,selMode='set',selAdd=false;
@@ -2323,7 +2326,7 @@ document.getElementById('efile').addEventListener('change',async e=>{
     document.getElementById('ew').value=w;document.getElementById('eh').value=rows.length;eRender();draftSoon();eStat('Imported as a new level');
   }catch(err){eStat('That is not a valid boxrun.fun level file')}
 });
-function eRot(){eori=(eori+1)%4;document.getElementById('erot').textContent=GLYPH[eori]}
+function eRot(){const g=grpOf(etool);if(g){etool=nextDir(g);markTool();return}eori=(eori+1)%4;document.getElementById('erot').textContent=GLYPH[eori]}
 document.getElementById('eshape').addEventListener('change',e=>{e.target.blur();if(SHT.includes(etool)){toolShape[etool]=e.target.value;updRot();eStat(e.target.value==='f'?'':(e.target.value==='q'||e.target.value==='s')?'Each tile is split into 4. Click the quarter where it should go. Click it again to remove it.':'Partial blocks stack: place another block on the same tile to overlap them.');eRender()}});
 const cornerMode=()=>SHT.includes(etool)&&(toolShape[etool]==='q'||toolShape[etool]==='s');
 for(const [id,dd] of [['mvm',-1],['mvp',1]])document.getElementById(id).addEventListener('click',()=>{mvd=Math.max(1,Math.min(8,mvd+dd));document.getElementById('mvd').textContent=mvd});
@@ -2461,11 +2464,12 @@ ec.addEventListener('wheel',e=>{e.preventDefault();const q=ec.getBoundingClientR
 ec.addEventListener('pointerdown',e=>{if(e.button===1||espace||ehand){e.stopImmediatePropagation();e.preventDefault();ec.setPointerCapture(e.pointerId);epan={x:e.clientX,y:e.clientY,cx:ecx,cy:ecy,cs:eo.cs};ec.style.cursor='grabbing'}});
 ec.addEventListener('pointermove',e=>{if(!epan)return;e.stopImmediatePropagation();ecx=epan.cx-(e.clientX-epan.x)/epan.cs;ecy=epan.cy-(e.clientY-epan.y)/epan.cs;eRender()});
 ['pointerup','pointercancel'].forEach(n=>ec.addEventListener(n,()=>{if(epan){epan=null;ec.style.cursor=ehand||espace?'grab':''}}));
-const EK2T={w:'#',l:'L',p:'P',i:'I',e:'.',s:'S',g:'G',b:'B',m:'M',c:'C',k:'K',h:'H',v:'V',1:'1',2:'2',3:'3',q:'sel',t:'txt',arrowright:'>',arrowleft:'<',arrowup:'^',arrowdown:'v'};
+const EK2T={w:'#',l:'L',p:'P',i:'I',e:'.',s:'S',g:'G',b:'B',m:'M',c:'C',k:'K',a:'>',h:'H',1:'1',2:'2',3:'3',q:'sel',t:'txt'};
+const EK_DIR={arrowright:'>',arrowleft:'<',arrowup:'^',arrowdown:'v',v:'V'};
 addEventListener('keydown',e=>{if(editorEl.hidden||/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||''))return;
   if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='s'){e.preventDefault();document.querySelector('#etools [data-e=save]').click();return}
   if(e.ctrlKey||e.metaKey||e.altKey)return;
-  {const k=e.key.toLowerCase(),t=EK2T[k];if(t&&!e.repeat&&!(paste&&t!=='sel')){e.preventDefault();const bt=document.querySelector('#epal button[data-t="'+CSS.escape(t)+'"]');if(bt)bt.click();return}
+  {const k=e.key.toLowerCase(),t=EK2T[k];if(EK_DIR[k]&&!paste){e.preventDefault();etool=EK_DIR[k];markTool();return}if(t&&!e.repeat&&!(paste&&t!=='sel')){e.preventDefault();const bt=document.querySelector('#epal button[data-t="'+CSS.escape(t)+'"]');if(bt)bt.click();return}
    if(k==='f'&&!e.repeat){document.querySelector('#epal button[data-bucket]').click();return}
    if(k==='d'&&!e.repeat&&SHT.includes(etool)){const sel=document.getElementById('eshape'),o=[...sel.options].map(x=>x.value);sel.value=o[(o.indexOf(sel.value)+1)%o.length];sel.dispatchEvent(new Event('change'));return}
    if(k==='enter'&&!e.repeat){e.preventDefault();document.querySelector('#etools [data-e=test]').click();return}
@@ -2489,7 +2493,7 @@ function eValid(){
 editorEl.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.bucket){if(NOFILL.includes(etool))return;efill=!efill;markTool();eStat(efill?'Fill on: click a tile to fill the whole connected area with the selected tile. Click the bucket again to turn it off.':'');return}
-  if(b.dataset.t){const prev=etool;etool=b.dataset.t;if(SHT.includes(prev)&&SHT.includes(etool))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
+  if(b.dataset.t){const prev=etool,gg=grpOf(b.dataset.t);etool=gg?nextDir(gg):b.dataset.t;if(SHT.includes(prev)&&SHT.includes(etool))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(grpOf(etool)?'Click the tool again (or press R) to turn it. What you place next faces the way it shows.':etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
   if(paste&&['save','share','tags','test','export','back','new','resize','import'].includes(a))cancelPaste();
