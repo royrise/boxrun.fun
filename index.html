@@ -316,7 +316,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   </div>
   <div class="center">
     <div class="score" id="score">0</div>
-    <div class="sub"><span id="kills">0</span> KO &nbsp;·&nbsp; <span id="clock">0:00</span></div>
+    <div class="sub"><span id="kills">0</span> KO &nbsp;·&nbsp; <span id="clock">5:00</span></div>
   </div>
   <div class="right"><div id="board"></div></div>
 </div>
@@ -347,7 +347,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
 
 <div class="overlay hidden" id="over">
   <div class="panel">
-    <h2>You got boxed</h2>
+    <h2 id="overTitle">You got boxed</h2>
     <p id="overStats"></p>
     <div class="stack">
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg> Retry</button>
@@ -453,6 +453,7 @@ function genMap() {
 }
 function applyMap(m) { RECTS = m.rects; PADS = m.pads; }
 let mapTimer = MAP_TIME, nextMap = null;
+const LIFE_TIME = 300; // each life lasts 5 minutes, then the run ends and your score counts
 const PAD_ACC = 700, LAVA_DMG = 12;
 
 function rectClosest(o, x, y) {
@@ -775,6 +776,8 @@ function update(dt) {
   respawnQ = respawnQ.filter(r => r.t > 0);
   if (ents.filter(e => !e.isPlayer).length + respawnQ.length < botTarget()) respawnQ.push(newBotInfo(0.5));
 
+  if (state === 'play' && player.alive && time >= LIFE_TIME) { player.alive = false; burst(player.x, player.y, player.color, 40, 380); gameOver(true); return; }
+
   // arena reshuffle: preview the new layout for 5s, then swap
   mapTimer -= dt;
   if (mapTimer <= 5 && !nextMap) nextMap = genMap();
@@ -973,8 +976,9 @@ function standings() {
 
 function fmtTime(t) { const m = Math.floor(t / 60), s = Math.floor(t % 60); return m + ':' + String(s).padStart(2, '0'); }
 
-function gameOver() {
+function gameOver(timeUp) {
   state = 'over';
+  document.getElementById('overTitle').textContent = timeUp ? "Time's up!" : 'You got boxed';
   const score = Math.floor(player.score);
   const rank = standings().indexOf(player) + 1;
   const newBest = score > best.score;
@@ -997,7 +1001,7 @@ function updateHud() {
   if (time - player.lastHit > 1.05 || !player.alive) document.getElementById('combo').classList.remove('show');
   document.getElementById('score').textContent = Math.floor(player.score);
   document.getElementById('kills').textContent = player.kills;
-  document.getElementById('clock').textContent = fmtTime(time) + (mapTimer < 30 ? `  ·  SHIFT IN ${Math.ceil(mapTimer)}` : '');
+  document.getElementById('clock').textContent = fmtTime(Math.max(0, LIFE_TIME - time)) + (mapTimer < 30 ? `  ·  SHIFT IN ${Math.ceil(mapTimer)}` : '');
   const list = standings();
   let rows = list.slice(0, 5);
   if (!rows.includes(player)) rows = rows.slice(0, 4).concat(player);
