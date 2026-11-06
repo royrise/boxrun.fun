@@ -290,40 +290,17 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   .menu-btn.primary { border: 2px solid var(--yellow); box-shadow: 0 0 14px rgba(245,197,66,.45); }
   .tip { font-size: 11px; letter-spacing: .5px; margin-top: 6px; }
   kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; font-family: inherit; font-size: 10px; color: #fff; }
-  /* online */
-  .op { background: rgba(16,16,21,.92); overflow-y: auto; }
-  .op .panel { max-height: 100%; padding: 14px; width: min(94vw, 460px); }
-  .op h2 { font-size: clamp(22px, 6vw, 34px); margin-bottom: 8px; }
-  .op .menu-btn { width: 100%; height: 44px; font-size: 13px; }
-  .op .row2 { display: flex; gap: 8px; width: 100%; }
-  .op .row2 > * { flex: 1; min-width: 0; }
-  .op input, .op select { width: 100%; height: 44px; background: var(--panel); color: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font-family: inherit; font-size: 13px; text-transform: uppercase; user-select: text; }
-  .op select { text-transform: none; }
-  .op .note { min-height: 18px; font-size: 11px; color: var(--yellow); margin: 4px 0; }
-  .swatches { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin: 4px 0 8px; }
-  .swatches i { width: 22px; height: 22px; border-radius: 5px; border: 2px solid transparent; cursor: pointer; }
-  .swatches i.on { border-color: #fff; }
-  .list { width: 100%; max-height: 28vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
-  .list .it { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; text-align: left; }
-  .list .it.me { border-color: var(--yellow); }
-  .list .it b { color: #fff; } .list .it span { color: var(--muted); }
-  .list button.it { color: #fff; font-family: inherit; cursor: pointer; width: 100%; }
+  .lbp { background: rgba(16,16,21,.94); overflow-y: auto; }
+  .lbp .panel { width: min(94vw, 460px); max-height: 100%; padding: 14px; }
+  .lbp h2 { font-size: clamp(22px, 6vw, 34px); margin-bottom: 8px; }
+  .lbp .menu-btn { width: 100%; height: 44px; font-size: 13px; }
   .tabs { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 6px; }
   .tabs button { background: var(--panel); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-family: inherit; font-size: 10px; cursor: pointer; }
   .tabs button.on { color: #101015; background: var(--yellow); border-color: var(--yellow); }
-  #oLb .list { max-height: 44vh; }
-  #ohud { position: fixed; inset: 0; pointer-events: none; }
-  #ohud .tl { position: absolute; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; pointer-events: auto; }
-  #ohud .tc { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
-  #ohud .tr { position: absolute; top: 12px; right: 12px; }
-  #oTop { font-size: clamp(18px, 5vw, 30px); font-weight: 800; }
-  #oSub { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; margin-top: 3px; }
-  #oBan { position: absolute; top: 38%; left: 0; right: 0; text-align: center; font-size: clamp(30px, 9vw, 72px); font-weight: 900; color: var(--yellow); text-shadow: 0 0 22px rgba(0,0,0,.7); }
-  @media (max-width: 620px) { #ohud .tr { top: 64px; } #ohud #oBoard { min-width: 130px; font-size: 10px; } .hp-bar { width: 130px; } }
-  #oBoard { font-size: 12px; font-weight: 500; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; min-width: 190px; }
-  #oBoard .row { display: flex; justify-content: space-between; gap: 14px; line-height: 1.85; }
-  #oBoard .row.me { color: var(--bg); font-weight: 800; background: var(--blue); border-radius: 6px; margin: 0 -6px; padding: 0 6px; }
-  #oBoard .row.dead { opacity: .4; }
+  .list { width: 100%; max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
+  .list .it { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; text-align: left; }
+  .list .it.me { border-color: var(--yellow); }
+  .list .it b { color: #fff; } .list .it span { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -350,7 +327,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
     <div class="tagline">Spin. Flip. Slice.</div>
     <div class="stack">
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> Play</button>
-      <button class="menu-btn" data-o="open">Online</button>
+      <button class="menu-btn" id="lbOpen">Leaderboards</button>
       <button class="menu-btn" id="exitPvp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back</button>
     </div>
     <p class="tip"><kbd>WASD</kbd> move &nbsp;·&nbsp; <kbd>SPACE</kbd> / <kbd>CLICK</kbd> flip sword</p>
@@ -379,61 +356,13 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   </div>
 </div>
 
-<div class="overlay hidden op" id="oMain">
-  <div class="panel">
-    <h2>Online</h2>
-    <p class="note" id="oNote"></p>
-    <div class="swatches" id="oCols"></div>
-    <div class="stack" style="margin:6px 0;width:100%;gap:8px">
-      <button class="menu-btn primary" data-o="ranked">Ranked 1v1 &middot; best of 7</button>
-      <div class="row2"><button class="menu-btn" data-o="create">Create lobby</button><button class="menu-btn" data-o="lb">Leaderboards</button></div>
-      <div class="row2"><input id="oCode" maxlength="8" placeholder="Lobby code"><button class="menu-btn" data-o="join">Join</button></div>
-    </div>
-    <div class="list" id="oList"></div>
-    <button class="menu-btn" data-o="back">Back</button>
-  </div>
-</div>
-<div class="overlay hidden op" id="oLobby">
-  <div class="panel">
-    <h2>Lobby <span id="oCodeShow" style="color:var(--yellow)"></span></h2>
-    <p id="oHostNote">Share the code with friends. Free for all, highest score wins.</p>
-    <div class="list" id="oPl"></div>
-    <div id="oSet" class="stack" style="width:100%;gap:8px;margin:6px 0">
-      <div class="row2"><select id="oTime"><option value="60">1 min</option><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option></select>
-      <select id="oMax"><option value="2">2 players</option><option value="4">4 players</option><option value="6">6 players</option><option value="8">8 players</option></select></div>
-      <div class="row2"><select id="oPub"><option value="1">Public</option><option value="0">Private</option></select></div>
-      <button class="menu-btn primary" id="oStart">Start match</button>
-    </div>
-    <button class="menu-btn" data-o="leave">Leave lobby</button>
-  </div>
-</div>
-<div class="overlay hidden op" id="oQueue">
-  <div class="panel">
-    <h2>Ranked</h2>
-    <p id="oQs">Searching for an opponent…</p>
-    <div class="stack" style="width:100%"><button class="menu-btn" data-o="cancelq">Cancel</button></div>
-  </div>
-</div>
-<div class="overlay hidden op" id="oLb">
+<div class="overlay hidden lbp" id="lbp">
   <div class="panel">
     <h2>Leaderboards</h2>
-    <div class="tabs" id="oTabs"></div>
-    <div class="list" id="oLbList"></div>
-    <button class="menu-btn" data-o="omain">Back</button>
+    <div class="tabs" id="lbTabs"></div>
+    <div class="list" id="lbList"></div>
+    <button class="menu-btn" id="lbBack">Back</button>
   </div>
-</div>
-<div class="overlay hidden op" id="oEnd">
-  <div class="panel">
-    <h2 id="oEndT">Match over</h2>
-    <div id="oEndBody" style="width:100%"></div>
-    <div class="stack" style="width:100%;gap:8px"><button class="menu-btn primary hidden" id="oAgain" data-o="ranked">Find another match</button><button class="menu-btn" id="oEndBack" data-o="endback">Continue</button></div>
-  </div>
-</div>
-<div id="ohud" class="hidden">
-  <div class="tl"><button class="icon-btn" id="oLeave" aria-label="Leave"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="hp-bar"><div class="hp-fill" id="oHp"></div></div></div>
-  <div class="tc"><div id="oTop"></div><div id="oSub"></div></div>
-  <div class="tr"><div id="oBoard"></div></div>
-  <div id="oBan"></div>
 </div>
 
 <script>
@@ -441,7 +370,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
 let W, H, DPR, scale;
-let ARENA = 720; // half-width of the square arena (12 tiles)
+const ARENA = 720; // half-width of the square arena (12 tiles)
 
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -695,7 +624,6 @@ window.addEventListener('keydown', e => {
   if (k === ' ' || k.startsWith('arrow')) e.preventDefault();
   if (k === 'escape') { togglePause(); return; }
   if (k === ' ' && !e.repeat && state === 'play') reverse(player);
-  if (k === ' ' && !e.repeat && state === 'net') netFlip();
   keys.add(k);
 });
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -704,7 +632,6 @@ cv.addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clien
 cv.addEventListener('pointerdown', e => {
   mouse.x = e.clientX; mouse.y = e.clientY;
   if (e.button === 0 && state === 'play') reverse(player);
-  if (e.button === 0 && state === 'net') netFlip();
 });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -1054,6 +981,7 @@ function gameOver() {
   best.score = Math.max(best.score, score);
   best.combo = Math.max(best.combo, bestCombo);
   saveBest(); showBest(); updateHud();
+  submitScore(score, player.kills, bestCombo);
   document.getElementById('overStats').innerHTML =
     `<b style="font-size:30px;color:var(--yellow)">${score}</b> points${newBest ? ' · <b style="color:var(--blue)">new best!</b>' : ''}<br>` +
     `Rank <b>#${rank}</b> · <b>${player.kills}</b> kills · best combo <b>${bestCombo}x</b> · survived <b>${fmtTime(time)}</b><br>` +
@@ -1290,7 +1218,6 @@ let last = performance.now();
 function frame(now) {
   let dt = Math.min((now - last) / 1000, 1 / 30);
   last = now;
-  if (state === 'net') netUpdate(dt);
   if (state === 'play' || state === 'over') {
     if (hitstop > 0) { hitstop -= dt; dt *= 0.25; }
     update(dt);
@@ -1314,230 +1241,38 @@ function renderMenuBg(now) {
   demo.boost = Math.max(0, demo.boost - .03);
   ctx.globalAlpha = .35; drawBody(demo); drawSword(demo); ctx.globalAlpha = 1;
 }
-// ---------- online play (lobbies + ranked 1v1). The server runs the match; this only sends inputs and draws what it says ----------
-const NET = { api: '', token: '', id: '', name: '', ok: false };
-const NCOLS = ['#5ec8ff', '#ff6b9a', '#ffb347', '#b48cff', '#f5e663', '#2fd37a', '#ff8a3d', '#a3e635', '#f472d0', '#ff5a5f'];
-let myCol = NCOLS[0]; try { const c = localStorage.getItem('boxpvpcol'); if (NCOLS.includes(c)) myCol = c; } catch (e) {}
+// ---------- leaderboards (single player runs, saved on the boxrun.fun server) ----------
+const NET = { api: '', token: '', id: '' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let ws = null, wsKind = '', nRoster = {}, nEnts = new Map(), nLobby = null, nRanked = false, nStat = null, nInSent = '', nInAt = 0, nBoardAt = 0, nEnded = false, nMe = null, nOpp = null, lbTab = 'best', lbData = null;
-
 window.addEventListener('message', e => {
   const d = e.data; if (!d || d.t !== 'boxpvp-cfg') return;
-  NET.api = d.api || ''; NET.token = d.token || ''; NET.id = d.id || ''; NET.name = d.name || ''; NET.ok = !!(NET.api && NET.token && NET.id);
+  NET.api = d.api || ''; NET.token = d.token || ''; NET.id = d.id || '';
 });
 try { parent.postMessage({ t: 'boxpvp-ready' }, '*'); } catch (e) {}
-
-function opanel(id) {
-  document.querySelectorAll('.op').forEach(x => x.classList.add('hidden'));
-  $('menu').classList.toggle('hidden', !!id);
-  if (id) $(id).classList.remove('hidden');
+let lbData = null, lbTab = 'best';
+async function submitScore(score, kills, combo) {
+  if (!NET.api || !NET.token || score <= 0) return;
+  try { await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ score, kills, combo }) }); lbData = null; } catch (e) {}
 }
-function note(t) { $('oNote').textContent = t || ''; }
-function drawCols() {
-  $('oCols').innerHTML = NCOLS.map(c => `<i data-c="${c}" style="background:${c}" class="${c === myCol ? 'on' : ''}"></i>`).join('');
-  $('oCols').querySelectorAll('i').forEach(i => i.onclick = () => { myCol = i.dataset.c; try { localStorage.setItem('boxpvpcol', myCol); } catch (e) {} drawCols(); });
-}
-async function api(path) {
-  const r = await fetch(NET.api + path, { headers: NET.token ? { Authorization: 'Bearer ' + NET.token } : {} });
-  const j = await r.json().catch(() => null);
-  if (!r.ok) throw new Error((j && j.error) || 'The server said ' + r.status);
-  return j;
-}
-function openOnline() {
-  opanel('oMain'); drawCols();
-  note(!NET.api ? 'Online play needs the boxrun.fun server (not available here).' : !NET.ok ? 'Sign in with the Profile icon on boxrun.fun to play online.' : '');
-  document.querySelectorAll('#oMain [data-o="ranked"],#oMain [data-o="create"],#oMain [data-o="join"]').forEach(b => b.disabled = !NET.ok);
-  refreshList();
-}
-async function refreshList() {
-  const el = $('oList'); if (!NET.api) { el.innerHTML = ''; return; }
-  try {
-    const l = await api('/pvp/lobbies');
-    el.innerHTML = l.length ? l.map(x => `<button class="it" data-code="${esc(x.code)}" ${x.st !== 'lobby' || x.n >= x.max ? 'disabled style="opacity:.5"' : ''}><b>${esc(x.name)}</b><span>${x.n}/${x.max} · ${x.st === 'lobby' ? 'open' : 'playing'}</span></button>`).join('') : '<div class="it"><span>No public lobbies right now. Create one!</span></div>';
-    el.querySelectorAll('button[data-code]').forEach(b => b.onclick = () => joinRoom(b.dataset.code, false));
-  } catch (e) { el.innerHTML = '<div class="it"><span>Could not load lobbies.</span></div>'; }
-}
-function wsUrl(path) { return NET.api.replace(/^http/, 'ws') + path + (path.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(NET.token); }
-function closeWs() { if (ws) { const w = ws; ws = null; w.onmessage = w.onclose = w.onerror = null; try { w.close(); } catch (e) {} } }
-function joinRoom(code, create) {
-  closeWs(); wsKind = 'room'; nEnded = false;
-  note('Connecting…');
-  const w = ws = new WebSocket(wsUrl('/pvp/room?' + (create ? 'create=1' : 'room=' + encodeURIComponent(code)) + '&col=' + encodeURIComponent(myCol)));
-  w.onmessage = ev => { if (ws === w) { try { onNet(JSON.parse(ev.data)); } catch (e) {} } };
-  w.onclose = () => { if (ws === w) { ws = null; netLost(); } };
-  w.onerror = () => {};
-}
-function queueUp() {
-  closeWs(); wsKind = 'queue'; nEnded = false; opanel('oQueue'); $('oQs').textContent = 'Searching for an opponent…';
-  const w = ws = new WebSocket(wsUrl('/pvp/queue'));
-  w.onmessage = ev => {
-    if (ws !== w) return; let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-    if (m.t === 'queued') $('oQs').textContent = `Searching for an opponent… (your Elo ${m.elo})`;
-    else if (m.t === 'match') { nOpp = m.opp; $('oQs').textContent = `Opponent found: ${m.opp.name} (${m.opp.elo}). Starting…`; ws = null; w.onclose = null; try { w.close(); } catch (e) {} joinRankedRoom(m.room); }
-    else if (m.t === 'err') { closeWs(); openOnline(); note(m.m); }
-  };
-  w.onclose = () => { if (ws === w) { ws = null; openOnline(); note('Lost the connection to the matchmaker.'); } };
-}
-function joinRankedRoom(code) {
-  closeWs(); wsKind = 'room'; nRanked = true;
-  const w = ws = new WebSocket(wsUrl('/pvp/room?room=' + encodeURIComponent(code) + '&col=' + encodeURIComponent(myCol)));
-  w.onmessage = ev => { if (ws === w) { try { onNet(JSON.parse(ev.data)); } catch (e) {} } };
-  w.onclose = () => { if (ws === w) { ws = null; netLost(); } };
-}
-function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
-function netLost() {
-  if (nEnded) return;
-  netStop(); openOnline(); note('Disconnected from the match.');
-}
-function netStop() {
-  closeWs(); nEnts = new Map(); nRoster = {}; ents = []; parts = []; pickups = []; RECTS = []; PADS = []; ARENA = 720; nLobby = null; nRanked = false; nStat = null; nMe = null;
-  state = 'menu'; $('ohud').classList.add('hidden'); resize();
-}
-function onNet(m) {
-  if (m.t === 'err') { closeWs(); netStop(); openOnline(); note(m.m); return; }
-  if (m.t === 'hi') { return; }
-  if (m.t === 'lobby') {
-    nLobby = m;
-    if (m.ranked) return;
-    if (m.ph === 'lobby' && state !== 'net') { opanel('oLobby'); drawLobby(); }
-    else if (m.ph === 'lobby') { nEnded = false; $('oEnd').classList.add('hidden'); netToLobby(); }
-    else if (state === 'net') {}
-    return;
-  }
-  if (m.t === 'roster') { nRoster = {}; for (const [id, uid, name, color] of m.r) nRoster[id] = { uid, name, color }; return; }
-  if (m.t === 'start') {
-    ARENA = m.arena; RECTS = (m.map ? m.map.r : []).map(([x, y, w, h, k]) => ({ x, y, w, h, kind: ['wall', 'bumper', 'lava'][k], flash: 0 }));
-    PADS = (m.map ? m.map.p : []).map(([x, y, w, h, ang]) => ({ x, y, w, h, ang, c: Math.round(Math.cos(ang)), s: Math.round(Math.sin(ang)) }));
-    nRanked = !!m.ranked; nEnts = new Map(); ents = []; parts = []; pickups = []; shake = 0; time = 0; nEnded = false; nStat = null;
-    player = { x: 0, y: 0, r: 22, len: 62, alive: false, color: myCol }; cam.x = cam.y = 0;
-    state = 'net'; opanel(''); $('menu').classList.add('hidden'); $('ohud').classList.remove('hidden'); $('oBan').textContent = '';
-    $('oBoard').style.display = nRanked ? 'none' : ''; nInSent = ''; return;
-  }
-  if (m.t === 's') { netSnap(m); return; }
-  if (m.t === 'end') { netEnd(m); return; }
-}
-function netToLobby() { state = 'menu'; ents = []; parts = []; pickups = []; nEnts = new Map(); $('ohud').classList.add('hidden'); opanel('oLobby'); drawLobby(); resize(); }
-function drawLobby() {
-  if (!nLobby) return; const L = nLobby, host = L.host === NET.id;
-  $('oCodeShow').textContent = (L.code || '').toUpperCase();
-  $('oPl').innerHTML = L.players.map(p => `<div class="it ${p.id === NET.id ? 'me' : ''}"><b style="color:${esc(p.color)}">${esc(p.name)}</b><span>${p.id === L.host ? 'host' : ''}</span></div>`).join('');
-  $('oSet').style.display = host ? '' : 'none';
-  $('oHostNote').textContent = host ? 'You are the host. Pick the settings, then start when everyone is in.' : 'Waiting for the host to start. ' + L.cfg.time / 60 + ' min match, ' + L.players.length + '/' + L.cfg.max + ' players.';
-  if (host) { $('oTime').value = L.cfg.time; $('oMax').value = Math.min(8, Math.max(2, L.cfg.max)); $('oPub').value = L.cfg.pub ? '1' : '0'; $('oStart').disabled = L.players.length < 2; $('oStart').textContent = L.players.length < 2 ? 'Need 2+ players' : 'Start match'; }
-}
-function sendCfg() { send({ t: 'cfg', time: +$('oTime').value, max: +$('oMax').value, pub: $('oPub').value === '1' }); }
-['oTime', 'oMax', 'oPub'].forEach(i => $(i).addEventListener('change', sendCfg));
-$('oStart').addEventListener('click', () => send({ t: 'start' }));
-
-function angTo(a, b, k) { return a + (mod(b - a + Math.PI, TAU) - Math.PI) * k; }
-function netSnap(m) {
-  const seen = new Set();
-  for (const a of m.e) {
-    const [id, x, y, ang, face, hp, fl, bo, rg, sp, al, dir, dt_, sc, kl] = a, ro = nRoster[id]; if (!ro) continue;
-    let e = nEnts.get(id);
-    if (!e) { e = { id, x, y, ang, face, r: 22, len: 62, maxHp: 100, faceSm: face }; nEnts.set(id, e); }
-    if (al && !e.alive) { e.x = x; e.y = y; }
-    Object.assign(e, { tx: x, ty: y, tang: ang, face, hp, flash: fl ? .1 : 0, boost: bo ? 1 : 0, regen: rg ? 1 : 0, spawnT: sp ? 1 : 0, alive: !!al, dir, deadT: dt_, score: sc, kills: kl, color: ro.color, name: ro.name, uid: ro.uid, isPlayer: ro.uid === NET.id });
-    seen.add(id);
-  }
-  for (const id of [...nEnts.keys()]) if (!seen.has(id)) nEnts.delete(id);
-  pickups = m.p.map(p => ({ x: p[0], y: p[1], type: p[2] ? 'pack' : 'regen', seed: p[0] * .013 + p[1] * .007 }));
-  for (const ev of m.ev) {
-    const k = ev[0], x = ev[1], y = ev[2];
-    if (k === 'h') { burst(x, y, ev[3], 8 + ev[6] * 2, 260); const me = [...nEnts.values()].find(q => q.isPlayer); if (me && (me.id === ev[4] || me.id === ev[5])) shake = Math.max(shake, 6); }
-    else if (k === 'k') { burst(x, y, ev[3], 40, 380); shake = Math.max(shake, 9); }
-    else if (k === 'bm') burst(x, y, '#5ec8ff', 8, 220);
-    else if (k === 'l') burst(x, y, '#ff8a3d', 8, 200);
-    else if (k === 'c') burst(x, y, '#ffffff', 3, 140);
-    else if (k === 'p') burst(x, y, ev[3], 14, 200);
-  }
-  nStat = m.m; netHud();
-}
-function netUpdate(dt) {
-  time += dt; shake = Math.max(0, shake - dt * 30);
-  const k = Math.min(1, dt * 20);
-  for (const e of nEnts.values()) { if (e.tx === undefined) continue; e.x += (e.tx - e.x) * k; e.y += (e.ty - e.y) * k; e.ang = angTo(e.ang, e.tang, k); }
-  ents = [...nEnts.values()].filter(e => e.alive);
-  nMe = [...nEnts.values()].find(e => e.isPlayer) || null;
-  if (nMe) player = nMe;
-  if (nRanked) { cam.x = cam.y = 0; scale = Math.min(W, H) / (ARENA * 2 + 190); }
-  else { scale = Math.min(W, H) / 560; if (nMe) { cam.x += (nMe.x - cam.x) * Math.min(1, dt * 8); cam.y += (nMe.y - cam.y) * Math.min(1, dt * 8); } }
-  for (const p of parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .93; p.vy *= .93; p.life -= dt; }
-  parts = parts.filter(p => p.life > 0);
-  let ax = 0, ay = 0;
-  if (keys.has('a') || keys.has('arrowleft')) ax--; if (keys.has('d') || keys.has('arrowright')) ax++;
-  if (keys.has('w') || keys.has('arrowup')) ay--; if (keys.has('s') || keys.has('arrowdown')) ay++;
-  const s = ax + ',' + ay, n = performance.now();
-  if (s !== nInSent || n - nInAt > 400) { nInSent = s; nInAt = n; send({ t: 'in', x: ax, y: ay }); }
-}
-function netFlip() { send({ t: 'flip' }); }
-function netHud() {
-  const me = nMe, st = nStat; if (!st) return;
-  if (me) $('oHp').style.width = Math.max(0, me.hp) + '%';
-  const ban = $('oBan'), name = u => { const e = [...nEnts.values()].find(q => q.uid === u); return e ? e.name : 'Opponent'; };
-  if (nRanked) {
-    const opp = [...nEnts.values()].find(q => !q.isPlayer), w = st.w || {}, mw = w[NET.id] || 0, ow = opp ? (w[opp.uid] || 0) : 0;
-    $('oTop').textContent = `${mw} - ${ow}`;
-    $('oSub').textContent = `YOU vs ${opp ? opp.name.toUpperCase() : '…'} · ROUND ${st.rd} · FIRST TO 4`;
-    if (st.ph === 'wait') ban.textContent = 'Waiting for opponent…';
-    else if (st.ph === 'count') ban.textContent = Math.max(1, Math.ceil(st.pt));
-    else if (st.ph === 'fight') ban.textContent = st.rt < 1 ? 'FIGHT' : '';
-    else if (st.ph === 'rend') ban.textContent = st.l === null ? 'Draw' : st.l === NET.id ? 'You win the round' : name(st.l) + ' wins the round';
-    else ban.textContent = '';
-  } else {
-    const l = st.left || 0; $('oTop').textContent = Math.floor(l / 60) + ':' + String(l % 60).padStart(2, '0');
-    $('oSub').textContent = me ? `${Math.floor(me.score)} PTS · ${me.kills} KO` : '';
-    ban.textContent = me && !me.alive ? 'Respawning…' : '';
-    if (performance.now() - nBoardAt > 200) {
-      nBoardAt = performance.now(); const list = [...nEnts.values()].sort((a, b) => b.score - a.score);
-      $('oBoard').innerHTML = list.slice(0, 6).map((e, i) => `<div class="row${e.isPlayer ? ' me' : ''}${e.alive ? '' : ' dead'}"><span>${i + 1}. ${esc(e.name)}</span><span>${e.score}</span></div>`).join('');
-    }
-  }
-}
-function netEnd(m) {
-  nEnded = true; state = 'menu'; ents = []; $('ohud').classList.add('hidden'); opanel('oEnd');
-  const body = $('oEndBody'), again = $('oAgain'), back = $('oEndBack');
-  again.classList.toggle('hidden', m.kind !== 'ranked'); back.dataset.o = m.kind === 'ranked' ? 'endmenu' : 'endback'; back.textContent = m.kind === 'ranked' ? 'Back' : 'Continue';
-  if (m.kind === 'ranked') {
-    const won = m.winner === NET.id, draw = !m.winner;
-    $('oEndT').textContent = draw ? 'Draw' : won ? (m.forfeit ? 'Opponent left. You win' : 'You win') : (m.forfeit ? 'You forfeited' : 'You lost');
-    body.innerHTML = '<div class="list">' + m.rows.map(r => {
-      const d = r.after !== undefined ? r.after - r.before : null;
-      return `<div class="it ${r.uid === NET.id ? 'me' : ''}"><b>${esc(r.name)} · ${r.rw} rounds</b><span>${d === null ? '' : `Elo ${r.before} → <b style="color:${d >= 0 ? '#2fd37a' : '#ff5a5f'}">${r.after} (${d >= 0 ? '+' : ''}${d})</b>`}</span></div>`;
-    }).join('') + '</div>';
-  } else {
-    $('oEndT').textContent = 'Match over';
-    body.innerHTML = '<div class="list" style="max-height:40vh">' + m.rows.map(r => `<div class="it ${r.uid === NET.id ? 'me' : ''}"><b>${r.rank}. <span style="color:${esc(r.color)}">${esc(r.name)}</span></b><span>${r.score} pts · ${r.kills} KO · ${r.deaths} deaths</span></div>`).join('') + '</div>';
-  }
-}
-const LBT = { best: ['Best score', 'pts'], elo: ['Elo', ''], kills: ['Kills', ''], score: ['Total score', ''], wins: ['Wins', ''], games: ['Games', ''] };
+const LBT = { best: 'Best score', combo: 'Best combo', score: 'Total score', kills: 'Total kills', games: 'Games' };
 async function openLb() {
-  opanel('oLb'); $('oTabs').innerHTML = Object.keys(LBT).map(k => `<button data-k="${k}" class="${k === lbTab ? 'on' : ''}">${LBT[k][0]}</button>`).join('');
-  $('oTabs').querySelectorAll('button').forEach(b => b.onclick = () => { lbTab = b.dataset.k; openLb(); });
-  const el = $('oLbList'); el.innerHTML = '<div class="it"><span>Loading…</span></div>';
+  $('menu').classList.add('hidden'); $('lbp').classList.remove('hidden');
+  $('lbTabs').innerHTML = Object.keys(LBT).map(k => `<button data-k="${k}" class="${k === lbTab ? 'on' : ''}">${LBT[k]}</button>`).join('');
+  $('lbTabs').querySelectorAll('button').forEach(b => b.onclick = () => { lbTab = b.dataset.k; openLb(); });
+  const el = $('lbList');
+  if (!NET.api) { el.innerHTML = '<div class="it"><span>Leaderboards are only on boxrun.fun.</span></div>'; return; }
+  el.innerHTML = '<div class="it"><span>Loading…</span></div>';
   try {
-    if (!lbData || performance.now() - (lbData.at || 0) > 15000) { lbData = await api('/pvp/lb?me=' + encodeURIComponent(NET.id)); lbData.at = performance.now(); }
+    if (!lbData) {
+      const r = await fetch(NET.api + '/pvp/lb?me=' + encodeURIComponent(NET.id)); if (!r.ok) throw 0; lbData = await r.json();
+    }
     const b = lbData[lbTab], row = (r, me) => `<div class="it ${me ? 'me' : ''}"><b>#${r.rank} ${esc(r.name)}</b><span>${Math.floor(r.v).toLocaleString()}</span></div>`;
-    el.innerHTML = b.top.length ? b.top.map(r => row(r, r.id === NET.id)).join('') + (b.me && !b.top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(b.me, true) : '') : '<div class="it"><span>No games played yet.</span></div>';
+    el.innerHTML = b.top.length ? b.top.map(r => row(r, r.id === NET.id)).join('') + (b.me && !b.top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(b.me, true) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
   } catch (e) { el.innerHTML = '<div class="it"><span>Could not load the leaderboard.</span></div>'; }
 }
-document.addEventListener('click', e => {
-  const b = e.target.closest('[data-o]'); if (!b || b.disabled) return; const o = b.dataset.o;
-  if (o === 'open') openOnline();
-  else if (o === 'back') { opanel(''); }
-  else if (o === 'omain') openOnline();
-  else if (o === 'ranked') queueUp();
-  else if (o === 'create') joinRoom('', true);
-  else if (o === 'join') { const c = $('oCode').value.trim().toLowerCase(); if (c.length >= 3) joinRoom(c, false); else note('Type the lobby code first.'); }
-  else if (o === 'lb') openLb();
-  else if (o === 'cancelq') { send({ t: 'cancel' }); closeWs(); openOnline(); }
-  else if (o === 'leave') { send({ t: 'leave' }); netStop(); openOnline(); }
-  else if (o === 'endback') { if (nLobby && nLobby.ph === 'lobby') { nEnded = false; netToLobby(); } else { $('oEndBody').insertAdjacentHTML('beforeend', '<p class="tip">Returning to the lobby…</p>'); } }
-  else if (o === 'endmenu') { netStop(); openOnline(); }
-});
-$('oLeave').addEventListener('click', () => { send({ t: 'leave' }); netStop(); openOnline(); });
-
+$('lbOpen').addEventListener('click', openLb);
+$('lbBack').addEventListener('click', () => { $('lbp').classList.add('hidden'); $('menu').classList.remove('hidden'); });
 requestAnimationFrame(frame);
 })();
 <\/script>
