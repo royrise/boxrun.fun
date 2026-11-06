@@ -290,10 +290,6 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   .menu-btn.primary { border: 2px solid var(--yellow); box-shadow: 0 0 14px rgba(245,197,66,.45); }
   .tip { font-size: 11px; letter-spacing: .5px; margin-top: 6px; }
   kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; font-family: inherit; font-size: 10px; color: #fff; }
-  .lbp { background: rgba(16,16,21,.94); overflow-y: auto; }
-  .lbp .panel { width: min(94vw, 460px); max-height: 100%; padding: 14px; }
-  .lbp h2 { font-size: clamp(22px, 6vw, 34px); margin-bottom: 8px; }
-  .lbp .menu-btn { width: 100%; height: 44px; font-size: 13px; }
   .tabs { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 6px; }
   .tabs button { background: var(--panel); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-family: inherit; font-size: 10px; cursor: pointer; }
   .tabs button.on { color: #101015; background: var(--yellow); border-color: var(--yellow); }
@@ -301,6 +297,15 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   .list .it { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; text-align: left; }
   .list .it.me { border-color: var(--yellow); }
   .list .it b { color: #fff; } .list .it span { color: var(--muted); } .list .it .st { font-size: 10px; line-height: 1.6; }
+  .mrow { display: flex; gap: 30px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .mcol { display: flex; flex-direction: column; align-items: center; }
+  .lbbox { width: min(92vw, 330px); text-align: left; }
+  .lbh { font-size: 13px; font-weight: 800; letter-spacing: 2px; color: var(--yellow); text-align: center; margin: 18px 0 6px; }
+  .lbbox .list { max-height: none; overflow: visible; margin: 0; gap: 3px; }
+  .lbbox .it { padding: 5px 9px; font-size: 11px; }
+  @media (min-width: 760px) { .lbh { margin-top: 0; } .lbbox { margin-top: 6px; } }
+  @media (max-width: 759px) and (max-height: 760px) { .lbbox .x5 { display: none; } }
+  @media (max-width: 759px) and (max-height: 600px) { .lbbox .x3 { display: none; } }
 </style>
 </head>
 <body>
@@ -325,13 +330,14 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   <div class="panel">
     <h1>boxpvp</h1>
     <div class="tagline">Spin. Flip. Slice.</div>
+    <div class="mrow"><div class="mcol">
     <div class="stack">
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> Play</button>
-      <button class="menu-btn" id="lbOpen">Best Runs</button>
       <button class="menu-btn" id="exitPvp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back</button>
     </div>
     <p class="tip"><kbd>WASD</kbd> move &nbsp;·&nbsp; <kbd>SPACE</kbd> / <kbd>CLICK</kbd> flip sword</p>
     <p class="tip" id="bestLine"></p>
+    </div><div class="mcol lbbox"><div class="lbh">BEST RUNS</div><div class="list" id="menuLb"></div></div></div>
   </div>
 </div>
 
@@ -353,15 +359,6 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg> Retry</button>
       <button class="menu-btn" data-back><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back to menu</button>
     </div>
-  </div>
-</div>
-
-<div class="overlay hidden lbp" id="lbp">
-  <div class="panel">
-    <h2>Best Runs</h2>
-    <p class="tip">Each player's highest scoring life</p>
-    <div class="list" id="lbList"></div>
-    <button class="menu-btn" id="lbBack">Back</button>
   </div>
 </div>
 
@@ -648,7 +645,7 @@ function goMenu() {
   ents = []; parts = []; texts = []; pickups = []; respawnQ = []; keys.clear();
   for (const id of ['over', 'pause', 'hud']) document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden');
-  showBest();
+  showBest(); loadLb();
 }
 function togglePause() {
   if (state === 'play') { state = 'pause'; document.getElementById('pause').classList.remove('hidden'); }
@@ -1273,29 +1270,30 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 window.addEventListener('message', e => {
   const d = e.data; if (!d || d.t !== 'boxpvp-cfg') return;
   NET.api = d.api || ''; NET.token = d.token || ''; NET.id = d.id || '';
+  loadLb(true);
 });
 try { parent.postMessage({ t: 'boxpvp-ready' }, '*'); } catch (e) {}
 let lbData = null;
 async function submitScore(score, kills, combo, secs) {
   if (!NET.api || !NET.token || score <= 0) return;
   try { await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ score, kills, combo, secs }) }); lbData = null; } catch (e) {}
+  loadLb(true);
 }
-async function openLb() {
-  $('menu').classList.add('hidden'); $('lbp').classList.remove('hidden');
-  const el = $('lbList');
-  if (!NET.api) { el.innerHTML = '<div class="it"><span>Leaderboards are only on boxrun.fun.</span></div>'; return; }
-  el.innerHTML = '<div class="it"><span>Loading…</span></div>';
+async function loadLb(force) {
+  const el = $('menuLb');
+  if (!NET.api) { el.innerHTML = '<div class="it"><span>Sign in on boxrun.fun to see the leaderboard.</span></div>'; return; }
+  if (force) lbData = null;
+  if (!lbData) el.innerHTML = '<div class="it"><span>Loading…</span></div>';
   try {
     if (!lbData) {
       const r = await fetch(NET.api + '/pvp/lb?me=' + encodeURIComponent(NET.id)); if (!r.ok) throw 0; lbData = await r.json();
     }
-    const row = (r, me) => `<div class="it ${me ? 'me' : ''}"><div><b>#${r.rank} ${esc(r.name)}</b><br><span class="st">${r.k} KO · ${r.c}x combo · ${fmtTime(r.t)}</span></div><b>${Math.floor(r.v).toLocaleString()}</b></div>`;
-    const top = lbData.top || [];
-    el.innerHTML = top.length ? top.map(r => row(r, r.id === NET.id)).join('') + (lbData.me && !top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(lbData.me, true) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
+    const row = (r, me, i) => `<div class="it ${me ? 'me' : ''} ${i >= 5 ? 'x5' : ''} ${i >= 3 ? 'x3' : ''}"><div><b>#${r.rank} ${esc(r.name)}</b><br><span class="st">${r.k} KO · ${r.c}x combo · ${fmtTime(r.t)}</span></div><b>${Math.floor(r.v).toLocaleString()}</b></div>`;
+    const top = (lbData.top || []).slice(0, 8);
+    el.innerHTML = top.length ? top.map((r, i) => row(r, r.id === NET.id, i)).join('') + (lbData.me && !top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(lbData.me, true, 0) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
   } catch (e) { el.innerHTML = '<div class="it"><span>Could not load the leaderboard.</span></div>'; }
 }
-$('lbOpen').addEventListener('click', openLb);
-$('lbBack').addEventListener('click', () => { $('lbp').classList.add('hidden'); $('menu').classList.remove('hidden'); });
+setTimeout(() => { if (!NET.api) loadLb(); }, 1500);
 requestAnimationFrame(frame);
 })();
 <\/script>
