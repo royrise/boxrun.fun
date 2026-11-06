@@ -1079,24 +1079,35 @@ function drawPads() {
   ctx.globalAlpha = 1;
 }
 
+// lava texture from boxrun: pixel art, 4 rotations/mirrors picked per tile so it doesn't visibly repeat
+const lavaImg = new Image(); let lavaPats = null;
+lavaImg.onload = () => { lavaPats = [0, 1, 2, 3].map(r => { const c = document.createElement('canvas'); c.width = c.height = TILE; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.translate(TILE / 2, TILE / 2); g.rotate(r * Math.PI / 2); if (r & 1) g.scale(-1, 1); g.drawImage(lavaImg, -TILE / 2, -TILE / 2, TILE, TILE); return g.createPattern(c, 'repeat'); }); };
+lavaImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAB/klEQVR4XrWVzUoDQRCEJ8uyIGIIug9ggujRq7dADpK7T+CT+Rqi4Fnw5FEJ5uRBWENYECGERKp3v0lnzFELlv2Z6drq6p6Zzv2wt57Wq9DvZkH30aAIoDjphsWkDg9vCxsXyr0sPH0sf837fJ6H6ntlc/plHrKUdFotIzEQqSbrSkkBpOITMq80Jb29q0y1CIEy0rdd8BlnCtJkSPWuQIIh9/YInvzlcRaVgtz755WlEJEIyq+5DR3sN54LpE99xNmZXJXrXcVK/RUxBUqJPJS5xje//WMYsaTHtFxX0A2C1Pq08Rmv4SCbWG4NjEJtA/Ts2cWhEaiXj857Vkgwvizjs8gVK+BzJIZMdwgFkWmyyCHTsy6yQyUZSuRWVwgpqYe6IrUjLbJIJSAqFqFUoBL4Jc6c/saFLUAqHiseAfLK+wgpKStg16qjcFhmfaxNiNUGqVdJX/rCQE6GdAi+y/PNJuAqClJSvUsES9gX07xvF4eKmIt9WjetxjaZVpu9hMxC1RSRYmKl3yn/beWZFVFR2+T0pbfHb1BemeFx1uzX7rDIKZRvNxZLCnY4epnYYnjcfLt5jbFmhW8h/4xy2sl3wdbP32dB1/j6NGZmVtBmqrK1THu8KNj2kEER79ig1OPh0Fq4OS1DyFCoYH5ga771S4BckCrAOcgcv4B+ABJrce5u1v9mAAAAAElFTkSuQmCC';
+function lavaFill(x, y, ox, oy) { const P = lavaPats && lavaPats[(x * 3 + y * 5 + ((x * y) & 1)) & 3]; if (!P) return null; P.setTransform(new DOMMatrix([1, 0, 0, 1, ox, oy])); return P; }
 function drawScenery(rects) {
-  const ga = ctx.globalAlpha;
+  const ga = ctx.globalAlpha, k = TILE / 44;
   for (const o of rects) {
     if (o.kind === 'wall') {
       for (let x = o.x; x < o.x + o.w; x += TILE) for (let y = o.y; y < o.y + o.h; y += TILE) wallTile(x, y);
     } else if (o.kind === 'bumper') {
       o.flash = Math.max(0, (o.flash || 0) - 1 / 60);
-      ctx.fillStyle = o.flash > 0 ? '#bfe8ff' : '#18263b'; ctx.fillRect(o.x, o.y, o.w, o.h);
-      ctx.strokeStyle = '#5ec8ff'; ctx.lineWidth = 4; ctx.strokeRect(o.x + 4, o.y + 4, o.w - 8, o.h - 8);
-      ctx.lineWidth = 3; ctx.strokeRect(o.x + 18, o.y + 18, o.w - 36, o.h - 36);
+      for (let x = o.x; x < o.x + o.w; x += TILE) for (let y = o.y; y < o.y + o.h; y += TILE) {
+        const a = .7 + .3 * Math.sin(time * 7), cx = x + TILE / 2, cy = y + TILE / 2;
+        ctx.fillStyle = o.flash > 0 ? '#e7b0f5' : '#8a2fa8'; ctx.fillRect(x + 3 * k, y + 3 * k, TILE - 6 * k, TILE - 6 * k);
+        ctx.fillStyle = 'rgba(240,100,255,' + a + ')'; ctx.fillRect(x + 7 * k, y + 7 * k, TILE - 14 * k, TILE - 14 * k);
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 * k; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(cx, cy, TILE * .22, Math.PI * .15, Math.PI * 1.1); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, TILE * .22, Math.PI * 1.15, Math.PI * 2.1); ctx.stroke();
+        ctx.lineCap = 'butt';
+      }
     } else if (o.kind === 'lava') {
       for (let x = o.x; x < o.x + o.w; x += TILE) for (let y = o.y; y < o.y + o.h; y += TILE) {
         ctx.globalAlpha = ga;
-        ctx.fillStyle = '#ff5a1f'; ctx.fillRect(x, y, TILE, TILE);
-        ctx.globalAlpha = ga * (0.55 + 0.3 * Math.sin(time * 3 + x * 0.05 + y * 0.03));
-        ctx.fillStyle = '#ffa133'; ctx.fillRect(x + 10, y + 10, TILE - 20, TILE - 20);
+        const ix = Math.round(x / TILE), iy = Math.round(y / TILE), g = .5 + .5 * Math.sin(time * 4 + ix + iy);
+        ctx.fillStyle = lavaFill(ix, iy, x, y) || `rgb(${230 + 20 * g | 0},${70 + 50 * g | 0},20)`; ctx.fillRect(x, y, TILE, TILE);
+        ctx.globalAlpha = ga * (.04 + .14 * g);
+        ctx.fillStyle = 'rgb(255,200,80)'; ctx.fillRect(x, y, TILE, TILE);
         ctx.globalAlpha = ga;
-        ctx.strokeStyle = '#ffc04d'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, TILE - 2, TILE - 2);
       }
     }
   }
