@@ -306,6 +306,25 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   @media (min-width: 760px) { .lbh { margin-top: 0; } .lbbox { margin-top: 6px; } }
   @media (max-width: 759px) and (max-height: 760px) { .lbbox .x5 { display: none; } }
   @media (max-width: 759px) and (max-height: 600px) { .lbbox .x3 { display: none; } }
+  canvas { touch-action: none; }
+  #flipBtn { position: fixed; right: 20px; bottom: 26px; width: 96px; height: 96px; border-radius: 50%; display: none; place-items: center; background: rgba(94,200,255,.18); color: #fff; border: 2px solid rgba(94,200,255,.7); font-family: inherit; font-weight: 800; font-size: 13px; letter-spacing: 1px; touch-action: none; user-select: none; }
+  #flipBtn:active { background: rgba(94,200,255,.45); }
+  #joy { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border: 2px solid rgba(255,255,255,.28); border-radius: 50%; display: none; pointer-events: none; }
+  #joyK { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; background: rgba(94,200,255,.55); }
+  .tip.t { display: none; max-width: 240px; }
+  .overlay { overflow-y: auto; }
+  @media (max-height: 480px) { h1 { font-size: min(13vw, 14vh); } .tagline { margin: 2px 0 8px; } #menu .stack { margin: 6px 0; gap: 6px; } #menu .menu-btn { height: 40px; } .lbbox .x3 { display: none; } .lbh { margin-top: 0; } #menu .tip { margin-top: 2px; } }
+  .overlay > .panel { margin: auto; }
+  @media (max-height: 480px) { h2 { font-size: 26px; margin-bottom: 4px; } .banner { font-size: 22px; margin: 0; } #over .stack, #pause .stack { margin: 8px 0; gap: 6px; } #over .menu-btn, #pause .menu-btn { height: 40px; } #over p, #overExtra p { line-height: 1.35; } #over .panel { padding: 8px; } }
+  @media (pointer: coarse) { #flipBtn.show { display: grid; } .tip.k { display: none; } .tip.t { display: block; } }
+  .lbtabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; }
+  .lbtabs button { background: var(--panel); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 5px 11px; font-family: inherit; font-size: 10px; cursor: pointer; }
+  .lbtabs button.on { color: #101015; background: var(--yellow); border-color: var(--yellow); }
+  .banner { font-size: 30px; font-weight: 900; color: var(--yellow); letter-spacing: 2px; animation: comboPop .35s ease-out; margin: 4px 0; }
+  .banner.w { font-size: 18px; color: var(--blue); }
+  #overExtra { margin: 6px 0 2px; min-height: 8px; }
+  #overExtra p { color: #fff; font-size: 12px; line-height: 1.8; }
+  #nextLine { color: var(--yellow); }
 </style>
 </head>
 <body>
@@ -322,6 +341,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   <div class="center">
     <div class="score" id="score">0</div>
     <div class="sub"><span id="kills">0</span> KO &nbsp;·&nbsp; <span id="clock">5:00</span></div>
+    <div class="sub" id="nextLine"></div>
   </div>
   <div class="right"><div id="board"></div></div>
 </div>
@@ -335,15 +355,17 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> Play</button>
       <button class="menu-btn" id="exitPvp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back</button>
     </div>
-    <p class="tip"><kbd>WASD</kbd> move &nbsp;·&nbsp; <kbd>SPACE</kbd> / <kbd>CLICK</kbd> flip sword</p>
+    <p class="tip t">Drag on the left to move &nbsp;·&nbsp; tap the right side or FLIP to flip your sword</p>
+    <p class="tip k"><kbd>WASD</kbd> move &nbsp;·&nbsp; <kbd>SPACE</kbd> / <kbd>CLICK</kbd> flip sword</p>
     <p class="tip" id="bestLine"></p>
-    </div><div class="mcol lbbox"><div class="lbh">BEST RUNS</div><div class="list" id="menuLb"></div></div></div>
+    </div><div class="mcol lbbox"><div class="lbh">BEST RUNS</div><div class="lbtabs"><button data-w="all" class="on">All time</button><button data-w="week">This week</button></div><div class="list" id="menuLb"></div></div></div>
   </div>
 </div>
 
 <div class="overlay hidden" id="pause">
   <div class="panel">
     <h2>Paused</h2>
+    <p id="pauseInfo"></p>
     <div class="stack">
       <button class="menu-btn primary" id="resume"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> Resume</button>
       <button class="menu-btn" data-back><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back to menu</button>
@@ -355,12 +377,16 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   <div class="panel">
     <h2 id="overTitle">You got boxed</h2>
     <p id="overStats"></p>
+    <div id="overExtra"></div>
     <div class="stack">
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg> Retry</button>
       <button class="menu-btn" data-back><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back to menu</button>
     </div>
   </div>
 </div>
+
+<button id="flipBtn" aria-label="Flip sword">FLIP</button>
+<div id="joy"><div id="joyK"></div></div>
 
 <script>
 (() => {
@@ -541,9 +567,11 @@ function start() {
   ents.push(player);
   for (let i = 0; i < 5; i++) respawnQ.push(newBotInfo(0.3 + i * 0.25));
   for (let i = 0; i < 3; i++) spawnPickup();
+  startRun();
   state = 'play';
   for (const id of ['menu', 'over', 'pause']) document.getElementById(id).classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('overExtra').innerHTML = '';
   updateHud();
 }
 
@@ -586,7 +614,7 @@ function spawnPickup() {
   pickups.push({ x, y, type: Math.random() < 0.55 ? 'pack' : 'regen', seed: rand(0, TAU) });
 }
 
-function botTarget() { return Math.min(5 + Math.floor(time / 40), 9); }
+function botTarget() { return Math.min(5 + Math.floor(time / 30), 11); }
 
 function reverse(e) {
   if ((!e.isPlayer && e.revCd > 0) || !e.alive) return;
@@ -627,7 +655,30 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur', () => { keys.clear(); if (state === 'play') togglePause(); });
 cv.addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+const flipEl = document.getElementById('flipBtn');
+const joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 };
+function joyEnd() { joy.id = null; joy.x = joy.y = 0; document.getElementById('joy').style.display = 'none'; }
+window.addEventListener('pointermove', e => {
+  if (e.pointerId !== joy.id) return;
+  const R = 50; let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const l = Math.hypot(dx, dy);
+  if (l > R) { dx = dx / l * R; dy = dy / l * R; }
+  joy.x = Math.abs(dx) / R < .12 && Math.abs(dy) / R < .12 ? 0 : dx / R; joy.y = joy.x === 0 && Math.abs(dy) / R < .12 ? 0 : dy / R;
+  document.getElementById('joyK').style.transform = `translate(${dx}px,${dy}px)`;
+});
+window.addEventListener('pointerup', e => { if (e.pointerId === joy.id) joyEnd(); });
+window.addEventListener('pointercancel', e => { if (e.pointerId === joy.id) joyEnd(); });
+document.getElementById('flipBtn').addEventListener('pointerdown', e => { e.preventDefault(); if (state === 'play') reverse(player); });
 cv.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'touch') {
+    if (state !== 'play') return;
+    if (e.clientX < W * 0.6 && joy.id === null) {
+      joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = joy.y = 0;
+      const j = document.getElementById('joy'); j.style.left = e.clientX + 'px'; j.style.top = e.clientY + 'px'; j.style.display = 'block';
+      document.getElementById('joyK').style.transform = 'translate(0,0)';
+      try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    } else reverse(player);
+    return;
+  }
   mouse.x = e.clientX; mouse.y = e.clientY;
   if (e.button === 0 && state === 'play') reverse(player);
 });
@@ -641,14 +692,14 @@ document.getElementById('exitPvp').addEventListener('click', () => { try { paren
 // keep Space from re-pressing whatever button was clicked last
 document.querySelectorAll('button').forEach(b => b.addEventListener('click', () => b.blur()));
 function goMenu() {
-  state = 'menu';
+  state = 'menu'; joyEnd();
   ents = []; parts = []; texts = []; pickups = []; respawnQ = []; keys.clear();
   for (const id of ['over', 'pause', 'hud']) document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden');
   showBest(); loadLb();
 }
 function togglePause() {
-  if (state === 'play') { state = 'pause'; document.getElementById('pause').classList.remove('hidden'); }
+  if (state === 'play') { state = 'pause'; joyEnd(); document.getElementById('pauseInfo').innerHTML = `Score <b>${Math.floor(player.score)}</b> · <b>${fmtTime(Math.max(0, LIFE_TIME - time))}</b> left` + (nextLine(player.score) ? '<br>' + esc(nextLine(player.score)) : ''); document.getElementById('pause').classList.remove('hidden'); }
   else if (state === 'pause') { state = 'play'; document.getElementById('pause').classList.add('hidden'); last = performance.now(); }
 }
 
@@ -667,7 +718,8 @@ function update(dt) {
     if (keys.has('s') || keys.has('arrowdown')) ay += 1;
     if (keys.has('a') || keys.has('arrowleft')) ax -= 1;
     if (keys.has('d') || keys.has('arrowright')) ax += 1;
-    const l = Math.hypot(ax, ay); if (l) { ax /= l; ay /= l; }
+    if (joy.id !== null) { ax += joy.x; ay += joy.y; }
+    const l = Math.hypot(ax, ay); if (l > 1) { ax /= l; ay /= l; }
     player.vx += ax * STATS.accel * dt; player.vy += ay * STATS.accel * dt;
     capSpeed(player, STATS.speed * player.speedMul, dt);
     player.score += 2 * dt; // survival points
@@ -953,8 +1005,10 @@ function think(e, dt) {
     if (od < range && od > 0) { const f = (range - od) / 35 * (lava ? 2 : 1); ax += (e.x - cx) / od * f; ay += (e.y - cy) / od * f; }
   }
   const al = Math.hypot(ax, ay); if (al > 1) { ax /= al; ay /= al; }
-  e.vx += ax * STATS.accel * dt; e.vy += ay * STATS.accel * dt;
-  capSpeed(e, STATS.speed * e.speedMul, dt);
+  const dm = 1 + Math.min(.3, time / 1000);   // bots get quicker and spin faster as the run goes on
+  e.spin = STATS.spin * (1 + Math.min(.2, time / 1500));
+  e.vx += ax * STATS.accel * dm * dt; e.vy += ay * STATS.accel * dm * dt;
+  capSpeed(e, STATS.speed * dm * e.speedMul, dt);
 
   // flip to cut the shortest path to the target
   if (e.locked && e.revCd <= 0 && Math.random() < dt * (0.8 + 2 * ai.skill)) { reverse(e); return; }
@@ -997,6 +1051,7 @@ function updateHud() {
   fill.classList.toggle('regen', player.regen > 0);
   if (time - player.lastHit > 1.05 || !player.alive) document.getElementById('combo').classList.remove('show');
   document.getElementById('score').textContent = Math.floor(player.score);
+  document.getElementById('nextLine').textContent = nextLine(player.score).replace(/<[^>]+>/g, '');
   document.getElementById('kills').textContent = player.kills;
   document.getElementById('clock').textContent = fmtTime(Math.max(0, LIFE_TIME - time)) + (mapTimer < 30 ? `  ·  SHIFT IN ${Math.ceil(mapTimer)}` : '');
   const list = standings();
@@ -1240,6 +1295,7 @@ let last = performance.now();
 function frame(now) {
   let dt = Math.min((now - last) / 1000, 1 / 30);
   last = now;
+  flipEl.classList.toggle('show', state === 'play');
   if (state === 'play' || state === 'over') {
     if (hitstop > 0) { hitstop -= dt; dt *= 0.25; }
     update(dt);
@@ -1273,26 +1329,59 @@ window.addEventListener('message', e => {
   loadLb(true);
 });
 try { parent.postMessage({ t: 'boxpvp-ready' }, '*'); } catch (e) {}
-let lbData = null;
+// two boards: all time and this week. Both are cached; the HUD uses the all time one to show who you are chasing.
+const lbCache = { all: null, week: null }; let lbMode = 'all', runP = null;
+async function getLb(mode, force) {
+  if (!NET.api) return null;
+  if (force) lbCache[mode] = null;
+  if (!lbCache[mode]) {
+    const r = await fetch(NET.api + '/pvp/lb?w=' + (mode === 'week' ? 1 : 0) + '&me=' + encodeURIComponent(NET.id)); if (!r.ok) throw 0;
+    lbCache[mode] = await r.json();
+  }
+  return lbCache[mode];
+}
+function nextLine(score) {
+  const L = lbCache.all; if (!L || !L.top || !L.top.length) return '';
+  const above = L.top.filter(r => r.v > score).sort((a, b) => a.v - b.v)[0];
+  if (!above) return 'YOU LEAD THE BOARD';
+  const nm = above.id === NET.id ? 'YOUR BEST' : '#' + above.rank + ' ' + above.name.slice(0, 12).toUpperCase();
+  return `${nm} · ${Math.ceil(above.v - score)} TO GO`;
+}
+// each run is registered with the server when it starts; the score is only accepted for that run
+function startRun() {
+  runP = null;
+  if (!NET.api || !NET.token) return;
+  runP = fetch(NET.api + '/pvp/start', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token } }).then(r => r.json()).then(j => j.run || null).catch(() => null);
+}
 async function submitScore(score, kills, combo, secs) {
-  if (!NET.api || !NET.token || score <= 0) return;
-  try { await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ score, kills, combo, secs }) }); lbData = null; } catch (e) {}
+  if (!NET.api || !NET.token || score <= 0 || !runP) return;
+  const ex = $('overExtra');
+  try {
+    const run = await runP; if (!run) return;
+    const r = await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ run, score, kills, combo, secs }) });
+    if (!r.ok) return;
+    const j = await r.json(); lbCache.all = lbCache.week = null;
+    const part = (b, label) => !b ? '' : `<p>${label} rank <b>#${b.rank}</b> · best ${b.best.toLocaleString()}<br>` + (b.next ? `<b>${(b.next.v - b.best).toLocaleString()}</b> pts to pass ${esc(b.next.name)}` : '<b>You lead the board!</b>') + '</p>';
+    if (state === 'over' || state === 'menu') ex.innerHTML = (j.nb ? '<div class="banner">NEW BEST!</div>' : '') + (j.wnb && !j.nb ? '<div class="banner w">NEW WEEKLY BEST!</div>' : '') + (j.nb && j.wnb ? '' : '')
+      + part(j.a, 'All time') + part(j.w, 'This week') + (!j.nb && j.a ? `<p><b>${(j.a.best - score).toLocaleString()}</b> short of your best</p>` : '');
+  } catch (e) {}
   loadLb(true);
 }
 async function loadLb(force) {
   const el = $('menuLb');
   if (!NET.api) { el.innerHTML = '<div class="it"><span>Sign in on boxrun.fun to see the leaderboard.</span></div>'; return; }
-  if (force) lbData = null;
-  if (!lbData) el.innerHTML = '<div class="it"><span>Loading…</span></div>';
+  if (force) { lbCache.all = lbCache.week = null; }
+  if (!lbCache[lbMode]) el.innerHTML = '<div class="it"><span>Loading…</span></div>';
   try {
-    if (!lbData) {
-      const r = await fetch(NET.api + '/pvp/lb?me=' + encodeURIComponent(NET.id)); if (!r.ok) throw 0; lbData = await r.json();
-    }
+    const L = await getLb(lbMode); if (lbMode !== 'all') getLb('all').catch(() => {}); 
     const row = (r, me, i) => `<div class="it ${me ? 'me' : ''} ${i >= 5 ? 'x5' : ''} ${i >= 3 ? 'x3' : ''}"><div><b>#${r.rank} ${esc(r.name)}</b><br><span class="st">${r.k} KO · ${r.c}x combo · ${fmtTime(r.t)}</span></div><b>${Math.floor(r.v).toLocaleString()}</b></div>`;
-    const top = (lbData.top || []).slice(0, 8);
-    el.innerHTML = top.length ? top.map((r, i) => row(r, r.id === NET.id, i)).join('') + (lbData.me && !top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(lbData.me, true, 0) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
+    const top = (L.top || []).slice(0, 8);
+    el.innerHTML = top.length ? top.map((r, i) => row(r, r.id === NET.id, i)).join('') + (L.me && !top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(L.me, true, 0) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
   } catch (e) { el.innerHTML = '<div class="it"><span>Could not load the leaderboard.</span></div>'; }
 }
+document.querySelectorAll('.lbtabs button').forEach(b => b.addEventListener('click', () => {
+  lbMode = b.dataset.w; document.querySelectorAll('.lbtabs button').forEach(x => x.classList.toggle('on', x === b)); loadLb();
+}));
 setTimeout(() => { if (!NET.api) loadLb(); }, 1500);
 requestAnimationFrame(frame);
 })();
