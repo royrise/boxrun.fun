@@ -1288,7 +1288,7 @@ async function openLb() {
     if (!lbData) {
       const r = await fetch(NET.api + '/pvp/lb?me=' + encodeURIComponent(NET.id)); if (!r.ok) throw 0; lbData = await r.json();
     }
-    const b = lbData[lbTab], row = (r, me) => `<div class="it ${me ? 'me' : ''}"><b>#${r.rank} ${esc(r.name)}</b><span>${Math.floor(r.v).toLocaleString()}</span></div>`;
+    const b = lbData[lbTab] || { top: [], me: null }, row = (r, me) => `<div class="it ${me ? 'me' : ''}"><b>#${r.rank} ${esc(r.name)}</b><span>${Math.floor(r.v).toLocaleString()}</span></div>`;
     el.innerHTML = b.top.length ? b.top.map(r => row(r, r.id === NET.id)).join('') + (b.me && !b.top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(b.me, true) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
   } catch (e) { el.innerHTML = '<div class="it"><span>Could not load the leaderboard.</span></div>'; }
 }
