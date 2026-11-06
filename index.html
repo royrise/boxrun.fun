@@ -1108,6 +1108,7 @@ function drawScenery(rects) {
         ctx.globalAlpha = ga * (.04 + .14 * g);
         ctx.fillStyle = 'rgb(255,200,80)'; ctx.fillRect(x, y, TILE, TILE);
         ctx.globalAlpha = ga;
+        ctx.strokeStyle = '#ffc04d'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, TILE - 2, TILE - 2);
       }
     }
   }
@@ -1164,6 +1165,8 @@ function drawIndicators() {
   ctx.globalAlpha = 1;
 }
 
+// the skin equipped in boxrun, handed over by the page that hosts this game (colours, or a pixel-art crate skin)
+function mySkin() { try { const f = parent.__boxSkin; return f ? f() : null; } catch (e) { return null; } }
 function drawBody(e) {
   // faint reach ring
   const ga = ctx.globalAlpha;
@@ -1174,12 +1177,19 @@ function drawBody(e) {
   // the box: turns to face where it's moving, dark visor on the front edge
   if (e.faceSm === undefined) e.faceSm = e.face;
   e.faceSm += (mod(e.face - e.faceSm + Math.PI, TAU) - Math.PI) * 0.2;
-  const r = e.r;
+  const r = e.r, sk = e.isPlayer ? mySkin() : null;
+  if (sk) e.color = sk.p;   // sword and health bar match the equipped skin
   ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.faceSm);
-  ctx.fillStyle = e.flash > 0 ? '#ffffff' : e.color;
-  ctx.fillRect(-r, -r, r * 2, r * 2);
-  ctx.fillStyle = 'rgba(16,16,21,.85)';
-  ctx.fillRect(r - 12, -r + 7, 6, r * 2 - 14);
+  if (sk && sk.bc && !(e.flash > 0)) {
+    const sm = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sk.bc, -r, -r, r * 2, r * 2); ctx.imageSmoothingEnabled = sm;
+    ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1; ctx.strokeRect(-r + .5, -r + .5, r * 2 - 1, r * 2 - 1);
+  } else {
+    ctx.fillStyle = e.flash > 0 ? '#ffffff' : e.color;
+    ctx.fillRect(-r, -r, r * 2, r * 2);
+    if (sk) { ctx.fillStyle = e.flash > 0 ? '#ffffff' : sk.s; ctx.fillRect(r - 7, -r + 4, 5, r * 2 - 8); }
+    else { ctx.fillStyle = 'rgba(16,16,21,.85)'; ctx.fillRect(r - 12, -r + 7, 6, r * 2 - 14); }
+  }
   ctx.restore();
 
   if (e.regen > 0) {
@@ -2171,6 +2181,7 @@ function crCanvas(id,shiny,pc,sc){const sp=crSkin(id);if(!sp)return null;const k
 // the current look of a base skin item [k,shiny,serial] in the given colour ids (rainbow is frozen to the hue at that moment)
 const crQ=css=>css.charCodeAt(0)===104?'hsl('+((Math.round(parseInt(css.slice(4))/15)*15)%360)+',90%,60%)':css;
 const crCan=(b,p,s)=>b?crCanvas(b.k,b.s,crQ(skinCol(p)),crQ(skinCol(s,1))):null;
+window.__boxSkin=()=>{const k=pb.skin,tt=performance.now()/1000,sc=(id,sec)=>{const h=colOf(id).h;return h==='rainbow'?'hsl('+((tt*90+(sec?180:0))%360)+',90%,60%)':h},b=k.b;return {bc:b?crCanvas(b.k,b.s,crQ(sc(k.p)),crQ(sc(k.s,1))):null,p:sc(k.p),s:sc(k.s,1)}};   // BoxPvP draws your equipped skin through this
 const crRb=id=>colOf(id).h==='rainbow';
 const crImg=(b,p,s,px)=>{const c=crCan(b,p,s);if(c&&(crRb(p)||crRb(s))){queueMicrotask(paintCr);return '<canvas width="'+c.width+'" height="'+c.height+'" style="width:'+px+'px;height:'+px+'px;image-rendering:pixelated" data-cr="'+b.k+'|'+(b.s?1:0)+'|'+p+'|'+s+'"></canvas>'}return c?'<img src="'+c.toDataURL()+'" width="'+px+'" height="'+px+'" style="image-rendering:pixelated" alt=""'+(crRb(p)||crRb(s)?' data-cr="'+b.k+'|'+(b.s?1:0)+'|'+p+'|'+s+'"':'')+'>':''};
 // prismatic colours keep cycling in every preview that is on screen (skins page, crates, profile)
