@@ -300,7 +300,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
   .list { width: 100%; max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
   .list .it { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; text-align: left; }
   .list .it.me { border-color: var(--yellow); }
-  .list .it b { color: #fff; } .list .it span { color: var(--muted); }
+  .list .it b { color: #fff; } .list .it span { color: var(--muted); } .list .it .st { font-size: 10px; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -327,7 +327,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
     <div class="tagline">Spin. Flip. Slice.</div>
     <div class="stack">
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> Play</button>
-      <button class="menu-btn" id="lbOpen">Leaderboards</button>
+      <button class="menu-btn" id="lbOpen">Best Runs</button>
       <button class="menu-btn" id="exitPvp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back</button>
     </div>
     <p class="tip"><kbd>WASD</kbd> move &nbsp;·&nbsp; <kbd>SPACE</kbd> / <kbd>CLICK</kbd> flip sword</p>
@@ -358,8 +358,8 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
 
 <div class="overlay hidden lbp" id="lbp">
   <div class="panel">
-    <h2>Leaderboards</h2>
-    <div class="tabs" id="lbTabs"></div>
+    <h2>Best Runs</h2>
+    <p class="tip">Each player's highest scoring life</p>
     <div class="list" id="lbList"></div>
     <button class="menu-btn" id="lbBack">Back</button>
   </div>
@@ -985,7 +985,7 @@ function gameOver(timeUp) {
   best.score = Math.max(best.score, score);
   best.combo = Math.max(best.combo, bestCombo);
   saveBest(); showBest(); updateHud();
-  submitScore(score, player.kills, bestCombo);
+  submitScore(score, player.kills, bestCombo, Math.floor(time));
   document.getElementById('overStats').innerHTML =
     `<b style="font-size:30px;color:var(--yellow)">${score}</b> points${newBest ? ' · <b style="color:var(--blue)">new best!</b>' : ''}<br>` +
     `Rank <b>#${rank}</b> · <b>${player.kills}</b> kills · best combo <b>${bestCombo}x</b> · survived <b>${fmtTime(time)}</b><br>` +
@@ -1275,16 +1275,13 @@ window.addEventListener('message', e => {
   NET.api = d.api || ''; NET.token = d.token || ''; NET.id = d.id || '';
 });
 try { parent.postMessage({ t: 'boxpvp-ready' }, '*'); } catch (e) {}
-let lbData = null, lbTab = 'best';
-async function submitScore(score, kills, combo) {
+let lbData = null;
+async function submitScore(score, kills, combo, secs) {
   if (!NET.api || !NET.token || score <= 0) return;
-  try { await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ score, kills, combo }) }); lbData = null; } catch (e) {}
+  try { await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ score, kills, combo, secs }) }); lbData = null; } catch (e) {}
 }
-const LBT = { best: 'Best score', combo: 'Best combo', score: 'Total score', kills: 'Total kills', games: 'Games' };
 async function openLb() {
   $('menu').classList.add('hidden'); $('lbp').classList.remove('hidden');
-  $('lbTabs').innerHTML = Object.keys(LBT).map(k => `<button data-k="${k}" class="${k === lbTab ? 'on' : ''}">${LBT[k]}</button>`).join('');
-  $('lbTabs').querySelectorAll('button').forEach(b => b.onclick = () => { lbTab = b.dataset.k; openLb(); });
   const el = $('lbList');
   if (!NET.api) { el.innerHTML = '<div class="it"><span>Leaderboards are only on boxrun.fun.</span></div>'; return; }
   el.innerHTML = '<div class="it"><span>Loading…</span></div>';
@@ -1292,8 +1289,9 @@ async function openLb() {
     if (!lbData) {
       const r = await fetch(NET.api + '/pvp/lb?me=' + encodeURIComponent(NET.id)); if (!r.ok) throw 0; lbData = await r.json();
     }
-    const b = lbData[lbTab] || { top: [], me: null }, row = (r, me) => `<div class="it ${me ? 'me' : ''}"><b>#${r.rank} ${esc(r.name)}</b><span>${Math.floor(r.v).toLocaleString()}</span></div>`;
-    el.innerHTML = b.top.length ? b.top.map(r => row(r, r.id === NET.id)).join('') + (b.me && !b.top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(b.me, true) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
+    const row = (r, me) => `<div class="it ${me ? 'me' : ''}"><div><b>#${r.rank} ${esc(r.name)}</b><br><span class="st">${r.k} KO · ${r.c}x combo · ${fmtTime(r.t)}</span></div><b>${Math.floor(r.v).toLocaleString()}</b></div>`;
+    const top = lbData.top || [];
+    el.innerHTML = top.length ? top.map(r => row(r, r.id === NET.id)).join('') + (lbData.me && !top.some(r => r.id === NET.id) ? '<div class="it"><span>…</span></div>' + row(lbData.me, true) : '') : '<div class="it"><span>No scores yet. Be the first!</span></div>';
   } catch (e) { el.innerHTML = '<div class="it"><span>Could not load the leaderboard.</span></div>'; }
 }
 $('lbOpen').addEventListener('click', openLb);
