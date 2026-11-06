@@ -1354,17 +1354,18 @@ function startRun() {
   runP = fetch(NET.api + '/pvp/start', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token } }).then(r => r.json()).then(j => j.run || null).catch(() => null);
 }
 async function submitScore(score, kills, combo, secs) {
-  if (!NET.api || !NET.token || score <= 0 || !runP) return;
-  const ex = $('overExtra');
+  if (!NET.api || !NET.token || score <= 0) return;
+  const ex = $('overExtra'), fail = m => { if (state === 'over') ex.innerHTML = `<p style="color:#ff8a8a">Score not saved: ${esc(m)}</p>`; };
+  if (!runP) return fail('not connected to the server (try reloading the game).');
   try {
-    const run = await runP; if (!run) return;
+    const run = await runP; if (!run) return fail('could not start a run on the server.');
     const r = await fetch(NET.api + '/pvp/score', { method: 'POST', headers: { Authorization: 'Bearer ' + NET.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ run, score, kills, combo, secs }) });
-    if (!r.ok) return;
+    if (!r.ok) { let m = 'the server said ' + r.status; try { m = (await r.json()).error || m; } catch (e) {} return fail(m); }
     const j = await r.json(); lbCache.all = lbCache.week = null;
     const part = (b, label) => !b ? '' : `<p>${label} rank <b>#${b.rank}</b> · best ${b.best.toLocaleString()}<br>` + (b.next ? `<b>${(b.next.v - b.best).toLocaleString()}</b> pts to pass ${esc(b.next.name)}` : '<b>You lead the board!</b>') + '</p>';
     if (state === 'over' || state === 'menu') ex.innerHTML = (j.nb ? '<div class="banner">NEW BEST!</div>' : '') + (j.wnb && !j.nb ? '<div class="banner w">NEW WEEKLY BEST!</div>' : '') + (j.nb && j.wnb ? '' : '')
       + part(j.a, 'All time') + part(j.w, 'This week') + (!j.nb && j.a ? `<p><b>${(j.a.best - score).toLocaleString()}</b> short of your best</p>` : '');
-  } catch (e) {}
+  } catch (e) { fail('network error.'); }
   loadLb(true);
 }
 async function loadLb(force) {
