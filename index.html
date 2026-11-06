@@ -351,6 +351,7 @@ body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
     <div class="stack">
       <button class="menu-btn primary" data-start><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> Play</button>
       <button class="menu-btn" data-o="open">Online</button>
+      <button class="menu-btn" id="exitPvp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg> Back</button>
     </div>
     <p class="tip"><kbd>WASD</kbd> move &nbsp;·&nbsp; <kbd>SPACE</kbd> / <kbd>CLICK</kbd> flip sword</p>
     <p class="tip" id="bestLine"></p>
@@ -711,6 +712,7 @@ document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click
 document.getElementById('resume').addEventListener('click', togglePause);
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
 document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goMenu));
+document.getElementById('exitPvp').addEventListener('click', () => { try { parent.postMessage('boxpvp-exit', '*'); } catch (e) {} });
 // keep Space from re-pressing whatever button was clicked last
 document.querySelectorAll('button').forEach(b => b.addEventListener('click', () => b.blur()));
 function goMenu() {
