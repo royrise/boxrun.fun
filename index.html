@@ -223,6 +223,8 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #netwarn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 70px);left:50%;transform:translateX(-50%);z-index:8;background:#7a1f1f;border:1px solid #ff6b6b;color:#fff;padding:8px 16px;border-radius:10px;font:700 14px system-ui,sans-serif;max-width:92vw;text-align:center;pointer-events:none}#netwarn[hidden]{display:none}
 body.nokeys #inpd{display:none!important}body.nobg #menubg{display:none}
 #p-settings{width:min(560px,94vw)}#setbody{display:flex;flex-direction:column;gap:10px;margin:6px 0 18px;text-align:left}.srw{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#2a2d44;border:1px solid #4a4d63;border-radius:12px;padding:12px 16px;font-size:16px}.srg{display:flex;align-items:center;gap:10px;flex:1;max-width:240px}.srg input{flex:1;min-width:0}.srg output{width:44px;text-align:right;font-variant-numeric:tabular-nums;opacity:.8}.stg,#menu #p-settings .stg{min-width:64px;padding:8px 14px;border-radius:10px;border:1px solid #4a4d63;background:#1a1a22;color:#8a8fb0;font:inherit;font-size:15px;cursor:pointer}.stg.on,#menu #p-settings .stg.on{background:#1f9d5c!important;border-color:#2fd37a!important;color:#fff!important}#menu #p-settings .stg:not(.on){background:#1a1a22!important;color:#8a8fb0!important}.srst{opacity:.8}
+#menu #p-pmenu .bars.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:900px){#menu #p-pmenu .bars.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:460px){#menu #p-pmenu .bars.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1000px),(max-height:520px) and (min-width:600px){#menu #p-pmenu .bars.tiles{grid-template-columns:repeat(5,minmax(0,1fr))}#menu #p-pmenu .bars.tiles .bar{font-size:clamp(12px,1.5vw,20px);gap:12px;padding:8px}#menu #p-pmenu [data-a=lbmenu]{grid-column:auto;grid-row:auto}}
 </style>
 </head>
 <body>
@@ -1467,12 +1469,16 @@ function show(id){newHint();if(mp&&!mp.inGame&&!mp.nav&&id!=='mp')mpLeave();
   try{if(id!=='profile')gateNote=''}catch(e){}
   if(id==='main')navStack=[];else if(!navBack&&lastPanel!==id){navStack.push(lastPanel);if(navStack.length>30)navStack.shift()}
   lastPanel=id;resume={stack:navStack.slice(),panel:id};
-  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','duel','mp','mpmenu','lbmenu','quests','settings'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id);alignHead();requestAnimationFrame(alignHead);setTimeout(alignHead,350)}
+  closeSide();document.getElementById('topback').hidden=id==='main';['main','levels','stats','lb','skins','comm','endless','profile','weekly','contrib','pmenu','emenu','duel','mp','mpmenu','lbmenu','quests','settings'].forEach(n=>document.getElementById('p-'+n).hidden=n!==id);fitPanel();alignHead();requestAnimationFrame(()=>{fitPanel();alignHead()});setTimeout(()=>{fitPanel();alignHead()},350)}
 // when a panel starts at the very top of the screen (phones), its heading is lined up with the back arrow instead of sitting beside it at a different height
+// menus that should never need scrolling: if one is taller than the screen, shrink it to fit (never below half size)
+const FITP=['main','pmenu','mpmenu','emenu','settings','contrib'];
+function fitPanel(){try{const m=document.getElementById('menu');if(!m||m.hidden)return;const el=[...document.querySelectorAll('#menu .panel')].find(x=>!x.hidden);if(!el)return;el.style.zoom='';if(!FITP.includes(el.id.slice(2)))return;
+  const avail=innerHeight-20,cz=parseFloat(getComputedStyle(el).zoom)||1;let h=el.getBoundingClientRect().height;if(h<=avail)return;let z=cz;for(let i=0;i<4&&h>avail+1;i++){z=Math.max(cz*.5,z*avail/h);el.style.zoom=z;h=el.getBoundingClientRect().height}}catch(e){}}
 function alignHead(){try{const b=document.getElementById('topback');if(!b||b.hidden)return;const br=b.getBoundingClientRect();document.querySelectorAll('#menu .panel h2').forEach(h=>{h.style.marginTop=''});
   const p=[...document.querySelectorAll('#menu .panel')].find(x=>!x.hidden),h=p&&p.querySelector('h2');if(!h)return;const hr=h.getBoundingClientRect();if(!hr.height||hr.top>br.bottom)return;
   const z=hr.height/(h.offsetHeight||1)||1,d=(br.top+br.height/2)-(hr.top+hr.height/2);if(d>1)h.style.marginTop=(d/z)+'px'}catch(e){}}
-addEventListener('resize',()=>alignHead());
+addEventListener('resize',()=>{fitPanel();alignHead()});
 function navPrev(){if(navStack.length){const prev=navStack.pop(),keep=navStack.slice();navBack=true;openPanel(prev);navBack=false;navStack=keep;resume={stack:keep.slice(),panel:prev}}else show('main')}
 function openPanel(id){   // show a panel again, refreshing the ones whose content can change
   try{if(id==='levels')buildLevels();else if(id==='skins')buildSkins();else if(id==='stats')buildStats();else if(id==='comm')showComm();else if(id==='endless')openEndless();else if(id==='weekly')openWeekly();else if(id==='profile')showProfile();else if(id==='lb')showLB('run3')}catch(e){}
