@@ -2844,6 +2844,7 @@ async function dPoll(){
 function dTick(r){
   if(!duel||duel.done)return;
   if(duel.waiting&&r.st==='wait'&&r.queue!=null&&!duel.code)document.getElementById('dwt').textContent='Looking for an opponent\u2026 '+r.queue+' in queue';
+  if(r.st==='void'){dVoid();return}
   duel.opp=r.opp;
   if(r.st==='play'&&r.opp&&r.opp.g){const nw=performance.now(),g=r.opp.g,o=duel.gh;
     const O=duel.ghs||(duel.ghs={});
@@ -2852,6 +2853,13 @@ function dTick(r){
   duel.me=r.me;duel.ranked=!!r.ranked;duel.goal=r.goal||1000;
   if(duel.waiting&&r.st==='play'){duel.waiting=false;dStart(r);clearInterval(dTmr);dTmr=setInterval(dPoll,500);return}
   if(r.st==='done'){dFinish(r)}
+}
+function dVoid(){   // the server cancelled the match because one player never joined: nobody loses and no rating changes
+  if(!duel||duel.done)return;
+  const waiting=duel.waiting;duel.done=true;clearInterval(dTmr);dTmr=null;
+  if(waiting){dEnd();dWait(false);dNote('That match was cancelled because it started while you were away. No rating change.');return}
+  if(state==='play'||state==='dead'){state='over';timer=1e9}
+  banner.innerHTML='<b>Match cancelled</b><small>Your opponent never joined. No rating change.</small><div class="bb"><button data-b="menu" class="pri">Back to menu</button></div>';banner.style.opacity=1;
 }
 function dStart(r){
   dWait(false);
