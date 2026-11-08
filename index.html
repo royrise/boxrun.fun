@@ -722,7 +722,7 @@ function update(dt) {
     const l = Math.hypot(ax, ay); if (l > 1) { ax /= l; ay /= l; }
     player.vx += ax * STATS.accel * dt; player.vy += ay * STATS.accel * dt;
     capSpeed(player, STATS.speed * player.speedMul, dt);
-    player.score += 2 * dt; // survival points
+    if (Math.hypot(player.vx, player.vy) > 40 || time - player.lastHit < 3) player.score += 2 * dt; // survival points (no points for sitting still)
   }
 
   // AI
@@ -901,7 +901,12 @@ function hit(a, b, cx, cy) {
 
   // scoring
   let pts = 10; const tags = [];
-  if (a.combo >= 2) { pts += 10 * (a.combo - 1); tags.push(`${a.combo}x Combo`); }
+  if (a.combo >= 2) { pts += 10 * (Math.min(a.combo, 5) - 1); tags.push(`${a.combo}x Combo`); }
+  // hitting the same opponent over and over earns less (resets after 6 s without hitting them)
+  const fh = a.farm || (a.farm = {}), fe = fh[b.id];
+  fh[b.id] = (fe && time - fe.t < 6) ? { t: time, n: fe.n + 1 } : { t: time, n: 1 };
+  const fm = Math.max(0.2, 1 - 0.1 * (fh[b.id].n - 4));
+  if (fm < 1) pts = Math.max(2, Math.round(pts * fm));
   if (snap) { pts += 15; tags.push('Snap'); }
   if (counter) { pts += 40; tags.push('Counter'); }
   award(a, pts, tags.length ? tags.join(' + ') : 'Hit');
@@ -944,12 +949,16 @@ function kill(e) {
   if (k) {
     k.kills++;
     let pts = 100; const tags = ['KO'];
+    const kl = k.killLog || (k.killLog = {}), recent = (kl[e.name] || []).filter(t => time - t < 40);
+    recent.push(time); kl[e.name] = recent;
+    const km = Math.max(0.2, 1 - 0.3 * (recent.length - 1));   // 2nd kill of the same opponent within 40 s = 70%, then 40%, then 20%
     if (time - k.lastKill < 3) { pts += 150; tags.push('Multi KO'); }
     if (k.combo >= 3) { pts += 50; tags.push('Combo finish'); }
     if (k.lastAttacker === e.id) { pts += 50; tags.push('Revenge'); k.lastAttacker = null; }
     if (leader === e && e.score >= 150) { pts += 100; tags.push('Bounty'); }
     if (e.hazardKill) { pts += 50; tags.push('Lava'); }
     k.lastKill = time;
+    pts = Math.max(10, Math.round(pts * km));
     award(k, pts, tags.join(' + '));
     if (k.isPlayer) {
       floatText(e.x, e.y, 'KO', '#ffd166', 16, .7);
