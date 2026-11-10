@@ -196,7 +196,7 @@ body.menuopen #hud,body.menuopen #msg{visibility:hidden!important}
 #epal{display:inline-flex;flex-wrap:wrap;gap:6px;max-width:100%}
 #eanc{display:inline-grid;grid-template-columns:repeat(3,12px);gap:2px}#etools #eanc button{width:12px;height:12px;padding:0;border-radius:2px;border-color:#4a4d63}#etools #eanc button.on{background:#5ec8ff;border-color:#fff}#epal button{padding:4px 6px!important;line-height:0}#epal button svg{display:block}
 #etext{font:inherit;font-size:13px;color:#eef;background:#2a2d44;border:1px solid #4a4d63;border-radius:8px;padding:4px 8px;width:190px;height:44px;resize:none;vertical-align:middle}
-#etools input[type=color]{width:36px;height:30px;padding:2px;vertical-align:middle}
+#etools input[type=color]{width:36px;height:30px;padding:2px;vertical-align:middle}@media(pointer:coarse){#etools input:not([type=color]),#etools select,#etools textarea{font-size:16px}#etools input[type=number]{width:64px}}   /* 16px stops phones zooming the page in when a box is tapped */
 #profbody{display:flex;flex-direction:column;gap:6px;text-align:left;font-size:19px}
 #p-profile{width:min(460px,100%)}
 #profbody .srow{justify-content:flex-start;gap:10px}
@@ -3662,6 +3662,7 @@ function eBarDrag(bar,vert){
     bar.addEventListener('pointermove',mv);bar.addEventListener('pointerup',up);bar.addEventListener('pointercancel',up)});
 }
 eBarDrag(esbH,false);eBarDrag(esbV,true);
+document.getElementById('etools').addEventListener('focusout',()=>setTimeout(()=>{try{window.scrollTo(0,0)}catch(e){}},50));
 function eZoom(f,px,py){const tx=(px-eo.x)/eo.cs,ty=(py-eo.y)/eo.cs,r=ec.getBoundingClientRect();ezoom=Math.max(1,Math.min(ezoom*f,Math.max(1,96/efit)));const cs=efit*ezoom;ecx=tx-(px-r.width/2)/cs;ecy=ty-(py-r.height/2)/cs;eRender()}
 ec.addEventListener('wheel',e=>{e.preventDefault();const q=ec.getBoundingClientRect();eZoom(Math.exp(-e.deltaY*(e.ctrlKey?.01:.0022)),e.clientX-q.left,e.clientY-q.top)},{passive:false});
 ec.addEventListener('pointerdown',e=>{if(e.button===1||espace||ehand){e.stopImmediatePropagation();e.preventDefault();ec.setPointerCapture(e.pointerId);epan={x:e.clientX,y:e.clientY,cx:ecx,cy:ecy,cs:eo.cs};ec.style.cursor='grabbing'}});
