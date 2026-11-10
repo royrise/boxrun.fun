@@ -1437,7 +1437,7 @@ requestAnimationFrame(frame);
  <div id="etools">
   <div class="erow"><input id="ename" maxlength="24" placeholder="Level name" value="My level">
    <span class="grp"><input id="ew" type="number" min="6" max="100" title="Width"><span>×</span><input id="eh" type="number" min="6" max="100" title="Height"><span id="eanc" title="Resize anchor: the highlighted square is the part of the level that stays put"></span><button data-e="resize">Resize</button></span>
-   <span class="grp"><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
+   <span class="grp"><button data-e="undo" title="Undo (Z)">↶ Undo</button><button data-e="redo" title="Redo (Shift+Z or Y)">Redo ↷</button><button data-e="new" title="Start a new empty level">New</button><button data-e="save">Save</button><button data-e="export" title="Save this level to a file">Export</button><button data-e="import" title="Load a level file">Import</button><input type="file" id="efile" accept=".json,application/json" hidden></span>
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="share" class="shareb" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="back">Back</button></span></div>
   
   <div class="erow"><span id="epal"></span></div>
@@ -2097,7 +2097,7 @@ function loop(now){
 }
 const map={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right'};
 addEventListener('keydown',e=>{
-  if(!editorEl.hidden&&!['INPUT','TEXTAREA'].includes(e.target.tagName)&&['z','r'].includes(e.key.toLowerCase())){e.key.toLowerCase()==='z'?eUndoDo():eRot();return}
+  if(!editorEl.hidden&&!['INPUT','TEXTAREA'].includes(e.target.tagName)&&['z','y','r'].includes(e.key.toLowerCase())){const k=e.key.toLowerCase();if(k==='y'||(k==='z'&&e.shiftKey))eRedoDo();else if(k==='z')eUndoDo();else eRot();return}
   if(!editorEl.hidden&&!['INPUT','TEXTAREA'].includes(e.target.tagName)){
     if(e.key==='Delete'||e.key==='Backspace'){selClear();e.preventDefault();return}
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){selAll();e.preventDefault();return}
@@ -3375,7 +3375,7 @@ const GRP={'>':'>v<^','H':'HV'},lastDir={'>':'>','H':'H'},grpOf=t=>'>v<^'.includ
 const nextDir=g=>{const q=GRP[g];return grpOf(etool)===g?q[(q.indexOf(etool)+1)%q.length]:lastDir[g]};
 let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t;
 function markTool(){if(NOFILL.includes(etool))efill=false;for(const g in GRP)if(grpOf(etool)===g)lastDir[g]=etool;document.querySelectorAll('#epal button[data-t]').forEach(b=>{const gb=grpOf(b.dataset.t);b.classList.toggle('on',gb?gb===grpOf(etool):b.dataset.t===etool);if(gb){const ic=ICONS[lastDir[gb]];if(b._ic!==ic){b._ic=ic;b.innerHTML=ic}}});const bk=document.querySelector('#epal [data-bucket]');if(bk){bk.classList.toggle('on',efill);bk.disabled=NOFILL.includes(etool)}ec.style.cursor=efill?'cell':'';const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';updRot()}
-let eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
+let eRedo=[],eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
 // selection: a set of 'x,y' tiles; drag a rectangle (Shift/+ Add adds, Alt removes), then Delete clears them
 let esel=new Set(),selA=null,selB=null,selMode='set',selAdd=false;
 const cellAt=e=>{const r=ec.getBoundingClientRect(),x=Math.floor((e.clientX-r.left-eo.x)/eo.cs),y=Math.floor((e.clientY-r.top-eo.y)/eo.cs);return [Math.max(0,Math.min(eg[0].length-1,x)),Math.max(0,Math.min(eg.length-1,y))]};
@@ -3449,8 +3449,11 @@ markAnc();const toolShape={'#':'f','L':'f','P':'f','I':'f','G':'f'},SHT='#LPIG',
 const eovClean=()=>cleanOv(eov,eg.map(r=>r.join('')));
 const etxClean=()=>cleanTx(etx,eg.map(r=>r.join('')));
 function eshpClean(){const o={};for(const k in eshp){const [x,y]=k.split(',').map(Number),v=eg[y]&&eg[y][x];if(v&&SHT.includes(v))o[k]=eshp[k]}return o}
-function ePush(){eUndo.push({g:eg.map(r=>r.slice()),s:JSON.stringify(eshp),o:JSON.stringify(eov),x:JSON.stringify(etx),a:esa});if(eUndo.length>100)eUndo.shift();eDirty=true}
-function eUndoDo(){if(paste){cancelPaste();return}const u=eUndo.pop();if(u){esel=new Set();eg=u.g;eshp=JSON.parse(u.s);eov=JSON.parse(u.o||'{}');etx=JSON.parse(u.x||'{}');esa=u.a||0;eRender();draftSoon()}}
+function eSnap(){return {g:eg.map(r=>r.slice()),s:JSON.stringify(eshp),o:JSON.stringify(eov),x:JSON.stringify(etx),a:esa}}
+function eRestore(u){esel=new Set();eg=u.g;eshp=JSON.parse(u.s);eov=JSON.parse(u.o||'{}');etx=JSON.parse(u.x||'{}');esa=u.a||0;eRender();draftSoon()}
+function eRedoDo(){if(paste)return;const u=eRedo.pop();if(u){eUndo.push(eSnap());eRestore(u);eDirty=true}}
+function ePush(){eRedo=[];eUndo.push({g:eg.map(r=>r.slice()),s:JSON.stringify(eshp),o:JSON.stringify(eov),x:JSON.stringify(etx),a:esa});if(eUndo.length>100)eUndo.shift();eDirty=true}
+function eUndoDo(){if(paste){cancelPaste();return}const u=eUndo.pop();if(u){eRedo.push(eSnap());esel=new Set();eg=u.g;eshp=JSON.parse(u.s);eov=JSON.parse(u.o||'{}');etx=JSON.parse(u.x||'{}');esa=u.a||0;eRender();draftSoon()}}
 // save / load a level as a file
 let dlNS=null;(async()=>{try{if(window.claude)dlNS=await claude.use('downloads')}catch(e){}})();
 // save a file: through the host's file-saving capability when there is one, otherwise a normal browser download (works on any website)
@@ -3529,7 +3532,7 @@ addEventListener('pagehide',flushDraft);addEventListener('beforeunload',flushDra
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushDraft()});
 document.getElementById('ename').addEventListener('input',()=>{eDirty=true;draftSoon()});
 function openEditor(id){
-  if(id!==undefined){selReset();eUndo=[];eid=id;const c=id&&customs.find(c=>c.id===id);
+  if(id!==undefined){selReset();eUndo=[];eRedo=[];eid=id;const c=id&&customs.find(c=>c.id===id);
     eshp=c&&c.sh?JSON.parse(JSON.stringify(c.sh)):{};
     eov=c&&c.ov?JSON.parse(JSON.stringify(c.ov)):{};
     etx=c&&c.tx?JSON.parse(JSON.stringify(c.tx)):{};
@@ -3706,6 +3709,8 @@ editorEl.addEventListener('click',e=>{
   else if(a==='seldel')selClear();
   else if(a==='selnone'){esel=new Set();selNote();eRender()}
   else if(a==='seladd'){selAdd=!selAdd;b.classList.toggle('on',selAdd)}
+  else if(a==='undo'){eUndoDo()}
+  else if(a==='redo'){eRedoDo()}
   else if(a==='new'){ePush();esel=new Set();eid=null;eg=newGrid(20,12,true);eshp={};eov={};etx={};esa=0;etg=[];renderETags();document.getElementById('ename').value='My level';document.getElementById('ew').value=20;document.getElementById('eh').value=12;eDirty=false;dropDraft('new');eRender();eStat('New level')}
   else if(a==='export')eExport();
   else if(a==='import')document.getElementById('efile').click();
