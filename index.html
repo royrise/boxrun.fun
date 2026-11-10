@@ -1979,7 +1979,7 @@ function update0(dt){
     bcd=Math.max(0,bcd-dt);tpK=Math.max(0,tpK-dt/.5);
     if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){bturn=Math.PI;bcd=1;bump('bounces')}
     {const ch=tile(Math.floor(p.x),Math.floor(p.y));
-      if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].find(q=>q[0]!==cx||q[1]!==cy);if(o){bump('tps');tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
+      if(ch>='1'&&ch<='3'&&portals[ch]){if(!tpLock){const cx=Math.floor(p.x),cy=Math.floor(p.y),o=portals[ch].reduce((b,q)=>{if(q[0]===cx&&q[1]===cy)return b;const d=(q[0]-cx)**2+(q[1]-cy)**2;return(!b||d<b.d)?{q,d}:b},null);o=o&&o.q;if(o){bump('tps');tpFrom={x:p.x,y:p.y};tpK=1;p.x=o[0]+.5;p.y=o[1]+.5;tpLock=true;rec.push([gt,p.x,p.y,p.a]);lastRec=gt}}}else tpLock=false}
     if(gt-lastRec>=1/30){rec.push(mode==='endless'?[gt,p.x-eSh.x,p.y-eSh.y,p.a]:[gt,p.x,p.y,p.a]);lastRec=gt}
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),ck=fx+','+fy;
       if(tile(fx,fy)==='K'){if(fell[ck]){state='dead';timer=0.7;deaths++;playTick(segT);if(mode!=='test'&&!practice){pb.deaths=(pb.deaths||0)+1;savePB()}return}else if(crumb[ck]==null)crumb[ck]=.4}}
