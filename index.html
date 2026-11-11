@@ -2065,8 +2065,8 @@ function draw(){
   ctx.save();ctx.translate(p.x*U,p.y*U);ctx.rotate(p.a);ctx.scale(1-.6*tpK,1-.6*tpK);ctx.globalAlpha=1-.5*tpK;
   const s=SIZE*U;
   {
-  const bc=pb.skin.b&&state!=='dead'?crCan(pb.skin.b,pb.skin.p,pb.skin.s):null;
-  if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm;ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1;ctx.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1)}else{
+  const bc=pb.skin.b?crCan(pb.skin.b,pb.skin.p,pb.skin.s):null;
+  if(bc){const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(bc,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm;if(state==='dead'){ctx.fillStyle='rgba(255,40,40,.62)';ctx.fillRect(-s/2,-s/2,s,s)}ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1;ctx.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1)}else{
   ctx.fillStyle=state==='dead'?'#ff4d4d':skinCol(pb.skin.p);ctx.fillRect(-s/2,-s/2,s,s);
   ctx.fillStyle=skinCol(pb.skin.s,1);ctx.fillRect(s/2-7,-s/2+4,5,s-8)}} // front marker
   ctx.restore();
