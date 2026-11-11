@@ -1617,7 +1617,7 @@ store.set('boxrunCheck','1');
 let pb={levels:[],run:null};
 try{const s=store.get('cubeRunnerPB');if(s)pb=Object.assign(pb,JSON.parse(s))}catch(e){}
 function savePB(){const ok=store.set('cubeRunnerPB',JSON.stringify(pb));if(bootDone)pushProfile();return ok}
-function respawn(){if(state==='win'||state==='menu')return;flushNotes();lp=null;keyGot=new Set(cp.k&&keyCp?keyCp:[]);if(!cp.k){crumb={};fell={};mvT=0}bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;mvT+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
+function respawn(){if(state==='win'||state==='menu')return;flushNotes();lp=null;if(!cp.k){crumb={};fell={};mvT=0}bcd=0;bturn=0;tpLock=false;tpK=0;p={x:cp.x,y:cp.y,a:cp.a};if(touching(p.x,p.y,p.a,['#'])&&!resolve(.6)){const q=Math.PI/2;cp.a=Math.round(cp.a/q)*q;p={x:cp.x,y:cp.y,a:cp.a};resolve(.6)}{const l0=lt,g0=gt;let g=0;while(movers.length&&g<360&&touching(p.x,p.y,p.a,['#'])){lt+=1/60;gt+=1/60;mvT+=1/60;g++}if(touching(p.x,p.y,p.a,['#'])){lt=l0;gt=g0}}attempts++;segT=0;wasIce=false;state='play';if(cp.k){rec.push([gt,p.x,p.y,p.a,1]);lastRec=gt}else{lt=0;rec=[[0,p.x,p.y,p.a]];lastRec=0;gt=0}gi=0}
 let fullRun=false;
 if(!pb.ghosts)pb.ghosts=[];
 let rec=[],lastRec=0,ghost=null,gi=0,gt=0,extGhost=null,pendingGhost=null;
