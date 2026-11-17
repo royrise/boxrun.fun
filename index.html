@@ -1804,10 +1804,10 @@ function fillTile(x,y){
   const sh=shapes[x+','+y];if(!sh){ctx.fillRect(x*U,y*U,U,U);return}
   ctx.beginPath();polyOf(x,y,sh).forEach(([X,Y],i)=>i?ctx.lineTo(X*U,Y*U):ctx.moveTo(X*U,Y*U));ctx.closePath();ctx.fill();
 }
-function drawCannon(c,px,py,s,d,ph){c.save();c.translate(px+s/2,py+s/2);c.rotate(d*Math.PI/2);
-  c.fillStyle='#2b2d42';c.fillRect(-s/2+2,-s/2+2,s-4,s-4);c.strokeStyle='#e8541a';c.lineWidth=Math.max(2,s*.06);c.fillStyle='#14141c';
-  c.beginPath();c.rect(0,-s*.14,s*.46,s*.28);c.fill();c.stroke();c.beginPath();c.arc(0,0,s*.26,0,7);c.fillStyle='#3a3d55';c.fill();c.stroke();
-  if(ph>0){c.fillStyle='rgba(255,150,40,'+ph+')';c.beginPath();c.arc(s*.46,0,s*.13,0,7);c.fill()}c.restore()}
+function drawCannon(c,px,py,s,d,ph){c.save();c.translate(px+s/2,py+s/2);c.fillStyle='#1a1014';c.fillRect(-s/2,-s/2,s,s);c.strokeStyle='#e8541a';c.lineWidth=Math.max(2,s*.07);c.strokeRect(-s/2+s*.05,-s/2+s*.05,s*.9,s*.9);
+  c.rotate(d*Math.PI/2);c.fillStyle='#e8541a';c.strokeStyle='#ffb347';c.lineWidth=Math.max(1.5,s*.04);c.beginPath();c.rect(0,-s*.15,s*.42,s*.3);c.fill();c.stroke();
+  c.fillStyle='#2b1a1a';c.strokeStyle='#ffb347';c.beginPath();c.arc(0,0,s*.24,0,7);c.fill();c.stroke();c.fillStyle='#ff7a2a';c.beginPath();c.arc(0,0,s*.09,0,7);c.fill();
+  if(ph>0){c.fillStyle='rgba(255,230,120,'+ph+')';c.beginPath();c.arc(s*.44,0,s*.14,0,7);c.fill()}c.restore()}
 function drawDoor(c,px,py,s,n){c.save();c.fillStyle='#202236';c.fillRect(px+2,py+2,s-4,s-4);c.strokeStyle='#5ec8ff';c.lineWidth=Math.max(2,s*.06);c.strokeRect(px+s*.1,py+s*.1,s*.8,s*.8);
   keyGlyph(c,px-s*.1,py-s*.02,s*.6);c.font='800 '+Math.round(s*.4)+'px Orbitron,system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';c.fillText(String(n),px+s*.7,py+s*.52);c.restore()}
 function keyGlyph(c,px,py,s){c.save();c.translate(px+s/2,py+s/2);c.rotate(-.6);c.lineCap='round';c.lineJoin='round';
@@ -3376,7 +3376,7 @@ let efill=false;const NOFILL=['S','H','V','N','O','1','2','3','sel','txt'];
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
 // editor zoom: ezoom 1 = whole level fits the screen; ecx/ecy = the tile at the centre of the view
 let ezoom=1,ecx=0,ecy=0,efit=30,ehand=false,espace=false,epan=null;
-const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['Y','Key (collect them all to finish the level)'],['N','Cannon (click again or press N to turn it). Its bullets are lava'],['O','Locked door (opens when you have enough keys)'],['>','Wind (click again or press A to turn it)'],['H','Moving wall (click again or press H to switch sideways / up-down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','Y':'#1e1e2a','N':'#4a4d63','O':'#4a4d63','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
+const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['Y','Key (collect them all to finish the level)'],['N','Cannon (click again or press N to turn it). Its bullets are lava'],['O','Locked door (opens when you have enough keys)'],['>','Wind (click again or press A to turn it)'],['H','Moving wall (click again or press H to switch sideways / up-down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','Y':'#1e1e2a','N':'#1a1014','O':'#202236','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
   '#':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.5"/><path d="M2 9h20M2 16h20M9 2v7M15 9v7M9 16v6" stroke="#9a9fc0" stroke-width="1" fill="none"/>'),
@@ -3393,7 +3393,7 @@ const ICONS={
   'v':'<svg viewBox="0 0 24 24" width="24" height="24"><rect x="2" y="2" width="20" height="20" rx="2" fill="#1e2a38" stroke="#4a4d63"/><g transform="rotate(90 12 12)" stroke="#bfeaff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l5 5-5 5M13 7l5 5-5 5"/></g></svg>',
   'K':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#1e1e2a" stroke="#4a4d63"/><path d="M4 5l6 5-1 4 6 4 4 3M10 10l6-3 4 1M9 14l-3 5" stroke="#9aa0c8" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'),
   'Y':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#1e1e2a"/><g fill="none" stroke="#5ec8ff" stroke-width="2.4" stroke-linecap="round"><circle cx="8.5" cy="15.5" r="3.6"/><path d="M11 13l8-8M16 8l2.5 2.5M13.5 10.5l2 2"/></g>'),
-  'N':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#2b2d42"/><rect x="12" y="9" width="10" height="6" fill="#14141c" stroke="#e8541a" stroke-width="1.5"/><circle cx="11" cy="12" r="5.5" fill="#3a3d55" stroke="#e8541a" stroke-width="1.5"/>'),
+  'N':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#1a1014" stroke="#e8541a" stroke-width="1.8"/><rect x="12" y="9" width="9" height="6" fill="#e8541a" stroke="#ffb347" stroke-width="1"/><circle cx="11" cy="12" r="5.2" fill="#2b1a1a" stroke="#ffb347" stroke-width="1.3"/><circle cx="11" cy="12" r="1.8" fill="#ff7a2a"/>'),
   'O':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#202236" stroke="#5ec8ff" stroke-width="1.5"/><rect x="7" y="11" width="10" height="8" rx="1.5" fill="#5ec8ff"/><path d="M9 11V8.5a3 3 0 016 0V11" fill="none" stroke="#5ec8ff" stroke-width="2"/>'),
   'C':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#3a3d55"/><rect x="8" y="4" width="2" height="16" fill="#ddd"/><path d="M10 5l9 4-9 4z" fill="#2fd37a"/>'),
   'M':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#5a3d22"/><circle cx="8" cy="8" r="2.5" fill="#8a6238"/><circle cx="16" cy="10" r="3" fill="#8a6238"/><circle cx="10" cy="16" r="3" fill="#8a6238"/>'),
@@ -3411,7 +3411,7 @@ const EKEY={'#':'W','L':'L','P':'P','I':'I','.':'E','S':'S','G':'G','B':'B','M':
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" data-hk="'+EKEY[t[0]]+'" title="'+t[1]+' ('+EKEY[t[0]]+')" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('')+'<button data-bucket="1" data-hk="F" title="Fill (F)" aria-label="Fill">'+ICONS.bucket+'</button>';
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
 for(const c of 'abcdefghijklmnop')ECOL[c]='#1e1e2a';
-for(let i=0;i<80;i++)ECOL[String.fromCharCode(CN0+i)]='#4a4d63';for(let i=0;i<20;i++)ECOL[String.fromCharCode(DR0+i)]='#4a4d63';
+for(let i=0;i<80;i++)ECOL[String.fromCharCode(CN0+i)]='#1a1014';for(let i=0;i<20;i++)ECOL[String.fromCharCode(DR0+i)]='#4a4d63';
 let cnd=0,cnr=1,cns=1,drn=1;
 const cnTxt=()=>{document.getElementById('cnd').textContent=['\u25b6','\u25bc','\u25c0','\u25b2'][cnd];document.getElementById('cnr').textContent='every '+CN_RATE[cnr]+'s';document.getElementById('cns').textContent=CN_SPD[cns]+' tiles/s';document.getElementById('drn').textContent=drn};
 // wind and moving walls are one tool each: click it again (or press R) to turn it, and what you place next follows
