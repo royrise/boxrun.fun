@@ -1442,7 +1442,7 @@ requestAnimationFrame(frame);
    <span class="grp"><button data-e="test">▶ Test</button><button data-e="share" class="shareb" title="Save this level and share it with everyone in Community levels">Share</button><button data-e="back">Back</button></span></div>
   
   <div class="erow"><span id="epal"></span></div>
-  <div class="erow"><span class="grp" id="ezoomg"><button data-e="zout" title="Zoom out (-)">−</button><button data-e="zfit" title="Fit the whole level (0)">Fit</button><button data-e="zin" title="Zoom in (+). The mouse wheel zooms too">+</button><button data-e="hand" id="ehand" title="Pan tool: drag to move around. You can also hold Space or use the middle mouse button">✋</button></span><select id="eshape" title="Block shape (D cycles it)"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><button data-e="rot" id="erot" data-hk="R" title="Rotate shape (R)">◤</button><span id="cnbar" hidden>Cannon <button id="cndb" title="Turn the cannon (click the tool again or press N)"><b id="cnd">▶</b></button> <button id="cnrm" title="Shorter wait between shots">−</button> <b id="cnr">every 1s</b> <button id="cnrp" title="Longer wait between shots">+</button> <button id="cnsm" title="Slower bullets">−</button> <b id="cns">5 tiles/s</b> <button id="cnsp" title="Faster bullets">+</button></span><span id="drbar" hidden>Keys needed <button id="drm" title="Fewer keys">−</button> <b id="drn">1</b> <button id="drp" title="More keys">+</button></span><span id="mvbar" hidden>Move distance <button id="mvm" title="Shorter">−</button> <b id="mvd">2</b> tiles <button id="mvp" title="Longer">+</button></span><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
+  <div class="erow"><span class="grp" id="ezoomg"><button data-e="zout" title="Zoom out (-)">−</button><button data-e="zfit" title="Fit the whole level (0)">Fit</button><button data-e="zin" title="Zoom in (+). The mouse wheel zooms too">+</button><button data-e="hand" id="ehand" title="Pan tool: drag to move around. You can also hold Space or use the middle mouse button">✋</button></span><select id="eshape" title="Block shape (D cycles it)"><option value="f">Full</option><option value="q">Quarter</option><option value="s">Quarter slope</option><option value="h">Half slope</option></select><button data-e="rot" id="erot" data-hk="R" title="Rotate shape (R)">◤</button><span id="cnbar" hidden>Cannon <button id="cndb" title="Turn the cannon (click the tool again or press N)"><b id="cnd">▶</b></button> <button id="cnrm" title="Shorter wait between shots">−</button> <b id="cnr">every 1s</b> <button id="cnrp" title="Longer wait between shots">+</button> <button id="cnsm" title="Slower bullets">−</button> <b id="cns">5 tiles/s</b> <button id="cnsp" title="Faster bullets">+</button></span><span id="drbar" hidden>Door <button id="drdb" title="Turn the door (click the tool again or press O)"><b id="drd">▲</b></button> keys needed <button id="drm" title="Fewer keys">−</button> <b id="drn">1</b> <button id="drp" title="More keys">+</button></span><span id="mvbar" hidden>Move distance <button id="mvm" title="Shorter">−</button> <b id="mvd">2</b> tiles <button id="mvp" title="Longer">+</button></span><span id="selbar" hidden><button data-e="seladd" id="seladd" title="Add to the selection instead of replacing it">+ Add</button><button data-e="selall" title="Select every tile (Ctrl+A)">All</button><button data-e="selcopy" title="Copy the selected tiles (Ctrl+C)">Copy</button><button data-e="selcut" title="Cut the selected tiles (Ctrl+X)">Cut</button><button data-e="selpaste" title="Paste (Ctrl+V), then click where it goes">Paste</button><button data-e="seldel" title="Clear the selected tiles (Delete)">Delete</button><button data-e="selnone" title="Deselect (Esc)">Deselect</button></span><span id="txbar" hidden><textarea id="etext" rows="2" maxlength="90" placeholder="Text for a sign (up to 3 lines)"></textarea><input type="color" id="etcol" value="#ffffff" title="Text colour"></span><span id="estat"></span></div>
  </div>
  <div id="ecw"><canvas id="ec"></canvas><div class="esb" id="esbh" hidden><i></i></div><div class="esb v" id="esbv" hidden><i></i></div></div>
 </div>
@@ -1601,7 +1601,7 @@ const TUT2=makeTutorial2();LEVELS[1]=TUT2.rows;LSH[1]=TUT2.sh;LSA[1]=0;LID[1]='t
 // cannons and locked doors keep their settings inside the tile character itself (like moving walls do)
 const CN_RATE=[.6,1,1.5,2.5,4],CN_SPD=[3,5,7,10],CN0=0x100,DR0=0x150,BR=.17;
 const cnInfo=c=>{const v=c.charCodeAt(0)-CN0;return v>=0&&v<80?{d:(v/20)|0,r:((v%20)/4)|0,s:v%4}:null};
-const drInfo=c=>{const v=c.charCodeAt(0)-DR0;return v>=0&&v<20?{n:v+1}:null};
+const drInfo=c=>{const v=c.charCodeAt(0)-DR0;return v>=0&&v<80?{n:v%20+1,d:(v/20)|0}:null};
 const mvInfo=c=>c==='H'?{v:0,d:2}:c==='V'?{v:1,d:2}:c>='a'&&c<='h'?{v:0,d:c.charCodeAt(0)-96}:c>='i'&&c<='p'?{v:1,d:c.charCodeAt(0)-104}:null;
 const WINDV={'>':[1,0],'<':[-1,0],'^':[0,-1],'v':[0,1]},WIND=2.5;
 const PCOL={'1':'#b36bff','2':'#ff6bd6','3':'#4fffc0'};
@@ -1780,7 +1780,7 @@ function load(n,keep){endPractice();
   texts=mode==='main'?[]:txLabels(cur.tx);
   cannons=[];bullets=[];cnMap={};doors={};pops=[];
   crumb={};fell={};mvT=0;movers=[];portals={};bcd=0;bturn=0;tpLock=false;tpK=0;cpT=0;cd=(mode==='main'||mode==='custom')?(keep?1:3)*CDN:0;goT=0;eSh.x=eSh.y=0;inHold.l=inHold.r=0;
-  for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y]);else{const ci=cnInfo(gc),di=ci?null:drInfo(gc);if(ci){const cn={x,y,d:ci.d,every:CN_RATE[ci.r],spd:CN_SPD[ci.s],t:CN_RATE[ci.r]*.5};cannons.push(cn);cnMap[x+','+y]=cn;grid[y][x]='#'}else if(di){doors[x+','+y]=di.n;grid[y][x]='#'}}}
+  for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++){const gc=grid[y][x],mi=mvInfo(gc);if(mi){movers.push({x,y,v:!!mi.v,d:mi.d});grid[y][x]='.'}else if(gc>='1'&&gc<='3')(portals[gc]=portals[gc]||[]).push([x,y]);else{const ci=cnInfo(gc),di=ci?null:drInfo(gc);if(ci){const cn={x,y,d:ci.d,every:CN_RATE[ci.r],spd:CN_SPD[ci.s],t:CN_RATE[ci.r]*.5};cannons.push(cn);cnMap[x+','+y]=cn;grid[y][x]='#'}else if(di){doors[x+','+y]={n:di.n,d:di.d};grid[y][x]='#'}}}
   for(let y=0;y<grid.length;y++)for(let x=0;x<grid[y].length;x++)
     if(grid[y][x]==='S'){const a0=(mode==='main'?(LSA[n]||0):(cur.sa||0))*Math.PI/2;p={x:x+.5,y:y+.5,a:a0};cp={x:p.x,y:p.y,a:a0,k:null};grid[y][x]='.'}
   keyList=[];keyGot=new Set();keyCp=null;keyGoal=null;keyHint=0;
@@ -1807,8 +1807,14 @@ function fillTile(x,y){
 function drawCannon(c,px,py,s,d,ph){c.save();c.translate(px+s/2,py+s/2);c.fillStyle='#4a4d63';c.fillRect(-s/2,-s/2,s,s);c.strokeStyle='#5d6180';c.lineWidth=Math.max(1.5,s*.05);c.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1);
   c.fillStyle='#34364a';c.fillRect(-s*.36,-s*.36,s*.72,s*.72);c.rotate(d*Math.PI/2);
   c.fillStyle=ph>0?'rgb('+(38+Math.round(70*ph))+','+(40+Math.round(70*ph))+','+(56+Math.round(70*ph))+')':'#262838';c.strokeStyle='#9a9fc0';c.lineWidth=Math.max(1.5,s*.04);c.beginPath();c.rect(-s*.06,-s*.28,s*.5,s*.56);c.fill();c.stroke();c.restore()}
-function drawDoor(c,px,py,s,n){c.save();c.fillStyle='#202236';c.fillRect(px+2,py+2,s-4,s-4);c.strokeStyle='#5ec8ff';c.lineWidth=Math.max(2,s*.06);c.strokeRect(px+s*.1,py+s*.1,s*.8,s*.8);
-  keyGlyph(c,px-s*.1,py-s*.02,s*.6);c.font='800 '+Math.round(s*.4)+'px Orbitron,system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';c.fillText(String(n),px+s*.7,py+s*.52);c.restore()}
+function drawDoor(c,px,py,s,n,d){c.save();c.translate(px+s/2,py+s/2);c.fillStyle='#4a4d63';c.fillRect(-s/2,-s/2,s,s);c.strokeStyle='#5d6180';c.lineWidth=Math.max(1.5,s*.05);c.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1);
+  c.rotate((d||0)*Math.PI/2);const w=s*.34,ay=-s*.12,by=s*.46,r=w;
+  const arch=()=>{c.beginPath();c.moveTo(-w,by);c.lineTo(-w,ay);c.arc(0,ay,w,Math.PI,0);c.lineTo(w,by);c.closePath()};
+  arch();c.fillStyle='#1c1410';c.fill();c.save();c.beginPath();c.moveTo(-w+s*.05,by);c.lineTo(-w+s*.05,ay);c.arc(0,ay,w-s*.05,Math.PI,0);c.lineTo(w-s*.05,by);c.closePath();c.clip();
+  c.fillStyle='#8a5a2b';c.fillRect(-w,-s*.5,w*2,s);c.strokeStyle='#5e3a18';c.lineWidth=Math.max(1,s*.025);for(const x of [-w*.5,0,w*.5]){c.beginPath();c.moveTo(x,-s*.5);c.lineTo(x,by);c.stroke()}
+  c.fillStyle='#2f2f3a';c.fillRect(-w,ay+s*.08,w*2,s*.05);c.fillRect(-w,s*.26,w*2,s*.05);c.restore();
+  arch();c.strokeStyle='#4a2c12';c.lineWidth=Math.max(2,s*.07);c.stroke();c.restore();
+  c.save();c.translate(px+s/2,py+s/2);c.fillStyle='rgba(20,14,10,.88)';c.fillRect(-s*.27,-s*.14,s*.54,s*.3);keyGlyph(c,-s*.39,-s*.14,s*.46);c.font='800 '+Math.round(s*.28)+'px Orbitron,system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';c.fillText(String(n),s*.1,s*.015);c.restore()}
 function keyGlyph(c,px,py,s){c.save();c.translate(px+s/2,py+s/2);c.rotate(-.6);c.lineCap='round';c.lineJoin='round';
   const path=()=>{c.beginPath();c.arc(-s*.22,0,s*.15,0,7);c.moveTo(-s*.07,0);c.lineTo(s*.3,0);c.moveTo(s*.2,0);c.lineTo(s*.2,s*.14);c.moveTo(s*.3,0);c.lineTo(s*.3,s*.11)};
   c.strokeStyle='#0c0c14';c.lineWidth=Math.max(3,s*.17);path();c.stroke();c.strokeStyle='#5ec8ff';c.lineWidth=Math.max(2,s*.09);path();c.stroke();c.restore()}
@@ -2005,7 +2011,7 @@ function update0(dt){
     cpT=Math.max(0,cpT-dt);
     {const fx=Math.floor(p.x),fy=Math.floor(p.y),k=fx+','+fy;if(tile(fx,fy)==='C'&&cp.k!==k){cp={x:fx+.5,y:fy+.5,a:p.a,k};keyCp=new Set(keyGot);cpT=.6;bump('cps')}}
     if(keyList.length&&state==='play')for(const [kx,ky] of keyList){const kk=kx+','+ky;if(!keyGot.has(kk)&&Math.hypot(p.x-kx-.5,p.y-ky-.5)<.7){keyGot.add(kk);keyPop=[kx+.5,ky+.5,.5]}}
-    for(const dk in doors)if(keyGot.size>=doors[dk]){const [dx,dy]=dk.split(',').map(Number);grid[dy][dx]='.';delete doors[dk];pops.push({x:dx+.5,y:dy+.5,t:.35})}
+    for(const dk in doors)if(keyGot.size>=doors[dk].n){const [dx,dy]=dk.split(',').map(Number);grid[dy][dx]='.';delete doors[dk];pops.push({x:dx+.5,y:dy+.5,t:.35})}
     bcd=Math.max(0,bcd-dt);tpK=Math.max(0,tpK-dt/.5);
     if(bcd<=0&&touching(p.x,p.y,p.a,['B'])){bturn=Math.PI;bcd=1;bump('bounces')}
     {const ch=tile(Math.floor(p.x),Math.floor(p.y));
@@ -2092,7 +2098,7 @@ function draw(){
       ctx.rotate(p.a+Math.PI/2);ctx.font='700 12px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';ctx.fillStyle='#fff';
       ctx.strokeText(m.name,0,-U*.17-6);ctx.fillText(m.name,0,-U*.17-6);ctx.restore()}}
   for(const k in cnMap){const cn=cnMap[k];drawCannon(ctx,cn.x*U,cn.y*U,U,cn.d,Math.max(0,1-cn.t/.3))}
-  for(const k in doors){const [dx,dy]=k.split(',').map(Number);drawDoor(ctx,dx*U,dy*U,U,doors[k])}
+  for(const k in doors){const [dx,dy]=k.split(',').map(Number);drawDoor(ctx,dx*U,dy*U,U,doors[k].n,doors[k].d)}
   for(const b of bullets){const g=ctx.createRadialGradient(b.x*U,b.y*U,0,b.x*U,b.y*U,BR*U*1.5);g.addColorStop(0,'#fff3b0');g.addColorStop(.45,'#ffb347');g.addColorStop(.8,'#e8541a');g.addColorStop(1,'rgba(232,84,26,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x*U,b.y*U,BR*U*1.5,0,7);ctx.fill()}
   for(let i=pops.length-1;i>=0;i--){const o=pops[i];o.t-=1/60;if(o.t<=0){pops.splice(i,1);continue}ctx.lineWidth=3;ctx.strokeStyle='rgba(255,170,60,'+Math.min(1,o.t*4)+')';ctx.beginPath();ctx.arc(o.x*U,o.y*U,U*(.15+(.3-o.t)*1.2),0,7);ctx.stroke()}
   if(keyGoal){const mx=keyGoal[0],my=keyGoal[1];ctx.save();ctx.translate(mx*U,my*U);ctx.rotate(p.a+Math.PI/2);ctx.font='800 '+Math.round(U*.4)+'px Orbitron,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.85)';const lb=String(keyList.length);ctx.strokeText(lb,U*.2,0);ctx.fillStyle=keyGot.size>=keyList.length?'#2fd37a':'#fff';ctx.fillText(lb,U*.2,0);keyGlyph(ctx,-U*.65,-U*.4,U*.8);ctx.restore()}
@@ -2418,12 +2424,12 @@ function cleanOv(o,rows){
 const TAGS_M=['Easy','Medium','Hard','Extreme','Speedrun','Maze','Precision','Troll'],TAGS_A=['Ice','Slow','Checkpoints','Crumbling','Wind','Pads','Slopes','Portals','Movers','Cannons','Locked doors','Keys','Small','Large'];
 const cleanTg=a=>(Array.isArray(a)?a:[]).filter((t,i,x)=>TAGS_M.includes(t)&&x.indexOf(t)===i).slice(0,4);
 function autoTags(rows,sh,ov){const j=rows.join(''),r=[],area=rows.length*rows[0].length;
-  if(j.includes('Y'))r.push('Keys');if(/[\u0100-\u014f]/.test(j))r.push('Cannons');if(/[\u0150-\u0163]/.test(j))r.push('Locked doors');if(j.includes('I'))r.push('Ice');if(j.includes('M'))r.push('Slow');if(j.includes('C'))r.push('Checkpoints');if(j.includes('K'))r.push('Crumbling');if(/[<>^v]/.test(j))r.push('Wind');if(/[PB]/.test(j))r.push('Pads');if(/[123]/.test(j))r.push('Portals');if(/[HVa-p]/.test(j))r.push('Movers');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
+  if(j.includes('Y'))r.push('Keys');if(/[\u0100-\u014f]/.test(j))r.push('Cannons');if(/[\u0150-\u019f]/.test(j))r.push('Locked doors');if(j.includes('I'))r.push('Ice');if(j.includes('M'))r.push('Slow');if(j.includes('C'))r.push('Checkpoints');if(j.includes('K'))r.push('Crumbling');if(/[<>^v]/.test(j))r.push('Wind');if(/[PB]/.test(j))r.push('Pads');if(/[123]/.test(j))r.push('Portals');if(/[HVa-p]/.test(j))r.push('Movers');if(Object.keys(sh||{}).length||Object.keys(ov||{}).length)r.push('Slopes');
   if(area<=300)r.push('Small');if(area>=900)r.push('Large');return r}
 function cleanLvl(L){
   try{
     const rows=(L.rows||[]).map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>100||w<3||w>100||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHVY123a-p<>^v\u0100-\u0163]/.test(r)))return null;
+    if(rows.length<3||rows.length>100||w<3||w>100||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHVY123a-p<>^v\u0100-\u019f]/.test(r)))return null;
     if((rows.join('').match(/S/g)||[]).length!==1||!rows.join('').includes('G'))return null;
     const sh={},s0=typeof L.sh==='string'?JSON.parse(L.sh):(L.sh||{});
     for(const k in s0){const v=s0[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)sh[k]=[v[0],v[1]|0]}
@@ -3376,7 +3382,7 @@ let efill=false;const NOFILL=['S','H','V','N','O','1','2','3','sel','txt'];
 let eg=[],eid=null,etool='#',epaint=false,eo={x:0,y:0,cs:30};
 // editor zoom: ezoom 1 = whole level fits the screen; ecx/ecy = the tile at the centre of the view
 let ezoom=1,ecx=0,ecy=0,efit=30,ehand=false,espace=false,epan=null;
-const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['Y','Key (collect them all to finish the level)'],['N','Cannon (click again or press N to turn it). Its bullets are lava'],['O','Locked door (opens when you have enough keys)'],['>','Wind (click again or press A to turn it)'],['H','Moving wall (click again or press H to switch sideways / up-down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','Y':'#1e1e2a','N':'#4a4d63','O':'#202236','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
+const TOOLS=[['#','Wall'],['L','Lava'],['P','Speed pad'],['I','Ice'],['.','Erase'],['S','Start'],['G','Goal'],['B','Bounce pad'],['M','Slow mud (-1/3 speed)'],['C','Checkpoint'],['K','Crumbling floor'],['Y','Key (collect them all to finish the level)'],['N','Cannon (click again or press N to turn it). Its bullets are lava'],['O','Wooden door (click again or press O to turn it). Opens when you have enough keys'],['>','Wind (click again or press A to turn it)'],['H','Moving wall (click again or press H to switch sideways / up-down)'],['1','Portal 1'],['2','Portal 2'],['3','Portal 3'],['sel','Select'],['txt','Text']],ECOL={'a':'#6a6f94','#':'#4a4d63','L':'#e8541a','P':'#c9a91c','I':'#8fd8ff','.':'#1e1e2a','S':'#1e1e2a','G':'#1e1e2a','B':'#8a2fa8','M':'#5a3d22','C':'#1e1e2a','K':'#1e1e2a','Y':'#1e1e2a','N':'#4a4d63','O':'#202236','>':'#1e1e2a','<':'#1e1e2a','^':'#1e1e2a','v':'#1e1e2a','H':'#1e1e2a','V':'#1e1e2a','1':'#1e1e2a','2':'#1e1e2a','3':'#1e1e2a'};
 const sv=b=>'<svg viewBox="0 0 24 24" width="24" height="24">'+b+'</svg>';
 const ICONS={
   '#':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.5"/><path d="M2 9h20M2 16h20M9 2v7M15 9v7M9 16v6" stroke="#9a9fc0" stroke-width="1" fill="none"/>'),
@@ -3394,7 +3400,7 @@ const ICONS={
   'K':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#1e1e2a" stroke="#4a4d63"/><path d="M4 5l6 5-1 4 6 4 4 3M10 10l6-3 4 1M9 14l-3 5" stroke="#9aa0c8" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'),
   'Y':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#1e1e2a"/><g fill="none" stroke="#5ec8ff" stroke-width="2.4" stroke-linecap="round"><circle cx="8.5" cy="15.5" r="3.6"/><path d="M11 13l8-8M16 8l2.5 2.5M13.5 10.5l2 2"/></g>'),
   'N':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63" stroke="#9a9fc0" stroke-width="1.2"/><rect x="5" y="5" width="14" height="14" fill="#34364a"/><rect x="10" y="7" width="9" height="10" fill="#262838" stroke="#9a9fc0" stroke-width="1"/>'),
-  'O':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#202236" stroke="#5ec8ff" stroke-width="1.5"/><rect x="7" y="11" width="10" height="8" rx="1.5" fill="#5ec8ff"/><path d="M9 11V8.5a3 3 0 016 0V11" fill="none" stroke="#5ec8ff" stroke-width="2"/>'),
+  'O':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#4a4d63"/><path d="M7 21V10a5 5 0 0110 0v11z" fill="#8a5a2b" stroke="#4a2c12" stroke-width="1.6"/><path d="M12 5.5V21M9.5 8v13M14.5 8v13" stroke="#5e3a18" stroke-width=".9"/>'),
   'C':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#3a3d55"/><rect x="8" y="4" width="2" height="16" fill="#ddd"/><path d="M10 5l9 4-9 4z" fill="#2fd37a"/>'),
   'M':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#5a3d22"/><circle cx="8" cy="8" r="2.5" fill="#8a6238"/><circle cx="16" cy="10" r="3" fill="#8a6238"/><circle cx="10" cy="16" r="3" fill="#8a6238"/>'),
   'B':sv('<rect x="2" y="2" width="20" height="20" rx="2" fill="#8a2fa8"/><path d="M7 15l5-6 5 6" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'),
@@ -3411,13 +3417,13 @@ const EKEY={'#':'W','L':'L','P':'P','I':'I','.':'E','S':'S','G':'G','B':'B','M':
 document.getElementById('epal').innerHTML=TOOLS.map(t=>'<button data-t="'+t[0]+'" data-hk="'+EKEY[t[0]]+'" title="'+t[1]+' ('+EKEY[t[0]]+')" aria-label="'+t[1]+'">'+ICONS[t[0]]+'</button>').join('')+'<button data-bucket="1" data-hk="F" title="Fill (F)" aria-label="Fill">'+ICONS.bucket+'</button>';
 function newGrid(w,h,sg){const g=[];for(let y=0;y<h;y++){g.push([]);for(let x=0;x<w;x++)g[y].push(x===0||y===0||x===w-1||y===h-1?'#':'.')}if(sg){g[h>>1][2]='S';g[h>>1][w-3]='G'}return g}
 for(const c of 'abcdefghijklmnop')ECOL[c]='#1e1e2a';
-for(let i=0;i<80;i++)ECOL[String.fromCharCode(CN0+i)]='#4a4d63';for(let i=0;i<20;i++)ECOL[String.fromCharCode(DR0+i)]='#4a4d63';
-let cnd=0,cnr=1,cns=1,drn=1;
-const cnTxt=()=>{document.getElementById('cnd').textContent=['\u25b6','\u25bc','\u25c0','\u25b2'][cnd];document.getElementById('cnr').textContent='every '+CN_RATE[cnr]+'s';document.getElementById('cns').textContent=CN_SPD[cns]+' tiles/s';document.getElementById('drn').textContent=drn};
+for(let i=0;i<80;i++)ECOL[String.fromCharCode(CN0+i)]='#4a4d63';for(let i=0;i<80;i++)ECOL[String.fromCharCode(DR0+i)]='#4a4d63';
+let cnd=0,cnr=1,cns=1,drn=1,drd=0;
+const cnTxt=()=>{document.getElementById('cnd').textContent=['\u25b6','\u25bc','\u25c0','\u25b2'][cnd];document.getElementById('cnr').textContent='every '+CN_RATE[cnr]+'s';document.getElementById('cns').textContent=CN_SPD[cns]+' tiles/s';document.getElementById('drn').textContent=drn;document.getElementById('drd').textContent=['\u25b2','\u25b6','\u25bc','\u25c0'][drd]};
 // wind and moving walls are one tool each: click it again (or press R) to turn it, and what you place next follows
 const GRP={'>':'>v<^','H':'HV'},lastDir={'>':'>','H':'H'},grpOf=t=>'>v<^'.includes(t||'#')&&t!=='#'?'>':t==='H'||t==='V'?'H':null;
 const nextDir=g=>{const q=GRP[g];return grpOf(etool)===g?q[(q.indexOf(etool)+1)%q.length]:lastDir[g]};
-let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t==='N'?String.fromCharCode(CN0+cnd*20+cnr*4+cns):t==='O'?String.fromCharCode(DR0+drn-1):t;
+let mvd=2;const mvChar=t=>t==='H'?String.fromCharCode(96+mvd):t==='V'?String.fromCharCode(104+mvd):t==='N'?String.fromCharCode(CN0+cnd*20+cnr*4+cns):t==='O'?String.fromCharCode(DR0+drd*20+drn-1):t;
 function markTool(){if(NOFILL.includes(etool))efill=false;for(const g in GRP)if(grpOf(etool)===g)lastDir[g]=etool;document.querySelectorAll('#epal button[data-t]').forEach(b=>{const gb=grpOf(b.dataset.t);b.classList.toggle('on',gb?gb===grpOf(etool):b.dataset.t===etool);if(gb){const ic=ICONS[lastDir[gb]];if(b._ic!==ic){b._ic=ic;b.innerHTML=ic}}});const bk=document.querySelector('#epal [data-bucket]');if(bk){bk.classList.toggle('on',efill);bk.disabled=NOFILL.includes(etool)}ec.style.cursor=efill?'cell':'';const sel=document.getElementById('eshape'),ok=SHT.includes(etool);sel.disabled=!ok;sel.value=ok?toolShape[etool]:'f';document.getElementById('selbar').hidden=etool!=='sel';document.getElementById('txbar').hidden=etool!=='txt';document.getElementById('mvbar').hidden=etool!=='H'&&etool!=='V';document.getElementById('cnbar').hidden=etool!=='N';document.getElementById('drbar').hidden=etool!=='O';updRot()}
 let eRedo=[],eUndo=[],eshp={},eov={},etx={},eori=0,esa=0,eanc=0,eHover=null,etg=[];
 // selection: a set of 'x,y' tiles; drag a rectangle (Shift/+ Add adds, Alt removes), then Delete clears them
@@ -3548,7 +3554,7 @@ document.getElementById('efile').addEventListener('change',async e=>{
     const d=JSON.parse(await f.text());
     if(!d||d.game!=='boxrun.fun'&&d.game!=='cube-runner'||!Array.isArray(d.rows))throw 0;
     const rows=d.rows.map(String),w=rows[0].length;
-    if(rows.length<3||rows.length>100||w<3||w>100||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHVY123a-p<>^v\u0100-\u0163]/.test(r)))throw 0;
+    if(rows.length<3||rows.length>100||w<3||w>100||rows.some(r=>r.length!==w||/[^#.LPISGBMCKHVY123a-p<>^v\u0100-\u019f]/.test(r)))throw 0;
     ePush();esel=new Set();eg=rows.map(r=>r.split(''));eid=null;esa=(d.sa|0)&3;eshp={};eov=cleanOv(d.ov,rows);etx=cleanTx(d.tx,rows);
     for(const k in d.sh||{}){const v=d.sh[k];if(/^\d+,\d+$/.test(k)&&Array.isArray(v)&&typeof v[0]==='string'&&v[0].length===1&&'qsh'.includes(v[0])&&v[1]>=0&&v[1]<4)eshp[k]=[v[0],v[1]|0]}
     document.getElementById('ename').value=String(d.name||'Imported').slice(0,24);
@@ -3559,7 +3565,7 @@ function eRot(){eori=(eori+1)%4;document.getElementById('erot').textContent=GLYP
 document.getElementById('eshape').addEventListener('change',e=>{e.target.blur();if(SHT.includes(etool)){toolShape[etool]=e.target.value;updRot();eStat(e.target.value==='f'?'':(e.target.value==='q'||e.target.value==='s')?'Each tile is split into 4. Click the quarter where it should go. Click it again to remove it.':'Partial blocks stack: place another block on the same tile to overlap them.');eRender()}});
 const cornerMode=()=>SHT.includes(etool)&&(toolShape[etool]==='q'||toolShape[etool]==='s');
 {const cl=(id,f)=>document.getElementById(id).addEventListener('click',()=>{f();cnTxt()});
-cl('cndb',()=>{cnd=(cnd+1)&3});cl('cnrm',()=>{cnr=Math.max(0,cnr-1)});cl('cnrp',()=>{cnr=Math.min(4,cnr+1)});cl('cnsm',()=>{cns=Math.max(0,cns-1)});cl('cnsp',()=>{cns=Math.min(3,cns+1)});cl('drm',()=>{drn=Math.max(1,drn-1)});cl('drp',()=>{drn=Math.min(20,drn+1)});cnTxt()}
+cl('cndb',()=>{cnd=(cnd+1)&3});cl('cnrm',()=>{cnr=Math.max(0,cnr-1)});cl('cnrp',()=>{cnr=Math.min(4,cnr+1)});cl('cnsm',()=>{cns=Math.max(0,cns-1)});cl('cnsp',()=>{cns=Math.min(3,cns+1)});cl('drdb',()=>{drd=(drd+1)&3});cl('drm',()=>{drn=Math.max(1,drn-1)});cl('drp',()=>{drn=Math.min(20,drn+1)});cnTxt()}
 for(const [id,dd] of [['mvm',-1],['mvp',1]])document.getElementById(id).addEventListener('click',()=>{mvd=Math.max(1,Math.min(8,mvd+dd));document.getElementById('mvd').textContent=mvd});
 function updRot(){const q=cornerMode(),b=document.getElementById('erot');b.disabled=q;b.title=q?'Corner pieces go in the quarter of the tile you click':'Rotate shape (R)'}
 function renderETags(){const el=document.getElementById('etags');if(!el)return;
@@ -3621,7 +3627,7 @@ function eRender(){lastER=performance.now();eHasMv=eg.some(r=>r.some(c=>mvInfo(c
     else if(v==='K')drawCrack(ex,px,py,cs,x,y,1);
     else if(v==='Y')keyGlyph(ex,px,py,cs);
     else if(cnInfo(v))drawCannon(ex,px,py,cs,cnInfo(v).d,0);
-    else if(drInfo(v))drawDoor(ex,px,py,cs,drInfo(v).n);
+    else if(drInfo(v))drawDoor(ex,px,py,cs,drInfo(v).n,drInfo(v).d);
     else if(v==='C'){ex.fillStyle='#3a3d55';ex.fillRect(px+cs*.12,py+cs*.12,cs*.76,cs*.76);ex.fillStyle='#ddd';ex.fillRect(px+cs*.32,py+cs*.2,cs*.07,cs*.6);ex.fillStyle='#2fd37a';ex.beginPath();ex.moveTo(px+cs*.39,py+cs*.22);ex.lineTo(px+cs*.78,py+cs*.4);ex.lineTo(px+cs*.39,py+cs*.58);ex.fill()}
     else if(v==='M'){ex.fillStyle='#7a5530';for(let i=0;i<3;i++){ex.beginPath();ex.arc(px+cs*(.3+.2*i),py+cs*(.3+.2*((i*2)%3)),cs*.1,0,7);ex.fill()}}
     else if(v==='B'){ex.fillStyle='#f064ff';ex.fillRect(px+cs*.18,py+cs*.18,cs*.64,cs*.64)}
@@ -3746,7 +3752,7 @@ function eValid(){
 editorEl.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.bucket){if(NOFILL.includes(etool))return;efill=!efill;markTool();eStat(efill?'Fill on: click a tile to fill the whole connected area with the selected tile. Click the bucket again to turn it off.':'');return}
-  if(b.dataset.t){const prev=etool,gg=grpOf(b.dataset.t);etool=gg?nextDir(gg):b.dataset.t;if(prev==='N'&&etool==='N'){cnd=(cnd+1)&3;cnTxt()}if(SHT.includes(prev)&&SHT.includes(etool))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(grpOf(etool)?'Click the tool again (or press its key) to turn it. What you place next faces the way it shows.':etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
+  if(b.dataset.t){const prev=etool,gg=grpOf(b.dataset.t);etool=gg?nextDir(gg):b.dataset.t;if(prev==='N'&&etool==='N'){cnd=(cnd+1)&3;cnTxt()}if(prev==='O'&&etool==='O'){drd=(drd+1)&3;cnTxt()}if(SHT.includes(prev)&&SHT.includes(etool))toolShape[etool]=toolShape[prev];if(prev==='sel'&&etool!=='sel'){selReset();eRender()}markTool();eStat(grpOf(etool)?'Click the tool again (or press its key) to turn it. What you place next faces the way it shows.':etool==='S'?'Click the start tile again to rotate it':etool==='txt'?'Click a tile to put the text there. Click a sign again to pick it up and edit it.':etool==='sel'?'Drag to select tiles. Drag inside the selection to move it. Shift (or + Add) adds, Alt removes. Ctrl+C / X / V copy, cut, paste.':'');return}
   if(b.dataset.anc!=null){eanc=+b.dataset.anc;markAnc();return}
   const a=b.dataset.e,name=(document.getElementById('ename').value.trim()||'Untitled');
   if(paste&&['save','share','tags','test','export','back','new','resize','import'].includes(a))cancelPaste();
