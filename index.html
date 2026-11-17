@@ -3667,6 +3667,9 @@ function ePaint(e,first){
   if(etool==='.')delete etx[x+','+y];
   if(etool==='S'&&!(first&&eg[y][x]==='S'))eg.forEach(row=>row.forEach((v,i)=>{if(v==='S')row[i]='.'}));
   if(etool==='S'&&first&&eg[y][x]==='S'){esa=(esa+1)%4;eRender();return}
+  if(first&&(etool==='N'||etool==='O')){const v=eg[y][x],ci=cnInfo(v),di=drInfo(v);
+    if(etool==='N'&&ci){eg[y][x]=String.fromCharCode(CN0+((ci.d+1)&3)*20+ci.r*4+ci.s);eRender();return}
+    if(etool==='O'&&di){eg[y][x]=String.fromCharCode(DR0+((di.d+1)&3)*20+di.n-1);eRender();return}}
   // a tile holds a list of pieces [char, kind, orient]: an optional floor piece (pad/ice/goal) first, then walls/lava. Partial pieces layer on top of each other.
   const isHaz=t=>t==='#'||t==='L',kind=SHT.includes(etool)?toolShape[etool]:'f',np=[mvChar(etool),kind,kind==='f'?0:(kind==='q'||kind==='s')?quad:eori],cur0=ePieces(x,y);let list;
   if(etool==='.')list=[];
