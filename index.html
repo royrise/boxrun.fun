@@ -1804,9 +1804,21 @@ function fillTile(x,y){
   const sh=shapes[x+','+y];if(!sh){ctx.fillRect(x*U,y*U,U,U);return}
   ctx.beginPath();polyOf(x,y,sh).forEach(([X,Y],i)=>i?ctx.lineTo(X*U,Y*U):ctx.moveTo(X*U,Y*U));ctx.closePath();ctx.fill();
 }
-function drawCannon(c,px,py,s,d,ph){c.save();c.translate(px+s/2,py+s/2);c.fillStyle='#4a4d63';c.fillRect(-s/2,-s/2,s,s);c.strokeStyle='#5d6180';c.lineWidth=Math.max(1.5,s*.05);c.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1);
-  c.fillStyle='#34364a';c.fillRect(-s*.36,-s*.36,s*.72,s*.72);c.rotate(d*Math.PI/2);
-  c.fillStyle=ph>0?'rgb('+(38+Math.round(70*ph))+','+(40+Math.round(70*ph))+','+(56+Math.round(70*ph))+')':'#262838';c.strokeStyle='#9a9fc0';c.lineWidth=Math.max(1.5,s*.04);c.beginPath();c.rect(-s*.06,-s*.28,s*.5,s*.56);c.fill();c.stroke();c.restore()}
+function drawCannon(c,px,py,s,d,ph){c.save();c.translate(px+s/2,py+s/2);c.fillStyle='#4a4d63';c.fillRect(-s/2,-s/2,s,s);c.strokeStyle='#5d6180';c.lineWidth=Math.max(1.5,s*.05);c.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1);c.rotate(d*Math.PI/2);
+  const g=ph>0?Math.round(60*ph):0,body='rgb('+(58+g)+','+(61+g)+','+(80+g)+')',hi='rgb('+(92+g)+','+(97+g)+','+(124+g)+')',ln='#171826';
+  const rr=(x,y,w,h,r)=>{c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h)};
+  c.lineWidth=Math.max(1.2,s*.035);c.strokeStyle=ln;
+  // breech (back block)
+  rr(-s*.34,-s*.24,s*.26,s*.48,s*.08);c.fillStyle=body;c.fill();c.stroke();
+  // barrel
+  rr(-s*.12,-s*.17,s*.56,s*.34,s*.03);c.fillStyle=body;c.fill();c.stroke();
+  // highlight along the top of the barrel
+  c.fillStyle=hi;c.fillRect(-s*.08,-s*.12,s*.48,s*.06);
+  // muzzle ring
+  rr(s*.34,-s*.22,s*.14,s*.44,s*.04);c.fillStyle=hi;c.fill();c.stroke();
+  // dark mouth
+  c.fillStyle='#0d0e18';c.fillRect(s*.44,-s*.11,s*.05,s*.22);
+  c.restore()}
 function drawDoor(c,px,py,s,n,d){c.save();c.translate(px+s/2,py+s/2);c.fillStyle='#4a4d63';c.fillRect(-s/2,-s/2,s,s);c.strokeStyle='#5d6180';c.lineWidth=Math.max(1.5,s*.05);c.strokeRect(-s/2+.5,-s/2+.5,s-1,s-1);
   c.rotate((d||0)*Math.PI/2);const w=s*.34,ay=-s*.12,by=s*.46,r=w;
   const arch=()=>{c.beginPath();c.moveTo(-w,by);c.lineTo(-w,ay);c.arc(0,ay,w,Math.PI,0);c.lineTo(w,by);c.closePath()};
